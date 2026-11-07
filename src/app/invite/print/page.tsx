@@ -1,0 +1,7 @@
+"use client";
+import {useEffect,useState} from "react";
+import Link from "next/link";
+import {ArrowLeft,Printer} from "lucide-react";
+import {defaults,type InviteData,friendlyDate} from "@/lib/designs";
+const LABELS={sway:"LINE",noor:"FRAME",afterglow:"MUSE"};
+export default function PrintPreview(){const [data,setData]=useState<InviteData>(defaults);useEffect(()=>{try{const raw=localStorage.getItem("wedsent-preview-draft-v1");if(raw)setData({...defaults,...JSON.parse(raw)})}catch{}},[]);return <main className="w7-print"><header><Link href="/studio"><ArrowLeft size={17}/> Studio</Link><div><span>A5 PRINT PREVIEW · EXPERIMENTAL</span><button onClick={()=>window.print()}><Printer size={16}/> Print / Save PDF</button></div></header><div className="w7-print-stage"><article className={`w7-print-card w7-print-${data.design}`}><div className="w7-print-top"><span>THE WEDDING OF</span><span>{LABELS[data.design]}</span></div><div className="w7-print-center"><small>TOGETHER WITH OUR FAMILIES</small><h1>{data.names||"Your names"}</h1><p>REQUEST THE PLEASURE OF YOUR COMPANY</p></div><div className="w7-print-bottom"><strong>{data.ceremony||"The celebration"}</strong><span>{friendlyDate(data.date)}</span><span>{data.venue||"Venue to follow"}<br/>{data.city||""}</span></div></article></div><p className="w7-print-disclaimer">This is an early A5 layout for at-home printing or saving as a PDF. Print proofs, crop marks, bleed and professional CMYK export aren't implemented yet. Check your printer settings before production.</p></main>}
