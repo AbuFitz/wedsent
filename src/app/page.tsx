@@ -1,2 +1,2 @@
-import {redirect} from "next/navigation";
-export default function Home(){redirect("/studio")}
+import Home from "./wedsent-home";
+export default function Page(){return <Home/>}
