@@ -1,5 +1,7 @@
 # Wedsent agent instructions
 
+**CRITICAL OWNER FEEDBACK (2026-11-07): BOTH IMPLEMENTED VISUAL DESIGNS ARE REJECTED.** Before any further marketing, invitation or Studio styling, read `docs/VISUAL_RESET_AND_REFERENCE_ATLAS.md`. Treat `src/app/home-v2.tsx`, `src/app/v2.css`, `src/app/studio/studio-v2.tsx` and current visual compositions as **discardable functional scaffolding**, not an approved UI baseline. The owner called them cheap, AI-generated and formulaic. Do not preserve layout/typography/colour decisions by inertia. Research real live websites, develop and show original comprehensive scenes, then rebuild. Do not simply recolour or rearrange their existing blocks.
+
 **Active build instruction:** Read `docs/CONTINUOUS_BUILD_DIRECTIVE.md` and execute its continuous implementation programme. Do not pause after every task packet awaiting another user instruction; ship coherent deployable slices and keep building, except for genuinely blocking permissions/commercial decisions.
 
 **Visual direction:** Read `docs/ART_DIRECTION_V2.md` before touching the marketing site, Studio or invitation renderer. The first prototype styling was explicitly rejected by the owner. Its CSS/layout is not precedent. The subsequent editorial implementation is itself an exploratory direction, **not locked or approved**. Improve or replace it using real references and human visual judgement.
@@ -17,6 +19,7 @@ Before implementing **any** feature, read in order:
 8. `docs/SOURCE_CODE_AUDIT.md`
 9. `docs/DECISIONS_AND_RELEASE_GATES.md`
 10. `docs/ART_DIRECTION_V2.md`
+11. `docs/VISUAL_RESET_AND_REFERENCE_ATLAS.md` (overrides rejected styling recommendations from earlier docs)
 
 Mandatory working rules:
 - Map every user journey to a flow ID; update diagrams and exception states before writing feature code.

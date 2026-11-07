@@ -2,6 +2,8 @@
 
 **Mission:** Build the platform, not another blueprint. Work continuously through vertical slices, committing deployable code as you go. Do not pause at the end of each packet to ask whether to continue. Ask the owner only for an actual blocking decision (such as expenditure, production credentials, a legally consequential decision, or an irreversible operation). When blocked on one integration, continue independent work and clearly record the dependency. Do not fabricate a completed feature.
 
+**Creative correction:** Owner has rejected both front-end visual passes. `docs/VISUAL_RESET_AND_REFERENCE_ATLAS.md` supersedes any instruction to preserve or refine the existing hero/gallery/section layouts. The next creative implementation must follow real website research and a visible high-fidelity route comparison before coding a third generic homepage. Meanwhile continue backend and data-model work in independent slices.
+
 ## Current baseline
 
 The repository now has an initial Next.js marketing experience, three distinct preliminary invitation skins, a browser-local Studio with editable names/date/venue/message/look/accent, a guest-view route and a **demo-only RSVP**. The design quality is a starting reference, not the final Wedsent visual standard. Drafts are stored **only in browser localStorage**. There is no user authentication, database, live RSVP, publishing, payment, outbound email, licensed music or Photo Hall yet. Do not claim otherwise. The marketing site says early preview.

@@ -37,6 +37,7 @@ Wedsent is a mobile-first, culture-aware invitation platform with an elegant set
 - [Inspected source-code evidence and open-source decisions](docs/SOURCE_CODE_AUDIT.md)
 - [Commercial decision register and release acceptance gates](docs/DECISIONS_AND_RELEASE_GATES.md)
 - [Second-pass visual identity, researched references and guided setup](docs/ART_DIRECTION_V2.md)
+- [Owner-rejected visual designs and researched reference reset](docs/VISUAL_RESET_AND_REFERENCE_ATLAS.md) — **current styling is not approved**
 - [Product and experience](docs/PRODUCT.md)
 - [Architecture and data contracts](docs/ARCHITECTURE.md)
 - [Open-source research and adoption register](docs/OPEN_SOURCE.md)
