@@ -1,5 +1,7 @@
 # Wedsent agent instructions
 
+**Active build instruction:** Read `docs/CONTINUOUS_BUILD_DIRECTIVE.md` and execute its continuous implementation programme. Do not pause after every task packet awaiting another user instruction; ship coherent deployable slices and keep building, except for genuinely blocking permissions/commercial decisions.
+
 This repository is an invitation product, not a generic wedding CRM. The first priority is a beautifully art-directed mobile invitation and a guided Studio, with reliable guest permissions and RSVP correctness.
 
 Before implementing **any** feature, read in order:

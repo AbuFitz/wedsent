@@ -31,10 +31,11 @@ Wedsent is a mobile-first, culture-aware invitation platform with an elegant set
 - [Agent instructions — mandatory starting point](AGENTS.md)
 - [Engineering playbook, tools, skills and marketing direction](docs/ENGINEERING_PLAYBOOK.md)
 - [End-to-end flowcharts, error paths and test matrix](docs/FLOWS.md)
+- [Continuous build directive for coding agents](docs/CONTINUOUS_BUILD_DIRECTIVE.md)
 - [Product and experience](docs/PRODUCT.md)
 - [Architecture and data contracts](docs/ARCHITECTURE.md)
 - [Open-source research and adoption register](docs/OPEN_SOURCE.md)
 
 ## Status
 
-Research and architectural foundation. **No production application has been implemented or deployed yet.** Prices, media rights, data-retention policy, photographer offering and integrations are proposals pending validation. Do not imply functionality exists until it is built and tested.
+**First interactive prototype exists:** the Next.js marketing site, three preliminary invitation looks, live Studio personalisation, guest preview and demo-only RSVP. Drafts save only in the same browser. **This is not a launched platform:** real accounts, database-backed events/guests/RSVPs, payments, invitations delivery and Photo Hall remain unimplemented. Follow the [continuous build directive](docs/CONTINUOUS_BUILD_DIRECTIVE.md) to build these without artificial approval pauses. Prices, rights, hosting terms and integrations remain pending validation.
