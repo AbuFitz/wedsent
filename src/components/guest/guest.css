@@ -11,3 +11,8 @@
   .guest-note{display:none}
   .guest .guest-wrap{display:block}
 }
+.guest--msg{display:grid;place-items:center;padding:24px;background:var(--bg)}
+.guest-msg{max-width:380px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.guest-msg h1{font-family:var(--display);font-size:clamp(32px,8vw,44px);letter-spacing:-.045em;line-height:1}
+.guest-msg p{color:var(--muted)}
+@media(max-width:560px){.guest--msg{display:grid;background:var(--bg)}}

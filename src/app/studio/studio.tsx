@@ -7,7 +7,7 @@ import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, 
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designById, designs, daysUntil, onColor, type DesignId, type InviteData } from "@/lib/designs";
-import { useDraft } from "@/lib/use-draft";
+import { useStudioDraft } from "@/lib/use-draft";
 import "./studio.css";
 
 type Tab = "design" | "words" | "details" | "style";
@@ -25,7 +25,7 @@ const tones = [
 ];
 
 export function Studio() {
-  const { draft, patch, state, ready } = useDraft();
+  const { draft, patch, state, ready, account, reload } = useStudioDraft();
   const params = useSearchParams();
   const [tab, setTab] = useState<Tab>("design");
   const [open, setOpen] = useState(false);
@@ -52,8 +52,11 @@ export function Studio() {
           <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
         </div>
         <div className="st-right">
-          <SaveBadge state={state} />
-          <Link href="/invite" target="_blank" className="btn btn-dark st-guest"><span>Guest preview</span> <ArrowUpRight size={16} /></Link>
+          <SaveBadge state={state} account={!!account} reload={reload} />
+          <Link href="/invite" target="_blank" className="btn btn-light st-guest"><span>Guest preview</span> <ArrowUpRight size={16} /></Link>
+          {account
+            ? <Link href="/dashboard" className="btn btn-dark st-guest"><span>Guests &amp; publish</span></Link>
+            : <Link href="/signin?next=/studio" className="btn btn-dark st-guest"><span>Save &amp; publish</span></Link>}
         </div>
       </header>
 
@@ -89,18 +92,19 @@ export function Studio() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <p className="st-note">Saved in this browser only. Publishing and real replies aren’t built yet.</p>
+        <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Not signed in: this draft only lives in this browser."}</p>
       </aside>
     </div>
   );
 }
 
-function SaveBadge({ state }: { state: string }) {
-  if (state === "failed")
-    return <span className="st-save st-save--bad"><AlertCircle size={15} /> Couldn’t save. Storage is blocked.</span>;
-  if (state === "saving" || state === "loading")
-    return <span className="st-save"><Loader2 size={15} className="spin" /> <b>Saving</b></span>;
-  return <span className="st-save"><Check size={15} /> <b>Saved</b></span>;
+function SaveBadge({ state, account, reload }: { state: string; account: boolean; reload: () => void }) {
+  if (state === "conflict")
+    return <span className="st-save st-save--bad"><AlertCircle size={15} /> <b>Changed elsewhere.</b> <button className="st-reload" onClick={reload}>Reload</button></span>;
+  if (state === "offline") return <span className="st-save st-save--bad"><AlertCircle size={15} /> <b>Offline. Changes not saved yet.</b></span>;
+  if (state === "failed") return <span className="st-save st-save--bad"><AlertCircle size={15} /> <b>Couldn’t save.</b></span>;
+  if (state === "saving" || state === "loading") return <span className="st-save"><Loader2 size={15} className="spin" /> <b>Saving</b></span>;
+  return <span className="st-save"><Check size={15} /> <b>{account ? "Saved to your account" : "Saved on this device"}</b></span>;
 }
 
 type TabProps = { draft: InviteData; patch: (p: Partial<InviteData>) => void };
