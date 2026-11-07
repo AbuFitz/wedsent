@@ -4,6 +4,8 @@ import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)(process.env.PW_PATH ?? "playwright");
 const base = process.argv[2] ?? "http://localhost:3113", out = process.argv[3] ?? ".";
 const ok = (c, m) => { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  :", m); };
+// Warm the dev server so first-compile time does not cause false failures.
+for (const u of ["/", "/studio", "/signin", "/dashboard", "/w/x", "/r/x", "/r/x/reply", "/api/me"]) await fetch(base + u).catch(() => {});
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, extraHTTPHeaders: { "x-forwarded-for": `10.1.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}` } });
 const p = await ctx.newPage();
