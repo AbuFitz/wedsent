@@ -1,5 +1,7 @@
 # Wedsent agent instructions
 
+**CURRENT VISUAL AUTHORITY — 2026-11-07 (V8 RESET):** The owner scrapped ALL earlier design, typography, Studio workflow and RSVP form work. `docs/DESIGN_SYSTEM_V8.md` is the only visual source of truth. Every "OWNER'S MOST RECENT DIRECTION", "ACTIVE PRODUCT-FIRST RESET", "LATEST OWNER RESET", "APPROVED CURRENT CREATIVE ROUTE", "LATEST OWNER VISUAL DIRECTION", "CRITICAL OWNER FEEDBACK" and "Visual direction" paragraphs below, and every file they name (home-v2…v6, v2–v7 CSS, studio-v2/v7, invitation-v2, invite-experience, the floral art), are HISTORICAL and deleted or superseded. Do not restore them. Architecture, product, flow, open-source and release-gate docs remain binding. Build with `motion`, keep invitations as independent art-directed designs, keep demo states honest.
+
 **OWNER'S MOST RECENT DIRECTION — 2026-11-07:** The owner requested the MAIN WEBSITE be rebuilt, not redirected to the Studio, with a modern product company identity, creative Framer-inspired layout and motion, much better type, code-crafted mobile invitation previews, and research-backed opening interactions. Read `docs/SHOWCASE_AND_MOTION_REBUILD.md`. Current `src/app/wedsent-home.tsx` + `.css` is a NEW exploration, not approval or a finished experience. Earlier V2–V7 styling is rejected and must not constrain future art direction. Continue real product and guest functionality alongside the showcase, and keep demo states honest.
 
 **ACTIVE PRODUCT-FIRST RESET (2026-11-07):** The owner has explicitly rejected V2–V6 invitation and website visual implementations. These are NOT a baseline and must not be rebuilt, cloned or polished. Current Studio implementation is `src/app/studio/studio-v7.tsx`, current guest invitation `src/components/invite-experience.tsx`, current RSVP `src/app/invite/rsvp/page.tsx`, and their isolated styles `src/app/product-v7.css`. `/` temporarily redirects into Studio while the **actual product** is developed; do not create another promotional homepage until the invite collection, creator, RSVP and mobile previews are convincing. Visual identity: restrained modern software (Inter/DM Sans, white, near-black, controlled accents, crisp hierarchy, intentional motion); individual invitations have separate art directions. Research Evite, Paperless Post, Partiful, Greenvelope, Joy and modern Framer SaaS rather than wedding-inspired fonts. V7 is still an early frontend-only slice, not a finished product or endorsed design. Never fabricate functioning publishing, payment, sending or guest management.
@@ -29,7 +31,7 @@ Before implementing **any** feature, read in order:
 8. `docs/SOURCE_CODE_AUDIT.md`
 9. `docs/DECISIONS_AND_RELEASE_GATES.md`
 10. `docs/ART_DIRECTION_V2.md`
-11. `docs/VISUAL_RESET_AND_REFERENCE_ATLAS.md` (overrides rejected styling recommendations from earlier docs)
+11. `docs/DESIGN_SYSTEM_V8.md` (current visual authority; items 10 and older visual docs are historical)
 
 Mandatory working rules:
 - Map every user journey to a flow ID; update diagrams and exception states before writing feature code.
@@ -51,3 +53,13 @@ Mandatory working rules:
 Initial packet order: P01 foundation -> P02 auth/database -> P03 renderer/three real designs -> P04 Studio -> P05 guests/RSVP -> P06 publishing/checkout -> P07 media/comms -> P08 real marketing showcase -> P09 optional Photo Hall -> P10 hardening/pilot.
 
 A task is complete only when its flow works from UI to server to persistence and back, including relevant failure branches.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

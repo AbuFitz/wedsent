@@ -1,10 +1,23 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/bricolage-grotesque/wdth.css";
+import "@fontsource-variable/fraunces/full.css";
+import "@fontsource-variable/fraunces/full-italic.css";
+import "@fontsource/instrument-serif/400.css";
+import "@fontsource/instrument-serif/400-italic.css";
 import "./globals.css";
-import "./v2.css";
-import "./faq.css";
-import "./theme-v5.css";
-import "./design-v6.css";
-import "./product-v7.css";
-import "./wedsent-home.css";
-export const metadata: Metadata = {title: "Wedsent — An invite worth opening", description: "Beautiful digital wedding invitations. Make it yours, share the moment, keep everyone in the loop."};
-export default function RootLayout({children}:{children:React.ReactNode}) {return <html lang="en"><body>{children}</body></html>}
+import { Providers } from "@/components/providers";
+
+export const metadata: Metadata = {
+  title: "Wedsent — invitations people open",
+  description: "Design a wedding invitation that opens like a moment, not a PDF. Live phone preview, guest-ready details, RSVP flow in progress.",
+};
+export const viewport: Viewport = { themeColor: "#F4F4F2", width: "device-width", initialScale: 1 };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body><Providers>{children}</Providers></body>
+    </html>
+  );
+}

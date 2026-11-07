@@ -9,7 +9,12 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
     "lucide-react": "^0.468.0",
+    "motion": "^14.10.1",
     "next": "^16.4.5",
     "react": "19.2.0",
     "react-dom": "19.2.0"

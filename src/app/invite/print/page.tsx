@@ -1,7 +1,37 @@
 "use client";
-import {useEffect,useState} from "react";
 import Link from "next/link";
-import {ArrowLeft,Printer} from "lucide-react";
-import {defaults,type InviteData,friendlyDate} from "@/lib/designs";
-const LABELS={sway:"LINE",noor:"FRAME",afterglow:"MUSE"};
-export default function PrintPreview(){const [data,setData]=useState<InviteData>(defaults);useEffect(()=>{try{const raw=localStorage.getItem("wedsent-preview-draft-v1");if(raw)setData({...defaults,...JSON.parse(raw)})}catch{}},[]);return <main className="w7-print"><header><Link href="/studio"><ArrowLeft size={17}/> Studio</Link><div><span>A5 PRINT PREVIEW · EXPERIMENTAL</span><button onClick={()=>window.print()}><Printer size={16}/> Print / Save PDF</button></div></header><div className="w7-print-stage"><article className={`w7-print-card w7-print-${data.design}`}><div className="w7-print-top"><span>THE WEDDING OF</span><span>{LABELS[data.design]}</span></div><div className="w7-print-center"><small>TOGETHER WITH OUR FAMILIES</small><h1>{data.names||"Your names"}</h1><p>REQUEST THE PLEASURE OF YOUR COMPANY</p></div><div className="w7-print-bottom"><strong>{data.ceremony||"The celebration"}</strong><span>{friendlyDate(data.date)}</span><span>{data.venue||"Venue to follow"}<br/>{data.city||""}</span></div></article></div><p className="w7-print-disclaimer">This is an early A5 layout for at-home printing or saving as a PDF. Print proofs, crop marks, bleed and professional CMYK export aren't implemented yet. Check your printer settings before production.</p></main>}
+import { ArrowLeft, Printer } from "lucide-react";
+import { accentFor, dateParts, friendlyTime, onColor, splitNames } from "@/lib/designs";
+import { useDraft } from "@/lib/use-draft";
+import type { CSSProperties } from "react";
+import "./print.css";
+
+export default function PrintPreview() {
+  const { draft, ready } = useDraft();
+  if (!ready) return <main className="pr" />;
+  const a = accentFor(draft);
+  const n = splitNames(draft.names);
+  const p = dateParts(draft.date);
+  const t = friendlyTime(draft.time);
+  return (
+    <main className="pr" style={{ "--a": a, "--on-a": onColor(a) } as CSSProperties}>
+      <header className="pr-bar">
+        <Link href="/studio"><ArrowLeft size={17} /> Studio</Link>
+        <button type="button" onClick={() => window.print()}><Printer size={16} /> Print or save as PDF</button>
+      </header>
+      <div className="pr-stage">
+        <article className={`pr-card pr-card--${draft.design}`}>
+          <p className="pr-occ">{draft.occasion || "Celebration"}</p>
+          <h1 className="pr-names">{n.a}{n.joined && <><span> &amp; </span>{n.b}</>}</h1>
+          {draft.message.trim() && <p className="pr-msg">{draft.message}</p>}
+          <div className="pr-meta">
+            <p><strong>{p.weekday} {p.day} {p.month} {p.year}</strong>{t && <><br />{t}</>}</p>
+            <p><strong>{draft.venue || "Venue to follow"}</strong>{draft.city && <><br />{draft.city}</>}</p>
+            {draft.dress && <p>{draft.dress}</p>}
+          </div>
+        </article>
+      </div>
+      <p className="pr-note">Early A5 layout for home printing. Bleed, crop marks and print-shop colour export aren’t built yet.</p>
+    </main>
+  );
+}
