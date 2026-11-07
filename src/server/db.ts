@@ -90,6 +90,7 @@ async function connect(): Promise<Db> {
 }
 
 export function getDb(): Promise<Db> {
+  if (!hasDurableDb()) return Promise.reject(Object.assign(new Error("backend_not_configured"), { status: 503, code: "backend_not_configured" }));
   return (globalForDb.__wedsentDb ??= connect());
 }
 

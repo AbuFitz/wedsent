@@ -5,9 +5,10 @@ const { chromium } = createRequire(import.meta.url)(process.env.PW_PATH ?? "play
 const base = process.argv[2] ?? "http://localhost:3113", out = process.argv[3] ?? ".";
 const ok = (c, m) => { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  :", m); };
 const b = await chromium.launch();
-const ctx = await b.newContext({ viewport: { width: 1280, height: 900 } });
+const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, extraHTTPHeaders: { "x-forwarded-for": `10.1.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}` } });
 const p = await ctx.newPage();
 p.on("pageerror", (e) => console.error("pageerror", e.message));
+if (process.env.DEBUG_API) p.on("response", (r) => r.url().includes("/api/") && console.log(r.status(), r.request().method(), r.url().replace(base, "")));
 const email = `e2e${Date.now()}@example.com`;
 
 // Local draft first (signed out), then sign up claims it.
@@ -28,14 +29,15 @@ await p.getByRole("tab", { name: "Words" }).click();
 ok((await p.getByLabel("Names").inputValue()) === "Layla & Omar", "local draft claimed into account");
 await p.getByRole("tab", { name: "Details" }).click();
 await p.getByLabel("Venue", { exact: true }).fill("Hall of Mirrors");
-await p.waitForTimeout(1200);
+await p.getByText("Saved to your account").first().waitFor({ timeout: 10000 }).catch(() => {});
 ok(await p.getByText("Saved to your account").first().isVisible(), "studio autosaves to server");
 await p.reload(); await p.waitForTimeout(1200);
 await p.getByRole("tab", { name: "Details" }).click();
 ok((await p.getByLabel("Venue", { exact: true }).inputValue()) === "Hall of Mirrors", "draft persists across reload (server)");
 
 // Events + guests.
-await p.goto(base + "/dashboard"); await p.getByRole("button", { name: "Events", exact: true }).click();
+await p.goto(base + "/dashboard"); await p.getByRole("button", { name: "Events", exact: true }).waitFor({ timeout: 15000 });
+await p.getByRole("button", { name: "Events", exact: true }).click();
 for (const t of ["Nikah", "Walima"]) { await p.getByLabel("Name", { exact: true }).fill(t); await p.getByRole("button", { name: "Add event" }).click(); await p.waitForTimeout(500); }
 await p.getByRole("button", { name: "Guests", exact: true }).click();
 await p.getByLabel("People").fill("Sara Khan, sara@example.com\nOmar Khan\nZayn Khan (child)");
