@@ -2,6 +2,8 @@
 
 **Active build instruction:** Read `docs/CONTINUOUS_BUILD_DIRECTIVE.md` and execute its continuous implementation programme. Do not pause after every task packet awaiting another user instruction; ship coherent deployable slices and keep building, except for genuinely blocking permissions/commercial decisions.
 
+**Visual direction:** Read `docs/ART_DIRECTION_V2.md` before touching the marketing site, Studio or invitation renderer. The first prototype styling was explicitly rejected by the owner. Its CSS/layout is not precedent. The subsequent editorial implementation is itself an exploratory direction, **not locked or approved**. Improve or replace it using real references and human visual judgement.
+
 This repository is an invitation product, not a generic wedding CRM. The first priority is a beautifully art-directed mobile invitation and a guided Studio, with reliable guest permissions and RSVP correctness.
 
 Before implementing **any** feature, read in order:
@@ -14,6 +16,7 @@ Before implementing **any** feature, read in order:
 7. `docs/UX_SCREEN_CONTRACTS.md`
 8. `docs/SOURCE_CODE_AUDIT.md`
 9. `docs/DECISIONS_AND_RELEASE_GATES.md`
+10. `docs/ART_DIRECTION_V2.md`
 
 Mandatory working rules:
 - Map every user journey to a flow ID; update diagrams and exception states before writing feature code.

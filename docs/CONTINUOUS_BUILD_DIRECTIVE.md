@@ -8,7 +8,7 @@ The repository now has an initial Next.js marketing experience, three distinct p
 
 ## Read and execute
 
-1. Read `AGENTS.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/OPEN_SOURCE.md`, `docs/FLOWS.md`, `docs/ENGINEERING_PLAYBOOK.md`, `docs/CREATIVE_SYSTEM.md`, `docs/UX_SCREEN_CONTRACTS.md`, `docs/SOURCE_CODE_AUDIT.md` and `docs/DECISIONS_AND_RELEASE_GATES.md` in full. Keep them accurate as implementation evolves.
+1. Read `AGENTS.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/OPEN_SOURCE.md`, `docs/FLOWS.md`, `docs/ENGINEERING_PLAYBOOK.md`, `docs/CREATIVE_SYSTEM.md`, `docs/UX_SCREEN_CONTRACTS.md`, `docs/SOURCE_CODE_AUDIT.md`, `docs/DECISIONS_AND_RELEASE_GATES.md` and `docs/ART_DIRECTION_V2.md` in full. Keep them accurate as implementation evolves.
 2. Build the creative engine **and** robust application in a continuous run. Deliver real commits, screenshots, tests and Vercel previews. The platform must visibly advance, not merely gain Markdown files.
 3. Before adding each subsystem, inspect relevant mature open-source code paths (not just READMEs), tests, licences and vulnerabilities. Record precise reusable patterns; never copy all-rights-reserved or unknown-licence code.
 4. Establish Figma/reference-backed art direction and a reusable creative playground following the six-stage `CREATIVE_SYSTEM.md` pipeline and review rubric. Generate at least three truly differentiated production-quality layouts and motion systems; no same layout with different backgrounds. Evaluate mobile/RTL/long names/no photo/slow network. Use visual screenshots to refine, not a generic component kit aesthetic.
@@ -30,6 +30,6 @@ The repository now has an initial Next.js marketing experience, three distinct p
 ## Immediate next actions
 
 1. Verify build/TypeScript and first Vercel deployment; inspect mobile screenshots and correct layout defects.
-2. Replace preliminary designs with stronger uniquely art-directed designs based on visual research, establish token/schema contracts and test their behaviour in Studio.
+2. Review the second-pass editorial homepage/Studio and three rendered invitation compositions against `ART_DIRECTION_V2.md`. They are **explorations, not approved final art**. Improve them with actual visual references, responsive screenshots and human art-direction feedback rather than anchoring to existing components. Establish proper token/schema contracts and test customisation in Studio.
 3. Provision and link DB/auth properly; convert local preview data into private persisted drafts, retain an explicit no-account guest view.
 4. Implement realistic wedding/event/household RSVP flows and production-ready publishing. Then continue through every contract above without waiting for another 'proceed'.
