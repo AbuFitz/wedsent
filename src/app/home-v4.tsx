@@ -6,6 +6,7 @@ import { ArrowDown, ArrowRight, ArrowUpRight, CalendarDays, Check, ChevronRight,
 import { InvitationV2 } from "@/components/invitation-v2";
 import { defaults, designs, type DesignId } from "@/lib/designs";
 import "./v4.css";
+import "./v4-polish.css";
 
 export default function HomeV4() {
   const [selected, setSelected] = useState<DesignId>("noor");
@@ -24,8 +25,6 @@ export default function HomeV4() {
         <span className="w4-stage-caption">THREE STARTING POINTS. YOUR STORY.</span>
       </div>
     </section>
-
-    <div className="w4-trust-strip"><span>Make it personal</span><span>Choose your look</span><span>Keep the details together</span><span>Designed for phones first</span></div>
 
     <section className="w4-design-section" id="designs"><div className="w4-section-heading"><div><span className="w4-eyebrow">01 / THE DESIGNS</span><h2>Find your look.</h2><p>Different moods, different stories. Start somewhere beautiful and put your own stamp on it.</p></div><Link href="/studio">Start designing <ArrowUpRight size={17}/></Link></div>
       <div className="w4-design-browser"><div className="w4-design-options">{designs.map((d,idx)=><button className={selected===d.id?"active":""} key={d.id} onClick={()=>setSelected(d.id)}><span>0{idx+1}</span><div><strong>{d.name}</strong><small>{d.description}</small></div><ChevronRight size={18}/></button>)}</div><div className={`w4-design-display w4-display-${selected}`}><div className="w4-design-device"><InvitationV2 data={{...defaults,design:selected}} compact interactive={false}/></div><div className="w4-design-display-foot"><span>{active.name} · {active.palette}</span><Link href={`/studio?design=${selected}`}>Use this design <ArrowUpRight size={17}/></Link></div></div></div>

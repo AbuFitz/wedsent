@@ -1,0 +1,13 @@
+/* Marketing typography is restrained; decorative type belongs inside invitations. */
+.w4-hero h1 em,
+.w4-final h2 i {
+  font-family: 'DM Sans', Arial, sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: -.075em;
+}
+.w4-hero { padding-bottom: 80px; }
+.w4-product-stage { min-width: 0; }
+@media(max-width:760px) {
+  .w4-hero { padding-bottom: 35px; }
+}
