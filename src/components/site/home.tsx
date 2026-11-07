@@ -22,7 +22,7 @@ export function Home() {
       <main>
         <Hero draft={draft} patch={patch} />
         <Designs draft={draft} />
-        <Status />
+        <Essentials />
         <Closing />
       </main>
       <footer className="foot">
@@ -162,40 +162,26 @@ function Designs({ draft }: { draft: InviteData }) {
   );
 }
 
-/* ------------------------ Honest status ------------------------ */
+/* ------------------- Product essentials ------------------- */
 
-const works = [
-  "Three designs, each with its own way to open",
-  "Phone preview that updates as you type",
-  "Accent colours, dress code and reply-by date",
-  "Add-to-calendar file and map link on every invitation",
-  "A5 print layout for your browser’s print or PDF dialog",
-  "The guest reply flow, as a preview",
-];
-const notYet = [
-  "Accounts, and drafts that follow you between devices",
-  "A published link you can send to guests",
-  "Real replies, guest lists and household tracking",
-  "Payments",
-  "Music, photos and multiple events",
+const essentials = [
+  { n: "01", title: "One link, everyone invited.", body: "Your own beautifully presented invitation link to share by WhatsApp, text, email or wherever your guests are.", state: "Planned for launch" },
+  { n: "02", title: "Replies without the chasing.", body: "See who's coming, who can't make it and who still needs a reminder. Handle plus-ones and households thoughtfully.", state: "In development" },
+  { n: "03", title: "Your details, always there.", body: "Directions, times, dress codes and event information in one clear place, designed to work beautifully on a phone.", state: "Interactive preview available" },
+  { n: "04", title: "Digital first. Print too.", body: "A digital invitation guests can open with a little anticipation, with matching print-ready artwork as the product matures.", state: "A5 preview available" },
 ];
 
-function Status() {
+function Essentials() {
   return (
     <section id="status" className="status">
       <motion.h2 className="status-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.8, ease }}>
-        What works today,<br />and what doesn’t yet.
+        Beautiful to open.<br />Simple to organise.
       </motion.h2>
-      <div className="status-grid">
-        <motion.div className="status-card" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, ease }}>
-          <h3>Working</h3>
-          <ul>{works.map((t) => <li key={t}><Check size={18} strokeWidth={2.6} />{t}</li>)}</ul>
-        </motion.div>
-        <motion.div className="status-card status-card--later" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, delay: 0.1, ease }}>
-          <h3>Not built yet</h3>
-          <ul>{notYet.map((t) => <li key={t}><Circle size={18} strokeDasharray="3 3" />{t}</li>)}</ul>
-        </motion.div>
+      <p className="status-lead">An invitation that makes an impression. A few useful things behind it that make the whole experience easier for you and your guests.</p>
+      <div className="essentials-grid">
+        {essentials.map((item) => <motion.article key={item.n} className="essential" initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.55}}><span className="essential-number">{item.n}</span><h3>{item.title}</h3><p>{item.body}</p><span className="essential-state">{item.state}</span></motion.article>)}
       </div>
+      <div className="status-bottom"><span>Wedsent is currently an early preview. Publishing and real guest responses are not live yet.</span><Link href="/pricing">One simple price <ArrowRight size={16}/></Link></div>
     </section>
   );
 }

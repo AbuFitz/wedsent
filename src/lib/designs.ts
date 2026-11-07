@@ -42,13 +42,13 @@ export type DesignMeta = {
 export const designs: DesignMeta[] = [
   {
     id: "zest",
-    name: "Zest",
-    mood: "Loud, warm, made for a party",
+    name: "Vermilion",
+    mood: "Warm, artistic, quietly expressive",
     opening: "Tap the envelope",
     openingHint: "Flap lifts, card rises, envelope drops away",
-    bg: "#FF5B1F",
-    ink: "#2A0B02",
-    accents: ["#FF5B1F", "#E8368F", "#1F9D6B", "#6A4DFF", "#F2A900"],
+    bg: "#9F4E3B",
+    ink: "#2A1714",
+    accents: ["#9F4E3B", "#875759", "#355C52", "#6F6683", "#946A3D"],
   },
   {
     id: "mono",

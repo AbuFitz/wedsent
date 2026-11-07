@@ -26,6 +26,8 @@
 
 /* ============================ ZEST ============================ */
 .inv--zest{--inv-body:"Bricolage Grotesque Variable","Geist Variable",sans-serif;--ink:#17120D;--pink:#FFB3D1;--sun:#FFE14D;--paper:#FFF8EC;background:var(--a);color:var(--on-a)}
+/* Vermilion: stationery-inspired rather than playful stationery stickers. */
+.inv--zest{--inv-body:"Geist Variable",sans-serif;--ink:#251815;--pink:#D8B0A3;--sun:#E0C8A6;--paper:#F5EDE6}
 .inv--zest .inside{background:var(--a)}
 .inv--zest .in-hero{padding-top:5cqw}
 .inv--zest .in-kicker{display:inline-block;background:var(--ink);color:var(--paper);padding:1.4cqw 3.4cqw;border-radius:99cqw;font-weight:700;font-size:3.6cqw;transform:rotate(-3deg)}
@@ -40,9 +42,18 @@
 .inv--zest .in-count{display:inline-block;margin-top:3cqw;background:var(--ink);color:var(--sun);padding:1.2cqw 3cqw;border-radius:99cqw;font-weight:700;font-size:3.6cqw}
 .inv--zest .in-rsvp{background:var(--ink);color:var(--paper);border-radius:99cqw;box-shadow:1cqw 1cqw 0 var(--pink)}
 .inv--zest .in-link,.inv--zest .in-cal{color:var(--on-a)}
+.inv--zest .in-names,.inv--zest .in-date strong,.env-card-names,.zest-headline{font-family:"Instrument Serif",serif!important;font-weight:400!important;font-style:normal!important;font-variation-settings:normal!important}
+.inv--zest .in-message,.inv--zest .in-card{border-radius:1cqw;box-shadow:none;border-color:color-mix(in srgb,var(--ink) 18%,transparent);transform:none}
+.inv--zest .in-when{background:#F1E2D1}.inv--zest .in-where{background:#D8B0A3}
 .inv--zest .in-card .in-link{color:var(--ink)}
 /* cover */
 .zest-cover{background:var(--a);color:var(--on-a)}
+.zest-cover{background:linear-gradient(145deg,#9F4E3B,#75362E);color:#FFF3E8}
+.zest-star,.zest-blob,.zest-squiggle,.zest-badge{display:none!important}
+.zest-headline{font-size:17cqw;line-height:.9;letter-spacing:-.04em;top:13cqh}
+.zest-envelope{rotate:0deg;top:53cqh}
+.env-back{background:#C58A7B}.env-front{background:#D9A69A}.env-flap{background:#E8BFB4}
+.env-card{background:#FBF5ED}
 .zest-shape{position:absolute;pointer-events:none}
 .zest-star{width:34cqw;right:-6cqw;top:7cqh;transform:rotate(14deg)}
 .zest-blob{width:44cqw;height:44cqw;left:-16cqw;bottom:6cqh;border-radius:50%;background:var(--pink)}

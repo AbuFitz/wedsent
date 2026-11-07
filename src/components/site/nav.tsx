@@ -16,7 +16,7 @@ export function Nav({ studioHref = "/studio" }: { studioHref?: string }) {
       <nav className="nav-pill" aria-label="Main">
         <Link href="/" className="nav-logo">wedsent</Link>
         <a href="#designs" className="nav-link">Designs</a>
-        <a href="#status" className="nav-link">What works</a>
+        <Link href="/pricing" className="nav-link">Pricing</Link>
         <Link href={studioHref} className="nav-cta">Open Studio</Link>
       </nav>
     </motion.header>
