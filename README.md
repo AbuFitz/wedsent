@@ -28,6 +28,9 @@ Wedsent is a mobile-first, culture-aware invitation platform with an elegant set
 
 ## Working documents
 
+- [Agent instructions — mandatory starting point](AGENTS.md)
+- [Engineering playbook, tools, skills and marketing direction](docs/ENGINEERING_PLAYBOOK.md)
+- [End-to-end flowcharts, error paths and test matrix](docs/FLOWS.md)
 - [Product and experience](docs/PRODUCT.md)
 - [Architecture and data contracts](docs/ARCHITECTURE.md)
 - [Open-source research and adoption register](docs/OPEN_SOURCE.md)
