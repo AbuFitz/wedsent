@@ -6,6 +6,7 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, Check, Menu, X } from "lucide
 import { InvitationV2 } from "@/components/invitation-v2";
 import { defaults, type DesignId } from "@/lib/designs";
 import "./v3.css";
+import "./v3-polish.css";
 
 const looks: { id: DesignId; name: string; description: string }[] = [
   { id: "afterglow", name: "A little louder", description: "For the colour lovers and the dance-floor starters." },

@@ -1,0 +1,14 @@
+/* Art-direction QA: keep the oversized editorial type readable over the collage. */
+.ws3-hero-art {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 34%, #000 70%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 34%, #000 70%);
+}
+.ws3-hero-content { position: relative; z-index: 1; }
+.ws3-hero-actions > a:last-child { background: #f8f0dbe0; padding-inline: 8px; }
+@media (max-width: 650px) {
+  .ws3-hero-art {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 72%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 72%);
+  }
+  .ws3-hero h1 { max-width: 100%; }
+}
