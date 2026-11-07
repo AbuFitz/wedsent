@@ -12,6 +12,10 @@ Legend: **Working** = exercised by automated tests or the browser e2e script in 
 - Host dashboard: counts of people per event (attending / declined / no reply / invited), CSV import with review and duplicate detection, CSV export with formula-injection guard.
 - Tests: `npm test` (22 backend tests on embedded Postgres), `tests/e2e/flow.mjs` (browser, 12 checks).
 
+## Design (this slice)
+- `/pricing` rebuilt: warmer, shows the real invitation renderer, honest "ready / coming" list, provisional £39 clearly labelled, no checkout. Uses Instrument Serif for display headings on this page only. Owner to confirm whether the marketing site should adopt a serif display face (owner brief says Geist-only for brand; the page deliberately tests the warmer alternative).
+- Vermilion (formerly Zest) art direction from the owner's commit is preserved. Its "tap to open" badge was hidden by that change, so the first-time affordance for the envelope is now weak. Needs a subtle hint.
+
 ## Partial
 - Studio: 3 designs, 4 tabs. One event only inside the invitation content; multi-event editing lives in the dashboard.
 - Guest page: opens, shows design, reply flow works; not yet showing the per-event schedule inside the invitation.
