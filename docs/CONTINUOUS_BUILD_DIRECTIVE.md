@@ -8,16 +8,16 @@ The repository now has an initial Next.js marketing experience, three distinct p
 
 ## Read and execute
 
-1. Read `AGENTS.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/OPEN_SOURCE.md`, `docs/FLOWS.md`, and `docs/ENGINEERING_PLAYBOOK.md` in full. Keep them accurate as implementation evolves.
+1. Read `AGENTS.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/OPEN_SOURCE.md`, `docs/FLOWS.md`, `docs/ENGINEERING_PLAYBOOK.md`, `docs/CREATIVE_SYSTEM.md`, `docs/UX_SCREEN_CONTRACTS.md`, `docs/SOURCE_CODE_AUDIT.md` and `docs/DECISIONS_AND_RELEASE_GATES.md` in full. Keep them accurate as implementation evolves.
 2. Build the creative engine **and** robust application in a continuous run. Deliver real commits, screenshots, tests and Vercel previews. The platform must visibly advance, not merely gain Markdown files.
 3. Before adding each subsystem, inspect relevant mature open-source code paths (not just READMEs), tests, licences and vulnerabilities. Record precise reusable patterns; never copy all-rights-reserved or unknown-licence code.
-4. Establish Figma/reference-backed art direction and a reusable creative playground. Generate at least three truly differentiated production-quality layouts and motion systems; no same layout with different backgrounds. Evaluate mobile/RTL/long names/no photo/slow network. Use visual screenshots to refine, not a generic component kit aesthetic.
+4. Establish Figma/reference-backed art direction and a reusable creative playground following the six-stage `CREATIVE_SYSTEM.md` pipeline and review rubric. Generate at least three truly differentiated production-quality layouts and motion systems; no same layout with different backgrounds. Evaluate mobile/RTL/long names/no photo/slow network. Use visual screenshots to refine, not a generic component kit aesthetic.
 5. Build a real Studio: account and wedding creation, versioned templates and content schema, autosave to backend, draft/published versions, guided step flow, editor undo, responsive preview, editable events, permission-aware share controls, and errors/recovery.
 6. Build PostgreSQL schema and tenant-safe APIs for ceremonies, venues, guests, households, event-level allocations, invite tokens, responses, changes, exports, permissions, audit trails. Prove F01–F07 end-to-end with browser + DB evidence.
 7. Build one-price checkout, verified webhooks, sending, reminders, share-card metadata and expiry policy only when pricing/hosting terms and provider access are confirmed. Share via native WhatsApp intent initially; never falsely claim automatic delivery.
 8. Build Photo Hall after the core is reliable: photographer-only scoped upload, staging, moderation, approved guest access, bulk downloads, rights, quotas, retention. Cover F08–F10 and security/privacy constraints.
 9. Make the marketing site a high-end editorial showcase of **real implemented invitations**, interaction, Studio, guest flow and culture-flexible events. Research design references, use clear young contemporary copy without fake slang, and avoid false testimonials/feature claims.
-10. Continuously run accessibility, mobile browser, performance, API, state and security tests. Revisit broken UI and bugs immediately when discovered; keep a brief outstanding-issues list.
+10. Continuously run accessibility, mobile browser, performance, API, state and security tests against the `UX_SCREEN_CONTRACTS.md` state matrix and the R0–R4 evidence gates. Revisit broken UI and bugs immediately when discovered; keep a brief outstanding-issues list.
 
 ## Iteration rules
 

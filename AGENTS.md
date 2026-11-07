@@ -10,6 +10,10 @@ Before implementing **any** feature, read in order:
 3. `docs/FLOWS.md`
 4. `docs/ENGINEERING_PLAYBOOK.md`
 5. `docs/OPEN_SOURCE.md`
+6. `docs/CREATIVE_SYSTEM.md`
+7. `docs/UX_SCREEN_CONTRACTS.md`
+8. `docs/SOURCE_CODE_AUDIT.md`
+9. `docs/DECISIONS_AND_RELEASE_GATES.md`
 
 Mandatory working rules:
 - Map every user journey to a flow ID; update diagrams and exception states before writing feature code.
@@ -21,6 +25,9 @@ Mandatory working rules:
 - Use actual data persistence, scoped permissions, idempotency, error states, loading, retries and audit trails.
 - Treat private RSVPs and Photo Hall uploads as sensitive. No guessable public IDs for private guest or media access.
 - All design work requires mobile + desktop review, long-name/RTL/no-photo fixtures, contrast and reduced-motion checks.
+- Creative templates require the complete `CREATIVE_SYSTEM.md` dossier, production reference analysis, honest visual review and artwork provenance before being considered finished.
+- Implement every relevant `UX_SCREEN_CONTRACTS.md` state, not just the attractive screenshot state. Use `SOURCE_CODE_AUDIT.md` as the beginning of *actual code-level research*, not an exhaustive vendor approval.
+- Check the unresolved decisions and R0–R4 release gates; do not invent paid product policies or quietly ship unverified rights/terms.
 - Marketing copy/showcases must reflect implemented functionality. Never fabricate metrics, testimonials or customer examples.
 - Use short, clear, contemporary copy. Avoid corporate CRM labels and forced TikTok slang.
 - After each build packet update the relevant docs, provide test evidence and note blocked paths.

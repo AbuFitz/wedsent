@@ -1,5 +1,7 @@
 # Open-source research and adoption register
 
+See [SOURCE_CODE_AUDIT.md](SOURCE_CODE_AUDIT.md) for inspected source file paths, pinned commits, concrete security/architecture findings and outstanding code audits. The initial project shortlist below is *not* a substitute for that inspection.
+
 Research date: 2026-11-07. GitHub repository presence does not imply permission to copy. Licences below were checked against actual repository LICENSE files where noted. Before incorporating code, verify current commit, authorship, dependencies, bundled images/fonts/music, attribution obligations, maintenance and security. Pin adopted dependencies, preserve notices and maintain an SBOM.
 
 ## Invitation, RSVP and platform foundations
