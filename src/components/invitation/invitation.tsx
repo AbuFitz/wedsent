@@ -100,6 +100,7 @@ function ZestCover({ data, onOpen }: CoverProps) {
         <span className="env-flap" />
       </button>
 
+      <p className="zest-hint" aria-hidden="true">Tap to open</p>
       <div className="zest-badge" aria-hidden="true">
         <svg viewBox="0 0 100 100">
           <defs><path id="zest-ring" d="M50 50m-37 0a37 37 0 1 1 74 0a37 37 0 1 1-74 0" /></defs>

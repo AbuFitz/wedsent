@@ -7,11 +7,11 @@
 .rs-step{opacity:.75}
 .rs-demo{font-size:13px;font-weight:500;padding:10px 14px;border:1.5px dashed currentColor;border-radius:12px;opacity:.85;margin-bottom:16px}
 .rs-card{background:#FFF8EC;color:#17120D;border-radius:28px;padding:clamp(22px,6vw,34px);display:flex;flex-direction:column;gap:20px;box-shadow:0 18px 50px -24px rgba(0,0,0,.5)}
-.rs--zest .rs-card{border:2px solid #17120D;box-shadow:6px 6px 0 #17120D}
+.rs--zest .rs-card{border:1px solid color-mix(in srgb,#251815 18%,transparent);box-shadow:0 24px 50px -30px rgba(37,24,21,.5)}
 .rs--mono .rs-card{background:#fff;border-radius:0;border:2px solid #0C0C0C;box-shadow:none}
 .rs--nocturne .rs-card{background:#16141C;color:#F4EFE6;border:1px solid #2c2933}
 .rs-h{font-family:var(--display);font-size:clamp(32px,9vw,44px);font-weight:700;letter-spacing:-.04em;line-height:1}
-.rs--zest .rs-h{font-family:"Fraunces Variable",serif;font-style:italic;font-weight:700}
+.rs--zest .rs-h{font-family:var(--serif);font-style:normal;font-weight:400;font-size:clamp(38px,10vw,52px)}
 .rs--mono .rs-h{font-weight:800;font-variation-settings:"wdth" 75}
 .rs--nocturne .rs-h{font-family:"Instrument Serif",serif;font-weight:400;font-size:clamp(38px,10vw,52px)}
 .rs-sub{opacity:.72;font-size:15px;margin-top:-10px}

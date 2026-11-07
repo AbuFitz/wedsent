@@ -15,7 +15,8 @@ export function Nav({ studioHref = "/studio" }: { studioHref?: string }) {
     <motion.header className="nav" animate={{ y: hidden ? -90 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 36 }}>
       <nav className="nav-pill" aria-label="Main">
         <Link href="/" className="nav-logo">wedsent</Link>
-        <a href="#designs" className="nav-link">Designs</a>
+        <a href="/#how" className="nav-link">How it works</a>
+        <a href="/#designs" className="nav-link">Designs</a>
         <Link href="/pricing" className="nav-link">Pricing</Link>
         <Link href={studioHref} className="nav-cta">Open Studio</Link>
       </nav>

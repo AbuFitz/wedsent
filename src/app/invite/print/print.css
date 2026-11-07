@@ -10,7 +10,7 @@
 .pr-meta{display:grid;gap:3cqw;font-size:4cqw;line-height:1.35;border-top:.5cqw solid currentColor;padding-top:4cqw}
 .pr-meta p{margin:0}
 .pr-card--zest{background:var(--a);color:var(--on-a)}
-.pr-card--zest .pr-names{font-family:"Fraunces Variable",serif;font-style:italic;font-weight:700;letter-spacing:-.02em}
+.pr-card--zest .pr-names{font-family:var(--serif);font-weight:400;letter-spacing:-.02em}
 .pr-card--mono{background:#EDEDE8;color:#0C0C0C}
 .pr-card--mono .pr-names{font-family:"Bricolage Grotesque Variable",sans-serif;font-weight:800;font-variation-settings:"wdth" 75;font-size:23cqw}
 .pr-card--mono .pr-names span{color:var(--a)}

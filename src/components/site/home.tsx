@@ -4,10 +4,12 @@ import { useRef, useState } from "react";
 import {
   AnimatePresence, motion, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform,
 } from "motion/react";
-import { ArrowRight, Check, Circle, RotateCcw } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { Nav } from "./nav";
+import { ProductTour } from "./showcase";
+import { Features, PriceTeaser, Faq, Closing, SiteFooter, Trust } from "./sections";
 import { designs, saveDraft, type DesignId, type InviteData } from "@/lib/designs";
 import { useDraft } from "@/lib/use-draft";
 import "./home.css";
@@ -21,14 +23,15 @@ export function Home() {
       <Nav />
       <main>
         <Hero draft={draft} patch={patch} />
+        <Trust />
+        <ProductTour data={draft} />
         <Designs draft={draft} />
-        <Essentials />
+        <Features />
+        <PriceTeaser />
+        <Faq />
         <Closing />
       </main>
-      <footer className="foot">
-        <span className="foot-logo">wedsent</span>
-        <span>Early build. Drafts stay in your browser; nothing is sent or stored on a server.</span>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
@@ -162,37 +165,3 @@ function Designs({ draft }: { draft: InviteData }) {
   );
 }
 
-/* ------------------- Product essentials ------------------- */
-
-const essentials = [
-  { n: "01", title: "One link, everyone invited.", body: "Your own beautifully presented invitation link to share by WhatsApp, text, email or wherever your guests are.", state: "Planned for launch" },
-  { n: "02", title: "Replies without the chasing.", body: "See who's coming, who can't make it and who still needs a reminder. Handle plus-ones and households thoughtfully.", state: "In development" },
-  { n: "03", title: "Your details, always there.", body: "Directions, times, dress codes and event information in one clear place, designed to work beautifully on a phone.", state: "Interactive preview available" },
-  { n: "04", title: "Digital first. Print too.", body: "A digital invitation guests can open with a little anticipation, with matching print-ready artwork as the product matures.", state: "A5 preview available" },
-];
-
-function Essentials() {
-  return (
-    <section id="status" className="status">
-      <motion.h2 className="status-title" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.8, ease }}>
-        Beautiful to open.<br />Simple to organise.
-      </motion.h2>
-      <p className="status-lead">An invitation that makes an impression. A few useful things behind it that make the whole experience easier for you and your guests.</p>
-      <div className="essentials-grid">
-        {essentials.map((item) => <motion.article key={item.n} className="essential" initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.55}}><span className="essential-number">{item.n}</span><h3>{item.title}</h3><p>{item.body}</p><span className="essential-state">{item.state}</span></motion.article>)}
-      </div>
-      <div className="status-bottom"><span>Wedsent is currently an early preview. Publishing and real guest responses are not live yet.</span><Link href="/pricing">One simple price <ArrowRight size={16}/></Link></div>
-    </section>
-  );
-}
-
-function Closing() {
-  return (
-    <section className="closing">
-      <motion.h2 initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.9, ease }}>
-        Make yours in<br />a few minutes.
-      </motion.h2>
-      <Link href="/studio" className="btn btn-dark closing-btn">Open Studio <ArrowRight size={18} /></Link>
-    </section>
-  );
-}

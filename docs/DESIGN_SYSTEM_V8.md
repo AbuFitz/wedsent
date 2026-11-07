@@ -7,7 +7,7 @@ All V2–V7 CSS, home pages, Studio, invitation renderer, RSVP and print styling
 
 ## Stack
 - `motion` (the Framer Motion engine) for springs, drag, hold gestures, `useScroll` sticky storytelling, `AnimatePresence`. `MotionConfig reducedMotion="user"` is set globally.
-- Self-hosted variable fonts via `@fontsource*` (no network at runtime): **Bricolage Grotesque** (product headlines and the Monolith design), **Geist** (UI and body), **Fraunces** (Zest), **Instrument Serif** (Nocturne).
+- Self-hosted variable fonts via `@fontsource*` (no network at runtime). **Site and product: Geist (UI, body, tool headings) + Instrument Serif (marketing display headings).** Bricolage Grotesque was judged childish for the brand and now appears only inside the Monolith invitation. Fraunces removed. Vermilion and Nocturne use Instrument Serif.
 - Plain CSS. Tokens in `src/app/globals.css`; invitation renderer in `src/components/invitation/`.
 
 ## Product identity
@@ -38,3 +38,8 @@ Not built: accounts, server persistence, publishing and share links, real RSVP s
 
 ## Known gaps / next
 Test fixtures for long names, RTL and no-message still need a pass. Screen-reader testing not done. Dev-only: verify `inert` behaviour on Safari. Designs 4–12 from `CREATIVE_SYSTEM.md` are not started.
+
+
+## Marketing site structure (rebuilt 2026-11-07, round 2)
+Research (Joy, Partiful, Paperless Post, Greenvelope homepages; Framer wedding templates such as Amorette, Bellure, Invitara; 2026 SaaS landing-page guidance): product-first hero, a short "one link, everyone's in" story shown with real screens, a transparent feature index, plain trust facts instead of invented metrics, visible one-time pricing (Greenvelope lists from $19, a useful benchmark for D01).
+Sections in `src/components/site/`: hero with live phone and name/date capture -> plain-facts strip -> **How it works** (scroll-pinned: Studio with live typing, household links, household reply, host counts; built from the real components' styles, labelled as example data) -> design tour (three live invitations) -> feature index (6 tiles, each with a miniature of the real UI) -> price teaser -> FAQ -> closing. Framer templates are licensed for use inside Framer only; they were studied for structure, not reused.
