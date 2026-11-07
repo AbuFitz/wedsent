@@ -190,3 +190,29 @@ function hashCode(s: string) {
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return h;
 }
+
+/** An event as the invitation renders it. Dates are plain yyyy-mm-dd / HH:mm strings. */
+export type InviteEvent = { id: string; title: string; startsOn: string | null; startsAt: string | null; venue: string; city: string };
+
+export const eventMapsUrl = (e: { venue: string; city: string }) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([e.venue, e.city].filter(Boolean).join(", "))}`;
+
+/** A real .ics for one event. */
+export function buildEventIcs(e: InviteEvent, couple: string) {
+  const esc = (s: string) => s.replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
+  const date = (e.startsOn ?? "").replace(/-/g, "");
+  if (!date) return "";
+  const hasTime = !!e.startsAt && /^\d{2}:\d{2}$/.test(e.startsAt);
+  const t = hasTime ? e.startsAt!.replace(":", "") + "00" : "";
+  const endH = hasTime ? String((parseInt(e.startsAt!.slice(0, 2), 10) + 3) % 24).padStart(2, "0") + e.startsAt!.slice(3) + "00" : "";
+  return [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Wedsent//Invitation//EN", "BEGIN:VEVENT",
+    `UID:${e.id}@wedsent`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`,
+    hasTime ? `DTSTART:${date}T${t}` : `DTSTART;VALUE=DATE:${date}`,
+    hasTime ? `DTEND:${date}T${endH}` : "",
+    `SUMMARY:${esc(`${e.title} — ${couple}`)}`,
+    `LOCATION:${esc([e.venue, e.city].filter(Boolean).join(", "))}`,
+    "END:VEVENT", "END:VCALENDAR",
+  ].filter(Boolean).join("\r\n");
+}

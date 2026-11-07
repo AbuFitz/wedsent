@@ -3,6 +3,8 @@
 ## Stack and decisions
 - Next.js 16 route handlers + server modules in `src/server/`. One app, one database. No microservices.
 - **Postgres via `pg`** when `DATABASE_URL` is set (works with Supabase/Neon/any). **Embedded Postgres (PGlite)** when it is not, in dev and tests only; in production without `DATABASE_URL` every API returns `503 backend_not_configured` rather than silently using ephemeral storage.
+- `@electric-sql/pglite` and `pg` are listed in `serverExternalPackages` (next.config.ts); bundling PGlite breaks its WASM file loading in dev and caused sign-up 500s.
+- Dates leave the database as plain `yyyy-mm-dd` / `HH:mm` strings (`to_char`), never as JS Dates, to avoid time-zone day shifts.
 - Plain SQL migrations in `db/migrations/`, applied on first connection and recorded in `schema_migrations`.
 - Own auth (not a vendor): keeps one data store, no extra service. Magic links and reset need email, so they are deferred.
 - Zod validates every write. Errors are `{error:{code,message,details}}` with stable codes.
@@ -22,7 +24,7 @@ users, sessions, weddings, design_versions (one mutable draft + immutable publis
 Transactional, `SELECT … FOR UPDATE` on the invitation (re-validates revocation inside the transaction), idempotency key per submission, per-answer `version` for stale detection, history row only when an answer actually changes, deadline enforced server-side with a host override path, all writes audited.
 
 ## API (all JSON, cookie session unless stated)
-`POST /api/auth/{signup,login,logout}`, `GET /api/me`, `GET|PUT /api/wedding`, `POST /api/wedding/publish`, `GET|POST /api/wedding/events`, `DELETE /api/wedding/events/:id`, `GET|POST /api/wedding/households`, `PATCH|DELETE /api/wedding/households/:id`, `POST …/:id/rotate`, `POST /api/wedding/import`, `GET /api/wedding/rsvps[?format=csv]`, `POST /api/wedding/responses`, `PUT /api/wedding/policy`; public: `GET /api/w/:slug`, `GET /api/r/:token`, `POST /api/r/:token/respond` (rate limited).
+`POST /api/auth/{signup,login,logout}`, `GET /api/me`, `GET|PUT /api/wedding`, `POST /api/wedding/publish`, `GET|POST /api/wedding/events`, `PUT|DELETE /api/wedding/events/:id`, `GET|POST /api/wedding/households`, `PATCH|DELETE /api/wedding/households/:id`, `POST …/:id/rotate`, `POST /api/wedding/import`, `GET /api/wedding/rsvps[?format=csv]`, `POST /api/wedding/responses`, `PUT /api/wedding/policy`; public: `GET /api/w/:slug`, `GET /api/r/:token`, `POST /api/r/:token/respond` (rate limited).
 
 ## Tests
 `npm test` runs `tests/platform.test.ts` against in-memory Postgres: auth and rate limit, tenant isolation, stale draft, publish immutability and idempotency, public payload privacy, per-person counts, idempotent double submit, version conflict, cross-household/event attack attempts, Walima-only guests, rotation, revoke-vs-reply race, deadline policy, CSV import/export.

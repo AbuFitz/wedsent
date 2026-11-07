@@ -22,7 +22,7 @@ await p.getByRole("link", { name: /Save & publish/ }).click();
 await p.waitForURL(/signin/);
 await p.getByLabel("Email").fill(email); await p.getByLabel("Password").fill("a-long-passphrase");
 await p.getByRole("button", { name: "Create account" }).click();
-await p.waitForURL(/\/studio/);
+await p.waitForURL((u) => u.pathname === "/studio", { timeout: 30000 });
 ok(true, "sign-up returns to Studio (next param)");
 
 // Draft claimed from local.
@@ -37,10 +37,29 @@ await p.reload(); await p.waitForTimeout(1200);
 await p.getByRole("tab", { name: "Details" }).click();
 ok((await p.getByLabel("Venue", { exact: true }).inputValue()) === "Hall of Mirrors", "draft persists across reload (server)");
 
-// Events + guests.
-await p.goto(base + "/dashboard"); await p.getByRole("button", { name: "Events", exact: true }).waitFor({ timeout: 15000 });
-await p.getByRole("button", { name: "Events", exact: true }).click();
-for (const t of ["Nikah", "Walima"]) { await p.getByLabel("Name", { exact: true }).fill(t); await p.getByRole("button", { name: "Add event" }).click(); await p.waitForTimeout(500); }
+// Events created in the Studio (account-saved), visible in the live preview.
+await p.getByRole("tab", { name: "Events" }).click();
+const addEvent = async (title, date, venue, visibility) => {
+  await p.getByLabel("Name", { exact: true }).fill(title);
+  await p.getByLabel("Date", { exact: true }).fill(date);
+  await p.getByLabel("Venue", { exact: true }).fill(venue);
+  await p.getByLabel("Who can see it?").selectOption(visibility);
+  await p.getByRole("button", { name: "Add event" }).click();
+  await p.getByText(title, { exact: true }).first().waitFor({ timeout: 8000 });
+};
+await addEvent("Nikah", "2027-06-12", "City Mosque", "invited");
+await addEvent("Walima", "2027-06-13", "The Glasshouse", "everyone");
+ok((await p.locator(".st-events li").count()) === 2, "studio: two events saved to the account");
+// Edit one.
+await p.getByRole("button", { name: "Edit Nikah" }).click();
+await p.getByLabel("Venue", { exact: true }).fill("Central Mosque");
+await p.getByRole("button", { name: "Save event" }).click();
+await p.getByText("Central Mosque").first().waitFor({ timeout: 8000 }).catch(() => {});
+ok(await p.getByText("Central Mosque").first().isVisible(), "studio: event edit persisted");
+
+// Guests.
+await p.goto(base + "/dashboard");
+await p.getByRole("button", { name: "Guests", exact: true }).waitFor({ timeout: 15000 });
 await p.getByRole("button", { name: "Guests", exact: true }).click();
 await p.getByLabel("People").fill("Sara Khan, sara@example.com\nOmar Khan\nZayn Khan (child)");
 await p.getByLabel(/Household name/).fill("The Khans");
@@ -63,6 +82,14 @@ gp.on("pageerror", (e) => console.error("guest pageerror", e.message));
 const pub = await gp.goto(url); ok(pub.status() === 200, "public link resolves");
 await gp.goto(link); await gp.waitForTimeout(1500);
 await gp.screenshot({ path: `${out}/guest-cover.png` });
+const inside = await gp.locator(".inside").first().innerText();
+ok(/For The Khans/.test(inside) && /Nikah/.test(inside) && /Walima/.test(inside) && /Central Mosque/.test(inside), "personal invitation shows the household greeting and both of their events");
+const pubGp = await g.newPage(); await pubGp.goto(url); await pubGp.waitForTimeout(1500);
+const pubInside = await pubGp.locator(".inside").first().innerText();
+ok(/Walima/.test(pubInside) && !/Nikah/.test(pubInside) && !/Khan/.test(pubInside), "public invitation shows only the public event and no guest data");
+await gp.getByLabel("Open invitation from").first().click().catch(() => {});
+await gp.waitForTimeout(2200);
+await gp.screenshot({ path: `${out}/guest-inside.png` });
 const raw = await (await fetch(link)).text();
 ok(!raw.includes("Khan") && !raw.includes("Layla") && /noindex/.test(raw), "guest link server HTML/meta has no guest or couple data and is noindex");
 await gp.goto(link.replace(/\/r\//, "/r/") + "/reply"); await gp.waitForTimeout(1000);

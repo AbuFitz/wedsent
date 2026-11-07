@@ -1,6 +1,6 @@
 .pt{position:relative;background:#fff;margin-top:clamp(60px,8vw,110px);border-radius:36px;max-width:1360px;margin-inline:auto}
 .pt-stick{position:sticky;top:0;height:100svh;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);align-items:center;gap:clamp(20px,4vw,70px);padding:0 clamp(20px,5vw,80px);--phone-w:min(290px,calc((100svh - 220px)/2.15))}
-.pt-title{font-family:var(--serif);font-weight:400;font-size:clamp(48px,6vw,92px);letter-spacing:-.025em;line-height:.95;margin-bottom:clamp(24px,4vh,46px)}
+.pt-title{font-family:var(--display);font-weight:600;font-size:clamp(38px,4.6vw,68px);letter-spacing:-.045em;line-height:1;margin-bottom:clamp(24px,4vh,46px)}
 .pt-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .pt-list li{display:flex;gap:16px;padding:14px 0;border-top:1px solid #E7E3DB;opacity:.45;transition:opacity .4s}
 .pt-list li[data-on=true]{opacity:1}

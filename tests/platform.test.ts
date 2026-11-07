@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { signIn, signUp, userFromToken } from "@/server/auth";
 import { getDraft, getPublishedBySlug, publish, saveDraft } from "@/server/weddings";
-import { createEvent, createHousehold, deleteHousehold, importHouseholds, listHouseholds, rotateInvitation, setHouseholdEvents } from "@/server/guests";
+import { createEvent, createHousehold, deleteHousehold, importHouseholds, listEvents, listHouseholds, rotateInvitation, setHouseholdEvents, updateEvent } from "@/server/guests";
 import { eventCounts, exportCsv, guestView, hostRecord, respond } from "@/server/rsvp";
 import { setDeadlinePolicy } from "@/server/weddings";
 import { getDb } from "@/server/db";
@@ -215,6 +215,30 @@ describe("deadline policy", () => {
     expect((await db.query(`select count(*)::int n from audit_events where wedding_id=$1 and action='rsvp.host_recorded'`, [f.weddingId])).rows[0].n).toBe(1);
     await setDeadlinePolicy(f.user.id, f.weddingId, new Date(Date.now() - 3600_000).toISOString(), true);
     await respond(f.token, { idempotencyKey: key(), answers: [{ guestId: g, eventId: f.nikah, status: "declined" }] });
+  });
+});
+
+describe("events", () => {
+  it("returns dates as plain strings in chronological order and lets the host edit an event", async () => {
+    const o = await newOwner();
+    const late = await createEvent(o.user.id, o.weddingId, { title: "Reception", startsOn: "2027-06-13", startsAt: "18:30" });
+    const early = await createEvent(o.user.id, o.weddingId, { title: "Nikah", startsOn: "2027-06-12", startsAt: "11:00" });
+    let evs = await listEvents(o.user.id, o.weddingId);
+    expect(evs.map((e: any) => e.title)).toEqual(["Nikah", "Reception"]);
+    expect(evs[0]).toMatchObject({ starts_on: "2027-06-12", starts_at_local: "11:00" });
+    await updateEvent(o.user.id, o.weddingId, early, { title: "Nikah ceremony", startsOn: "2027-06-14", startsAt: null, venue: "Mosque", city: "London", visibility: "everyone" });
+    evs = await listEvents(o.user.id, o.weddingId);
+    expect(evs.map((e: any) => e.title)).toEqual(["Reception", "Nikah ceremony"]);
+    expect(evs[1]).toMatchObject({ starts_on: "2027-06-14", starts_at_local: null, venue: "Mosque" });
+    const other = await newOwner();
+    expect(await code(updateEvent(other.user.id, o.weddingId, late, { title: "Hack" }))).toBe("not_found");
+    expect(await code(updateEvent(o.user.id, o.weddingId, "00000000-0000-0000-0000-000000000000", { title: "x" }))).toBe("not_found");
+  });
+  it("guest view and public payload expose event dates as yyyy-mm-dd strings", async () => {
+    const f = await fixture();
+    await updateEvent(f.user.id, f.weddingId, f.walima, { title: "Walima", startsOn: "2027-06-13", startsAt: "19:00", visibility: "everyone" });
+    expect((await guestView(f.token)).events.find((e) => e.title === "Walima")).toMatchObject({ startsOn: "2027-06-13", startsAt: "19:00" });
+    expect((await getPublishedBySlug(f.slug))!.events[0]).toMatchObject({ startsOn: "2027-06-13", startsAt: "19:00" });
   });
 });
 

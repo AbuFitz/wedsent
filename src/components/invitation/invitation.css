@@ -153,3 +153,23 @@
 .zest-cover[data-phase=rise] .env-card-names,.zest-cover[data-phase=rise] .env-card-meta,.zest-cover[data-phase=away] .env-card-names,.zest-cover[data-phase=away] .env-card-meta{opacity:1}
 .zest-hint{position:absolute;left:0;right:0;top:calc(53cqh + 34cqw);margin:0;text-align:center;font-size:3.9cqw;letter-spacing:.01em;opacity:.8;transition:opacity .25s}
 .zest-cover:not([data-phase=idle]) .zest-hint{opacity:0}
+
+/* ---- Multi-event: one card per event the guest is invited to ---- */
+.in-links{display:flex;flex-wrap:wrap;gap:0 4cqw;margin-top:1cqw}
+.inv .in-event .in-date strong{font-size:20cqw}
+.inv--zest .in-evtitle{font-family:var(--serif);font-weight:400;font-size:7.4cqw;letter-spacing:-.01em;line-height:1}
+.inv--zest .in-event:nth-of-type(odd){background:#F1E2D1}
+.inv--zest .in-event:nth-of-type(even){background:#D8B0A3}
+.inv--mono .in-evtitle{font-size:3.5cqw}
+.inv--mono .in-event:first-of-type{background:var(--a);color:var(--on-a);margin:0 -6cqw;padding:5cqw 6cqw 6cqw;border-bottom:0}
+.inv--mono .in-event:first-of-type .in-date strong{font-size:30cqw}
+.inv--mono .in-event .in-cal,.inv--mono .in-event .in-link{color:inherit}
+.inv--nocturne .in-evtitle{font-family:"Instrument Serif",serif;font-style:italic;font-size:7.2cqw;color:var(--a)}
+/* Event card polish */
+.inv--zest .in-card .in-cal{color:var(--ink)}
+.inv .in-event .in-evtitle{margin-bottom:2.4cqw}
+.inv .in-event .in-count{margin-block:2.2cqw 3cqw}
+.inv .in-event .in-venue{margin-top:1cqw}
+.inv--mono .in-event>:not(.in-evtitle){grid-column:2}
+.inv--mono .in-event>.in-evtitle{grid-column:1;grid-row:1;align-self:start;margin:0;padding-top:1.4cqw}
+.inv--mono .in-event .in-links{flex-direction:column;align-items:flex-start;gap:0}

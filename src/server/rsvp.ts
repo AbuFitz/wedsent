@@ -43,8 +43,8 @@ export async function guestView(token: string) {
   const guests = (await db.query(`select id, display_name, is_child from guests where household_id=$1 order by created_at`, [r.householdId])).rows;
   const ids = guests.map((g) => g.id);
   const events = (await db.query(
-    `select distinct e.id, e.title, e.starts_on, e.starts_at_local, e.venue, e.city, e.sort_order from wedding_events e
-     join event_invitees ei on ei.event_id = e.id where ei.guest_id = any($1::uuid[]) order by e.sort_order, e.starts_on`, [ids])).rows;
+    `select distinct e.id, e.title, to_char(e.starts_on,'YYYY-MM-DD') as starts_on, to_char(e.starts_at_local,'HH24:MI') as starts_at_local, e.venue, e.city, e.sort_order from wedding_events e
+     join event_invitees ei on ei.event_id = e.id where ei.guest_id = any($1::uuid[]) order by starts_on nulls last, starts_at_local nulls last, e.sort_order`, [ids])).rows;
   const invited = (await db.query(`select event_id, guest_id from event_invitees where guest_id = any($1::uuid[])`, [ids])).rows;
   const answers = (await db.query(`select event_id, guest_id, status, note, version from event_responses where guest_id = any($1::uuid[])`, [ids])).rows;
   const locked = !!r.deadline && r.deadline.getTime() < Date.now() && !r.allowAfter;

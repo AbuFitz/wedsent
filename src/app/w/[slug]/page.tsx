@@ -17,5 +17,5 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
 export default async function Page({ params }: P) {
   const w = await getPublishedBySlug((await params).slug).catch(() => null);
   if (!w) notFound();
-  return <PublicInvite content={w.content} />;
+  return <PublicInvite content={w.content} events={w.events as any} />;
 }

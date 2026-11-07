@@ -1,20 +1,23 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
-import { designById, designs, daysUntil, onColor, type DesignId, type InviteData } from "@/lib/designs";
+import { designById, designs, daysUntil, onColor, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
+import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
 import "./studio.css";
 
-type Tab = "design" | "words" | "details" | "style";
+type Tab = "design" | "words" | "details" | "events" | "style";
+type RawEvent = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
 const tabs: { id: Tab; label: string; icon: typeof Palette }[] = [
   { id: "design", label: "Design", icon: Sparkles },
   { id: "words", label: "Words", icon: Type },
   { id: "details", label: "Details", icon: CalendarDays },
+  { id: "events", label: "Events", icon: CalendarRange },
   { id: "style", label: "Style", icon: Palette },
 ];
 const occasions = ["Wedding", "Nikah", "Walima", "Mehndi", "Reception", "Civil ceremony"];
@@ -30,6 +33,13 @@ export function Studio() {
   const [tab, setTab] = useState<Tab>("design");
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState(true);
+  const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
+  const loadEvents = useCallback(async () => {
+    if (!account) return;
+    try { setRawEvents((await call("GET", "/api/wedding/events")).events); } catch { /* keep what we have */ }
+  }, [account]);
+  useEffect(() => { loadEvents(); }, [loadEvents]);
+  const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
 
   useEffect(() => {
     const d = params.get("design");
@@ -39,7 +49,7 @@ export function Studio() {
   const go = (t: Tab) => {
     setTab(t);
     setSheet(true);
-    if (t === "details") setOpen(true);
+    if (t === "details" || t === "events") setOpen(true);
     if (t === "design" || t === "style") setOpen(false);
   };
 
@@ -63,7 +73,7 @@ export function Studio() {
       <main className="st-canvas">
         <div className="st-phone" style={{ ["--bgtone" as string]: designById(draft.design).bg }}>
           <Phone label="Live invitation preview">
-            <Invitation data={draft} open={open} onOpenChange={setOpen} />
+            <Invitation data={draft} open={open} onOpenChange={setOpen} events={events} />
           </Phone>
           <button type="button" className="st-replay" onClick={() => setOpen(false)} disabled={!open}>
             <RotateCcw size={14} /> Replay opening
@@ -88,6 +98,7 @@ export function Studio() {
               {tab === "design" && <DesignTab draft={draft} patch={patch} />}
               {tab === "words" && <WordsTab draft={draft} patch={patch} />}
               {tab === "details" && <DetailsTab draft={draft} patch={patch} />}
+              {tab === "events" && <EventsTab account={!!account} events={rawEvents} reload={loadEvents} />}
               {tab === "style" && <StyleTab draft={draft} patch={patch} />}
             </motion.div>
           </AnimatePresence>
@@ -167,6 +178,7 @@ function DetailsTab({ draft, patch }: TabProps) {
   const left = daysUntil(draft.date);
   return (
     <div className="st-stack">
+      <p className="st-help st-help--flat">This is the headline date and venue. Use the Events tab for each ceremony or celebration; guests see the events they’re invited to.</p>
       <div className="st-row">
         <label className="st-field">
           <span>Date</span>
@@ -219,6 +231,70 @@ function StyleTab({ draft, patch }: TabProps) {
       </div>
       <div className="st-soon" aria-disabled="true"><strong>Music</strong><span>Not built yet</span></div>
       <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
+    </div>
+  );
+}
+
+const blank = { title: "", startsOn: "", startsAt: "", venue: "", city: "", visibility: "invited" as "invited" | "everyone" };
+function EventsTab({ account, events, reload }: { account: boolean; events: RawEvent[]; reload: () => Promise<void> }) {
+  const [f, setF] = useState(blank);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  if (!account)
+    return (
+      <div className="st-stack">
+        <h2 className="st-h">Events</h2>
+        <p className="st-help st-help--flat">Add the Nikah, ceremony, reception or any other celebration, and each guest sees only the ones they’re invited to. Events are saved to your account, so sign in first. Until then your invitation shows the single date and venue from Details.</p>
+        <Link href="/signin?next=/studio" className="btn btn-dark">Sign in to add events</Link>
+      </div>
+    );
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setBusy(true); setErr(null);
+    const body = { ...f, startsOn: f.startsOn || null, startsAt: f.startsAt || null };
+    try {
+      if (editing) await call("PUT", `/api/wedding/events/${editing}`, body); else await call("POST", "/api/wedding/events", body);
+      setF(blank); setEditing(null); await reload();
+    } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t save the event."); }
+    setBusy(false);
+  };
+  const del = async (id: string, title: string) => {
+    if (!confirm(`Delete “${title}”? Replies to it will be removed.`)) return;
+    try { await call("DELETE", `/api/wedding/events/${id}`); if (editing === id) { setEditing(null); setF(blank); } await reload(); } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t delete."); }
+  };
+  return (
+    <div className="st-stack">
+      <h2 className="st-h">Events</h2>
+      {events.length === 0 && <p className="st-help st-help--flat">No events yet. Add the first below and it appears in the preview.</p>}
+      <ul className="st-events">
+        {events.map((e) => (
+          <li key={e.id} data-editing={editing === e.id}>
+            <div><strong>{e.title}</strong><span>{[e.starts_on, e.starts_at_local, e.venue].filter(Boolean).join(" · ") || "No details yet"}</span></div>
+            <button type="button" className="st-ico" aria-label={`Edit ${e.title}`} onClick={() => { setEditing(e.id); setF({ title: e.title, startsOn: e.starts_on ?? "", startsAt: e.starts_at_local ?? "", venue: e.venue, city: e.city, visibility: e.visibility }); }}><Pencil size={15} /></button>
+            <button type="button" className="st-ico" aria-label={`Delete ${e.title}`} onClick={() => del(e.id, e.title)}><Trash2 size={15} /></button>
+          </li>
+        ))}
+      </ul>
+      <form className="st-stack" onSubmit={save}>
+        <h3 className="st-h2">{editing ? "Edit event" : "Add an event"}</h3>
+        <label className="st-field"><span>Name</span><input required maxLength={80} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Nikah" /></label>
+        <div className="st-row">
+          <label className="st-field"><span>Date</span><input type="date" value={f.startsOn} onChange={(e) => setF({ ...f, startsOn: e.target.value })} /></label>
+          <label className="st-field"><span>Time</span><input type="time" value={f.startsAt} onChange={(e) => setF({ ...f, startsAt: e.target.value })} /></label>
+        </div>
+        <label className="st-field"><span>Venue</span><input maxLength={80} value={f.venue} onChange={(e) => setF({ ...f, venue: e.target.value })} /></label>
+        <label className="st-field"><span>City</span><input maxLength={80} value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} /></label>
+        <label className="st-field"><span>Who can see it?</span>
+          <select value={f.visibility} onChange={(e) => setF({ ...f, visibility: e.target.value as "invited" | "everyone" })}>
+            <option value="invited">Only guests invited to it</option><option value="everyone">Anyone with the public link</option>
+          </select></label>
+        {err && <small className="st-err" role="alert">{err}</small>}
+        <div className="st-btns">
+          <button className="btn btn-dark" disabled={busy || !f.title.trim()}>{editing ? "Save event" : <><Plus size={16} /> Add event</>}</button>
+          {editing && <button type="button" className="btn btn-light" onClick={() => { setEditing(null); setF(blank); }}>Cancel</button>}
+        </div>
+        <p className="st-help st-help--flat">Choose who’s invited to each event in <Link href="/dashboard" className="st-inl">Guests</Link>.</p>
+      </form>
     </div>
   );
 }

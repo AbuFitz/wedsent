@@ -4,8 +4,8 @@ import Link from "next/link";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from "motion/react";
 import { ArrowUp, CalendarPlus, ChevronsUp, MapPin } from "lucide-react";
 import {
-  accentFor, buildIcs, dateParts, daysUntil, designById, fit, friendlyDate, friendlyTime,
-  mapsUrl, onColor, splitNames, type InviteData,
+  accentFor, buildEventIcs, buildIcs, dateParts, daysUntil, designById, eventMapsUrl, fit, friendlyDate, friendlyTime,
+  mapsUrl, onColor, splitNames, type InviteData, type InviteEvent,
 } from "@/lib/designs";
 import "./invitation.css";
 
@@ -18,9 +18,13 @@ export type InvitationProps = {
   rsvpHref?: string;
   /** Thumbnails: render the cover only and ignore input. */
   still?: boolean;
+  /** The events this guest may see. When present they replace the single date/venue block. */
+  events?: InviteEvent[];
+  /** Who the invitation is for (household name). Shown instead of the occasion label. */
+  greeting?: string;
 };
 
-export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still }: InvitationProps) {
+export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still, events, greeting }: InvitationProps) {
   const [inner, setInner] = useState(false);
   const open = openProp ?? inner;
   const setOpen = (v: boolean) => {
@@ -33,7 +37,7 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
 
   return (
     <div className={`inv inv--${design}`} style={style} data-open={open} {...(still ? { inert: true } : {})}>
-      <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} />
+      <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} events={events} greeting={greeting} />
       <AnimatePresence>
         {!open && (
           <Cover key={design} design={design} data={data} onOpen={() => setOpen(true)} still={!!still} />
@@ -231,7 +235,7 @@ function NocturneCover({ data, onOpen }: CoverProps) {
 /* Inside: details, one layout language per design                     */
 /* ------------------------------------------------------------------ */
 
-function Inside({ data, open, rsvpHref }: { data: InviteData; open: boolean; rsvpHref?: string }) {
+function Inside({ data, open, rsvpHref, events, greeting }: { data: InviteData; open: boolean; rsvpHref?: string; events?: InviteEvent[]; greeting?: string }) {
   const design = designById(data.design).id;
   const names = splitNames(data.names);
   const parts = dateParts(data.date);
@@ -258,11 +262,23 @@ function Inside({ data, open, rsvpHref }: { data: InviteData; open: boolean; rsv
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const evs = events && events.length ? events : null;
+  const downloadEvent = (ev: InviteEvent) => {
+    const ics = buildEventIcs(ev, data.names || "Wedding");
+    if (!ics) return;
+    const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${ev.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase() || "event"}.ics`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   return (
     <div className="inside" {...(open ? {} : { inert: true })}>
       <div className="inside-scroll">
         <motion.header className="in-hero" {...reveal(0)}>
-          <p className="in-kicker">{data.occasion || "Celebration"}</p>
+          <p className="in-kicker">{greeting ? `For ${greeting}` : data.occasion || "Celebration"}</p>
           <h2 className="in-names" style={{ fontSize: `${nameSize}cqw` }}>
             {names.a}
             {names.joined && <><span className="in-amp"> &amp; </span>{names.b}</>}
@@ -273,6 +289,27 @@ function Inside({ data, open, rsvpHref }: { data: InviteData; open: boolean; rsv
           <motion.p className="in-message" {...reveal(1)}>{data.message}</motion.p>
         )}
 
+        {evs ? evs.map((ev, i) => {
+          const p = dateParts(ev.startsOn ?? "");
+          const t = friendlyTime(ev.startsAt ?? "");
+          const left = ev.startsOn ? daysUntil(ev.startsOn) : null;
+          return (
+            <motion.section key={ev.id} className="in-card in-event" {...reveal(2 + i)}>
+              <h3 className="in-label in-evtitle">{ev.title}</h3>
+              {ev.startsOn ? (
+                <div className="in-date"><strong>{p.day}</strong><span>{p.month}<br />{p.year}</span></div>
+              ) : <p className="in-sub">Date to be confirmed</p>}
+              {ev.startsOn && <p className="in-sub">{p.weekday}{t && ` at ${t}`}</p>}
+              {i === 0 && left !== null && left >= 0 && <p className="in-count">{left > 1 ? `${left} days to go` : left === 1 ? "Tomorrow" : "Today"}</p>}
+              {(ev.venue || ev.city) && <p className="in-venue">{ev.venue || ev.city}</p>}
+              {ev.venue && ev.city && <p className="in-sub">{ev.city}</p>}
+              <div className="in-links">
+                {(ev.venue || ev.city) && <a className="in-link" href={eventMapsUrl(ev)} target="_blank" rel="noreferrer"><MapPin size="1em" /> Open in Maps</a>}
+                {ev.startsOn && <button type="button" className="in-cal" onClick={() => downloadEvent(ev)}><CalendarPlus size="1.1em" /> Add to calendar</button>}
+              </div>
+            </motion.section>
+          );
+        }) : (<>
         <motion.section className="in-card in-when" {...reveal(2)}>
           <h3 className="in-label">When</h3>
           <div className="in-date">
@@ -292,7 +329,7 @@ function Inside({ data, open, rsvpHref }: { data: InviteData; open: boolean; rsv
               <MapPin size="1em" /> Open in Maps
             </a>
           )}
-        </motion.section>
+        </motion.section></>)}
 
         {data.dress.trim() && (
           <motion.section className="in-card in-dress" {...reveal(4)}>
@@ -308,9 +345,11 @@ function Inside({ data, open, rsvpHref }: { data: InviteData; open: boolean; rsv
             <button type="button" className="in-rsvp" aria-disabled="true" title="Replies are switched off in previews">Reply</button>
           )}
           {rsvpBy && <p className="in-sub in-by">Please reply by {rsvpBy}</p>}
-          <button type="button" className="in-cal" onClick={addToCalendar}>
-            <CalendarPlus size="1.1em" /> Add to calendar
-          </button>
+          {!evs && (
+            <button type="button" className="in-cal" onClick={addToCalendar}>
+              <CalendarPlus size="1.1em" /> Add to calendar
+            </button>
+          )}
         </motion.div>
 
         <p className="in-foot">Made with Wedsent</p>
