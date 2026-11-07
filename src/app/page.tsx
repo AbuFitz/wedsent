@@ -1,1 +1,2 @@
-export {default} from "./home-v6";
+import {redirect} from "next/navigation";
+export default function Home(){redirect("/studio")}

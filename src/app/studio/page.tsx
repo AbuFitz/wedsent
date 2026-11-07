@@ -1,1 +1,1 @@
-export {default} from "./studio-v2";
+export {default} from "./studio-v7";
