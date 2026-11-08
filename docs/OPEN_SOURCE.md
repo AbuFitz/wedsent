@@ -88,6 +88,8 @@ Further source review: [Framer's interface](https://www.framer.com/academy/lesso
 
 ### Second research pass: actual application editors and CRM controls
 
+**Latest implementation note (8 Nov):** Further verified official upstream sources for [Twenty's command menu/navigation](https://github.com/twentyhq/twenty/blob/main/packages/twenty-docs/getting-started/core-concepts/layout.mdx), [Payload's live preview](https://github.com/payloadcms/payload/blob/main/docs/live-preview/overview.mdx) and [Puck's modular component-specific editing model](https://github.com/puckeditor/puck). Applied the relevant interaction ideas to Wedsent's own React/CSS editor: grouped section selection, preview-first editing and a searchable command menu. **No third-party editor code or protected design assets copied.**
+
 | Source | What is applicable | Adoption |
 | --- | --- | --- |
 | [Twenty](https://github.com/twentyhq/twenty) | Compact object navigation, right-side record peeks, only show key details in context, fast shortcuts | Interaction research, no source copied |

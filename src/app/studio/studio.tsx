@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, RotateCw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight, Eye, PanelLeftClose, PanelLeftOpen, LayoutTemplate, Settings2, Send, MapPin } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, RotateCw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight, Eye, PanelLeftClose, PanelLeftOpen, Search, X, Send } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
@@ -29,14 +29,11 @@ const tabs: { id: Tab; label: string; icon: typeof Palette }[] = [
   { id: "music", label: "Music", icon: Music2 },
   { id: "extras", label: "Extras", icon: SlidersHorizontal },
 ];
-type Workspace = "compose" | "style" | "sound" | "finish";
-const workspaces: { id: Workspace; label: string; icon: typeof Palette; description: string; tasks: Tab[] }[] = [
-  { id: "compose", label: "Content", icon: LayoutTemplate, description: "The words and practical details", tasks: ["words", "details", "events"] },
-  { id: "style", label: "Design", icon: Palette, description: "The invitation's visual world", tasks: ["design", "appearance", "photos"] },
-  { id: "sound", label: "Sound", icon: Music2, description: "Set the atmosphere", tasks: ["music"] },
-  { id: "finish", label: "Finishing", icon: Settings2, description: "Extra touches and sharing", tasks: ["extras"] },
+const navigatorGroups: { label: string; tasks: Tab[] }[] = [
+  { label: "Invitation", tasks: ["words", "details", "events"] },
+  { label: "Creative", tasks: ["design", "appearance", "photos", "music"] },
+  { label: "Finishing", tasks: ["extras"] },
 ];
-const workspaceFor = (task: Tab): Workspace => workspaces.find((area) => area.tasks.includes(task))?.id ?? "compose";
 const stepText: Record<Tab, { title: string; summary: string }> = {
   design: { title: "Choose your invitation", summary: "Start with an art-directed design. Every choice updates the real guest experience." },
   words: { title: "Make it yours", summary: "Names, occasion and the words your guests will remember." },
@@ -60,7 +57,9 @@ export function Studio() {
   const [tab, setTab] = useState<Tab>("words");
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState(true);
-  const [workspace, setWorkspace] = useState<Workspace>("compose");
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
+  const commandRef = useRef<HTMLInputElement>(null);
   const [mobilePreview, setMobilePreview] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
@@ -86,40 +85,49 @@ export function Studio() {
   };
 
   useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault(); setCommandOpen((previous) => !previous);
+      }
+      if (event.key === "Escape") setCommandOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  useEffect(() => { if (commandOpen) commandRef.current?.focus(); }, [commandOpen]);
+
+  useEffect(() => {
     const d = params.get("design");
     if (ready && d && designs.some((x) => x.id === d)) patch({ design: d as DesignId, accent: "" });
   }, [ready, params, patch]);
 
   const go = (t: Tab) => {
     setTab(t);
-    setWorkspace(workspaceFor(t));
+    setCommandOpen(false);
+    setCommandQuery("");
     setSheet(true);
     setMobilePreview(false);
     if (t === "details" || t === "events" || t === "words" || t === "extras") setOpen(true);
     if (t === "design" || t === "appearance" || t === "photos") setOpen(false);
   };
-  const selectWorkspace = (id: Workspace) => {
-    setWorkspace(id);
-    go(workspaces.find((area) => area.id === id)!.tasks[0]);
-  };
-  const area = workspaces.find((item) => item.id === workspace)!;
   const activeTask = tabs.find((item) => item.id === tab)!;
-  const previewTargets: { id: Tab; label: string; icon: typeof Palette; position: "cover" | "inside" | "both" }[] = [
-    { id: "words", label: "Names & message", icon: Type, position: "both" },
-    { id: "appearance", label: "Opening & colours", icon: Palette, position: "cover" },
-    { id: "details", label: "Date & venue", icon: MapPin, position: "inside" },
-    { id: "music", label: "Soundtrack", icon: Music2, position: "both" },
+  const commandActions = [
+    ...tabs.map((item) => ({ id: item.id, label: item.label, description: stepText[item.id].title, icon: item.icon, action: () => go(item.id) })),
+    { id: "preview", label: "View as a guest", description: "Open the guest experience", icon: Eye, action: () => window.open("/invite", "_blank", "noopener,noreferrer") },
+    { id: "share", label: "Copy feedback link", description: "Share the current draft for feedback", icon: Share2, action: () => void shareFeedback() },
   ];
+  const filteredCommands = commandActions.filter((item) => `${item.label} ${item.description}`.toLowerCase().includes(commandQuery.trim().toLowerCase()));
 
   return (
     <div className="st st-workspace" data-sheet={sheet} data-preview={mobilePreview} data-focus={focusMode}>
       <header className="st-top">
         <Link href="/" className="st-logo">wedsent <span className="st-studio-word">/ studio</span></Link>
-        <div className="st-seg" role="group" aria-label="Preview">
+        <div className="st-seg" role="group" aria-label="Invitation view">
           <button type="button" aria-pressed={!open} onClick={() => setOpen(false)}>Opening</button>
           <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
         </div>
         <div className="st-right">
+          <button type="button" className="st-command-trigger" onClick={() => setCommandOpen(true)} aria-label="Find an editing tool"><Search size={15} /><span>Find anything</span><kbd>⌘ K</kbd></button>
           <div className="st-history" role="group" aria-label="Edit history"><button type="button" aria-label="Undo change" title="Undo change" onClick={undo} disabled={!canUndo}><RotateCcw size={16}/></button><button type="button" aria-label="Redo change" title="Redo change" onClick={redo} disabled={!canRedo}><RotateCw size={16}/></button></div>
           <SaveBadge state={state} account={!!account} reload={reload} />
           {account
@@ -131,15 +139,11 @@ export function Studio() {
       </header>
       {shareStatus && <div className="st-share-toast" role="status">{shareStatus}</div>}
 
-      <nav className="st-rail" aria-label="Invitation sections">
-        <div className="st-rail-heading">YOUR INVITATION <span>SECTIONS</span></div>
-        {workspaces.map((item) => <div className="st-rail-group" key={item.id}>
-          <button type="button" className="st-rail-button" aria-expanded={workspace === item.id} aria-current={workspace === item.id ? "page" : undefined} onClick={() => selectWorkspace(item.id)} title={item.description}>
-            <item.icon size={19} strokeWidth={1.8} /><span>{item.label}</span><ChevronRight className="st-rail-chevron" size={15}/>
-          </button>
-          <div className="st-rail-children" aria-label={`${item.label} sections`}>
-            {item.tasks.map((task) => { const entry = tabs.find((t) => t.id === task)!; return <button type="button" key={task} onClick={() => go(task)} aria-current={tab === task ? "page" : undefined} className="st-rail-child"><entry.icon size={15}/><span>{entry.label}</span>{tab === task && <span className="st-selected-dot"/>}</button>; })}
-          </div>
+      <nav className="st-rail" aria-label="Invitation editor">
+        <div className="st-rail-heading"><strong>Edit invitation</strong><small>Choose what to change</small></div>
+        {navigatorGroups.map((group) => <div className="st-rail-group" key={group.label}>
+          <span className="st-rail-group-label">{group.label}</span>
+          {group.tasks.map((task) => { const entry = tabs.find((t) => t.id === task)!; return <button type="button" key={task} onClick={() => go(task)} aria-current={tab === task ? "page" : undefined} className="st-rail-child"><entry.icon size={17}/><span>{entry.label}</span>{tab === task && <ChevronRight className="st-rail-active-arrow" size={15}/>}</button>; })}
         </div>)}
         <div className="st-rail-bottom"><button type="button" onClick={() => setFocusMode((value) => !value)} title={focusMode ? "Show editor" : "Focus on the preview"} aria-pressed={focusMode}>{focusMode ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}<span>{focusMode ? "Show editor" : "Focus"}</span></button></div>
       </nav>
@@ -148,16 +152,12 @@ export function Studio() {
         <div className="st-phone" style={{ ["--bgtone" as string]: specById(draft.design).site.bg }}>
           <div className="st-preview-label"><span className="st-live-dot" /> Live guest preview <span>·</span> {open ? "Inside" : "Opening"}</div>
           <Phone label="Live invitation preview">
-            <Invitation data={draft} open={open} onOpenChange={setOpen} events={events} />
+            <Invitation data={draft} open={open} onOpenChange={setOpen} events={events} onEditTarget={go} />
           </Phone>
           <div className="st-preview-actions"><button type="button" className="st-replay" onClick={() => setOpen(false)} disabled={!open}><RotateCcw size={14} /> Replay opening</button>
           <button type="button" className="st-replay" onClick={() => go(open ? "details" : "design")}><Pencil size={14} /> Edit {open ? "details" : "cover"}</button></div>
         </div>
-        <div className="st-preview-shortcuts" aria-label="Edit what you see">
-          <span>QUICK EDIT</span>
-          {previewTargets.filter((target) => target.position === "both" || target.position === (open ? "inside" : "cover")).map((target) => <button type="button" key={target.id} onClick={() => go(target.id)}><target.icon size={15} />{target.label}<ChevronRight size={14} /></button>)}
-          <button type="button" onClick={() => setOpen((value) => !value)}><Eye size={15} />View {open ? "opening" : "inside"}<ChevronRight size={14} /></button>
-        </div>
+        <div className="st-canvas-hint"><Pencil size={14}/> Tap a part of the invitation to edit it</div>
       </main>
 
       <aside className="st-panel" aria-label="Edit invitation">
@@ -165,20 +165,11 @@ export function Studio() {
           <ChevronUp size={20} />
         </button>
         <div className="st-panel-navigation">
-          <div className="st-panel-area"><span>{area.label}</span><small>{area.description}</small></div>
-          <div className="st-tabs" role="tablist" aria-label={`${area.label} editing tools`}>
-            {area.tasks.map((id) => { const item = tabs.find((candidate) => candidate.id === id)!; return <button key={id} type="button" role="tab" id={`studio-tab-${id}`} aria-controls="studio-editor-content" aria-selected={tab === id} tabIndex={tab === id ? 0 : -1} className="st-tab" onClick={() => go(id)} onKeyDown={(event) => {
-              const at = area.tasks.indexOf(id);
-              const next = event.key === "ArrowRight" ? (at + 1) % area.tasks.length : event.key === "ArrowLeft" ? (at + area.tasks.length - 1) % area.tasks.length : event.key === "Home" ? 0 : event.key === "End" ? area.tasks.length - 1 : -1;
-              if (next === -1) return;
-              event.preventDefault(); go(area.tasks[next]);
-              document.getElementById(`studio-tab-${area.tasks[next]}`)?.focus();
-            }}><item.icon size={16} /><span>{item.label}</span></button>; })}
-          </div>
+          <div className="st-inspector-context"><activeTask.icon size={19}/><div><strong>{activeTask.label}</strong><span>Invitation editor</span></div><button type="button" onClick={() => setCommandOpen(true)} aria-label="Switch editing section"><Search size={18}/></button></div>
         </div>
-        <div className="st-body" id="studio-editor-content" role="tabpanel" aria-labelledby={`studio-tab-${tab}`}>
+        <div className="st-body" id="studio-editor-content" aria-label={`${activeTask.label} settings`}>
           <header className="st-task-header">
-            <span className="st-task-counter">EDITING <span>{activeTask.label.toUpperCase()}</span></span>
+            <span className="st-task-counter">YOUR INVITATION <span>{activeTask.label.toUpperCase()}</span></span>
             <h1>{stepText[tab].title}</h1><p>{stepText[tab].summary}</p>
           </header>
           <AnimatePresence mode="wait" initial={false}>
@@ -195,6 +186,13 @@ export function Studio() {
         <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Build mode: your draft saves on this device. Share for feedback creates a working invitation preview link, not a published RSVP invitation."}</p>
       </aside>
       <div className="st-mobile-switch" role="group" aria-label="Mobile Studio mode"><button type="button" aria-pressed={!mobilePreview} onClick={() => { setMobilePreview(false); setSheet(true); }}><Pencil size={15} /> Edit</button><button type="button" aria-pressed={mobilePreview} onClick={() => { setMobilePreview(true); setSheet(false); }}><Eye size={15} /> Preview</button></div>
+      {commandOpen && <div className="st-command-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCommandOpen(false); }}>
+        <section className="st-command" role="dialog" aria-modal="true" aria-label="Find editing tools">
+          <div className="st-command-search"><Search size={20}/><input ref={commandRef} value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} placeholder="What would you like to change?" aria-label="Search actions" onKeyDown={(event) => { if (event.key === "Enter" && filteredCommands.length) { filteredCommands[0].action(); setCommandOpen(false); } }} /><button type="button" aria-label="Close search" onClick={() => setCommandOpen(false)}><X size={18}/></button></div>
+          <div className="st-command-list">{filteredCommands.length ? filteredCommands.map((item) => <button type="button" key={item.id} onClick={() => { item.action(); setCommandOpen(false); }}><item.icon size={19}/><span><strong>{item.label}</strong><small>{item.description}</small></span><ArrowUpRight size={16}/></button>) : <p>No matching tools. Try “music”, “venue” or “design”.</p>}</div>
+          <footer>Press <kbd>Esc</kbd> to close · <kbd>Enter</kbd> for the first result</footer>
+        </section>
+      </div>}
     </div>
   );
 }

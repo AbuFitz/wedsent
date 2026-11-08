@@ -30,9 +30,11 @@ export type InvitationProps = {
   greeting?: string;
   /** Only true on an actual guest-facing page, not a phone mockup in the editor. */
   syncChrome?: boolean;
+  /** Studio-only: select an invitation section instead of activating its guest links. */
+  onEditTarget?: (target: "words" | "details" | "events" | "extras") => void;
 };
 
-export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still, events, greeting, syncChrome = false }: InvitationProps) {
+export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still, events, greeting, syncChrome = false, onEditTarget }: InvitationProps) {
   const [inner, setInner] = useState(false);
   const open = openProp ?? inner;
   const setOpen = (v: boolean) => {
@@ -66,7 +68,7 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
 
   return (
     <div className={`inv inv--${design}`} style={style} data-open={open} data-layout={spec.layout} {...(still ? { inert: true } : {})}>
-      <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} events={events} greeting={greeting} spec={spec} palette={palette} />
+      <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} events={events} greeting={greeting} spec={spec} palette={palette} onEditTarget={onEditTarget} />
       {!still && <GuestMusic choice={data.music ?? null} opened={open} />}
       <AnimatePresence>
         {!open && (
@@ -94,7 +96,7 @@ function Cover({ spec, ...p }: CoverProps & { spec: DesignSpec }) {
 /* Inside: details, one layout language per design                     */
 /* ------------------------------------------------------------------ */
 
-function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { data: InviteData; open: boolean; rsvpHref?: string; events?: InviteEvent[]; greeting?: string; spec: DesignSpec; palette: Palette }) {
+function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditTarget }: { data: InviteData; open: boolean; rsvpHref?: string; events?: InviteEvent[]; greeting?: string; spec: DesignSpec; palette: Palette; onEditTarget?: InvitationProps["onEditTarget"] }) {
   const design = spec.id;
   const names = splitNames(data.names);
   const parts = dateParts(data.date);
@@ -132,14 +134,21 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
 
   return (
     <div className="inside" {...(open ? {} : { inert: true })}>
-      <div className="inside-scroll">
+      <div className="inside-scroll" data-studio-interactive={!!onEditTarget} onClickCapture={(event) => {
+        if (!onEditTarget) return;
+        const target = (event.target as HTMLElement).closest<HTMLElement>("[data-studio-edit]");
+        if (!target) return;
+        event.preventDefault(); event.stopPropagation();
+        const section = target.dataset.studioEdit;
+        if (section === "words" || section === "details" || section === "events" || section === "extras") onEditTarget(section);
+      }}>
         {spec.layout === "stationery" ? (
-          <motion.div {...reveal(0)}>
+          <motion.div {...reveal(0)} data-studio-edit="words">
             <StationeryCard data={data} spec={spec} palette={palette} greeting={greeting} event={evs?.[0]} />
             {data.message.trim() && <p className={`in-message in-note in-message--${data.messageStyle || "plain"}`}>{data.message}</p>}
           </motion.div>
         ) : (<>
-        <motion.header className="in-hero" {...reveal(0)}>
+        <motion.header className="in-hero" {...reveal(0)} data-studio-edit="words">
           <p className="in-kicker">{greeting ? `For ${greeting}` : data.occasion || "Celebration"}</p>
           <h2 className="in-names" style={{ fontSize: `${nameSize}cqw` }}>
             {names.a}
@@ -148,7 +157,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
         </motion.header>
 
         {data.message.trim() && (
-          <motion.p className={`in-message in-message--${data.messageStyle || "plain"}`} {...reveal(1)}>{data.message}</motion.p>
+          <motion.p data-studio-edit="words" className={`in-message in-message--${data.messageStyle || "plain"}`} {...reveal(1)}>{data.message}</motion.p>
         )}
         </>)}
 
@@ -156,7 +165,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
           const p = dateParts(ev.startsOn ?? "");
           const t = friendlyTime(ev.startsAt ?? "");
           return (
-            <motion.section key={ev.id} className="in-card in-event" {...reveal(2 + i)}>
+            <motion.section key={ev.id} data-studio-edit="events" className="in-card in-event" {...reveal(2 + i)}>
               <h3 className="in-label in-evtitle">{ev.title}</h3>
               {ev.startsOn ? (
                 <div className="in-date"><strong>{p.day}</strong><span>{p.month}<br />{p.year}</span></div>
@@ -171,7 +180,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
             </motion.section>
           );
         }) : (<>
-        <motion.section className="in-card in-when" {...reveal(2)}>
+        <motion.section data-studio-edit="details" className="in-card in-when" {...reveal(2)}>
           <h3 className="in-label">{label(data.languages?.details ?? "en", "when")}</h3>
           <div className="in-date">
             <strong>{parts.day}</strong>
@@ -180,7 +189,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
           <p className="in-sub">{parts.weekday}{time && ` at ${time}`}</p>
         </motion.section>
 
-        <motion.section className="in-card in-where" {...reveal(3)}>
+        <motion.section data-studio-edit="details" className="in-card in-where" {...reveal(3)}>
           <h3 className="in-label">{label(data.languages?.details ?? "en", "where")}</h3>
           <p className="in-venue">{data.venue || "Venue to be confirmed"}</p>
           {data.city && <p className="in-sub">{data.city}</p>}
@@ -194,13 +203,13 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
         <CountdownWidget date={evs?.[0]?.startsOn ?? data.date} time={evs?.[0]?.startsAt ?? data.time} config={data.countdown ?? { enabled: false, style: "type", accent: "", label: "" }} lang={data.languages?.countdown ?? "en"} />
 
         {data.dress.trim() && (
-          <motion.section className="in-card in-dress" {...reveal(4)}>
+          <motion.section data-studio-edit="details" className="in-card in-dress" {...reveal(4)}>
             <h3 className="in-label">{label(data.languages?.details ?? "en", "dress")}</h3>
             <p className="in-venue">{data.dress}</p>
           </motion.section>
         )}
 
-        <motion.div className="in-actions" {...reveal(5)}>
+        <motion.div data-studio-edit="extras" className="in-actions" {...reveal(5)}>
           {rsvpHref ? (
             <Link className="in-rsvp" href={rsvpHref}>{label(data.languages?.reply ?? "en", "reply")}</Link>
           ) : (
