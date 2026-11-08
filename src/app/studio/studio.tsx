@@ -10,7 +10,7 @@ import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type In
 import { FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type OpeningKind } from "@/engine/registry";
 import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
-import { saveLocalMusic } from "@/lib/local-music";
+import { readLocalMusic, saveLocalMusic } from "@/lib/local-music";
 import { recommendExperience, type Mood, type AudioPreference } from "@/lib/recommendations";
 import "./studio.css";
 
@@ -242,6 +242,24 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
   const [musicBusy, setMusicBusy] = useState(false);
   const [musicError, setMusicError] = useState<string | null>(null);
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
+  const [audioPreview, setAudioPreview] = useState("");
+  const [audioPreviewError, setAudioPreviewError] = useState("");
+  const [musicRevision, setMusicRevision] = useState(0);
+  useEffect(() => {
+    let active = true;
+    let objectUrl = "";
+    setAudioPreview(""); setAudioPreviewError("");
+    const selected = draft.music;
+    if (!selected) return;
+    if (selected.src !== "local-music") { setAudioPreview(selected.src); return; }
+    readLocalMusic().then((blob) => {
+      if (!active) return;
+      if (!blob) { setAudioPreviewError("This browser no longer has the track. Please upload it again."); return; }
+      objectUrl = URL.createObjectURL(blob);
+      setAudioPreview(objectUrl);
+    }).catch(() => { if (active) setAudioPreviewError("Couldn't load the local track. Please upload again."); });
+    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [draft.music?.src, musicRevision]);
   const uploadMusic = async (file?: File) => {
     if (!file) return;
     if (file.size > 8_000_000 || !/\.mp3$/i.test(file.name) || !rightsConfirmed) {
@@ -257,6 +275,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
         src = result.src;
       } else await saveLocalMusic(file);
       patch({ music: { src, title: file.name.replace(/\.mp3$/i, "").slice(0, 80) } });
+      setMusicRevision((revision) => revision + 1);
     } catch (e) { setMusicError(e instanceof Error ? e.message : "Couldn’t add music."); }
     finally { setMusicBusy(false); }
   };
@@ -388,6 +407,9 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
       <label className="st-widget-toggle"><span><strong>I have permission to use this recording</strong><small>Only upload music you own or have rights to share with guests.</small></span><input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} /></label>
       <label className="st-field"><span>{musicBusy ? "Uploading music…" : "Choose MP3 (up to 8 MB)"}</span><input type="file" accept="audio/mpeg,.mp3" disabled={!rightsConfirmed || musicBusy} onChange={(e) => { void uploadMusic(e.target.files?.[0]); e.target.value = ""; }} /></label>
       {draft.music && <div className="st-music-selected"><span>Selected: {draft.music.title}</span><button type="button" className="st-chip" onClick={() => patch({ music: null })}>Remove music</button></div>}
+      {draft.music && audioPreview && <div className="st-audio-preview"><label htmlFor="studio-track-player">Listen to your selected track</label><audio id="studio-track-player" key={audioPreview} controls preload="metadata" src={audioPreview} onError={() => setAudioPreviewError("The selected MP3 could not play. Try another file or re-upload it.")} /></div>}
+      {draft.music && audioPreviewError && <small className="st-err" role="alert">{audioPreviewError}</small>}
+      <p className="st-help st-help--flat">Vocals-only nasheeds, duff, instrumental and ambient are recommendation preferences, not playable songs yet. The curated library needs rights clearance. Uploaded MP3s can be played here and by guests after opening the invitation.</p>
       {!account && <p className="st-help">Build mode music stays in this browser only. Re-upload once account publishing is enabled.</p>}
       {musicError && <small className="st-err" role="alert">{musicError}</small>}
       <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
