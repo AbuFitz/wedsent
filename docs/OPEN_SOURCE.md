@@ -1,5 +1,20 @@
 # Open-source research and adoption register
 
+## Atelier editor replacement, 8 November 2026
+
+The prior Studio presentation was removed completely. Inspiration is from mature product software rather than cloneable admin dashboards:
+
+| Primary source | Inspected interaction pattern | Code/asset decision |
+| --- | --- | --- |
+| [Penpot](https://github.com/penpot/penpot) | Purpose-specific property inspector, component variants, artboard-oriented workspace | MPL-2.0; **architecture/UX research only**, no source or imagery copied |
+| [AFFiNE](https://github.com/toeverything/AFFiNE) | Edgeless composition, contextual creation, minimal chrome | Review licence before any code reuse; **research only** |
+| [Actual Budget design rules](https://github.com/actualbudget/actual/blob/master/DESIGN.md) | Density by viewport, touch-primary controls at mobile sizes, responsive hierarchy | Design-token reference; **no code copied** |
+| [Cal.com](https://github.com/calcom/cal.com) | Task-led event editing rather than arbitrary record forms | AGPL/open-core and commercial boundary; **research only** |
+| [Phosphor Icons](https://github.com/phosphor-icons/react) | Consistent regular/filled icon hierarchy in the tool dock | **Reused installed MIT package**; code-only licence does not convey media rights |
+| [Wavesurfer.js](https://github.com/katspaugh/wavesurfer.js) | Waveform excerpt trimming with draggable regions | Existing BSD-3-Clause dependency retained |
+
+The replacement deliberately keeps the invitation template renderer and stable draft/event APIs while changing the entire editor UI. This is not a Penpot clone or freeform web canvas: template constraints keep compositions safe for mobile guests.
+
 See [SOURCE_CODE_AUDIT.md](SOURCE_CODE_AUDIT.md) for inspected source file paths, pinned commits, concrete security/architecture findings and outstanding code audits. The initial project shortlist below is *not* a substitute for that inspection.
 
 Research date: 2026-11-07. GitHub repository presence does not imply permission to copy. Licences below were checked against actual repository LICENSE files where noted. Before incorporating code, verify current commit, authorship, dependencies, bundled images/fonts/music, attribution obligations, maintenance and security. Pin adopted dependencies, preserve notices and maintain an SBOM.

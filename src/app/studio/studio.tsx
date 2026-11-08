@@ -1,639 +1,271 @@
 "use client";
+
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, RotateCw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight, Eye, PanelLeftClose, PanelLeftOpen, Search, X, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, Eye, Film, ImagePlus, ListMusic, LoaderCircle, MapPin, Maximize2, Minus, Palette, Pencil, Plus, RotateCcw, RotateCw, Search, Settings2, Share2, Sparkles, Trash2, Type, UploadCloud, Volume2, X } from "lucide-react";
+import { Confetti, MusicNotes, TextT, CalendarBlank, ImageSquare, PaintBrush } from "@phosphor-icons/react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
-import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
-import { FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type OpeningKind } from "@/engine/registry";
 import { call, ApiError } from "@/lib/api-client";
+import { designs, daysUntil, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
+import { FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type OpeningKind } from "@/engine/registry";
 import { useStudioDraft } from "@/lib/use-draft";
-import { readLocalMusic, saveLocalMusic } from "@/lib/local-music";
-import { recommendExperience, type Mood, type AudioPreference } from "@/lib/recommendations";
+import { saveLocalMusic, readLocalMusic } from "@/lib/local-music";
 import { CURATED_TRACKS } from "@/lib/music-library";
 import { makeFeedbackLink } from "@/lib/feedback-share";
 import { SoundWaveform } from "@/components/studio/sound-waveform";
 import "./studio.css";
 
-type Tab = "design" | "words" | "details" | "events" | "photos" | "appearance" | "music" | "extras";
+type Panel = "story" | "events" | "look" | "photo" | "sound" | "extras";
+type View = "cover" | "inside";
 type RawEvent = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
-const tabs: { id: Tab; label: string; icon: typeof Palette }[] = [
-  { id: "design", label: "Design", icon: Sparkles },
-  { id: "words", label: "Wording", icon: Type },
-  { id: "details", label: "Details", icon: CalendarDays },
-  { id: "events", label: "Events", icon: CalendarRange },
-  { id: "photos", label: "Photos", icon: ImageIcon },
-  { id: "appearance", label: "Appearance", icon: Palette },
-  { id: "music", label: "Music", icon: Music2 },
-  { id: "extras", label: "Extras", icon: SlidersHorizontal },
+type Patch = (changes: Partial<InviteData>) => void;
+const tools: { id: Panel; name: string; detail: string; icon: typeof Pencil }[] = [
+  { id: "story", name: "Your words", detail: "Names, note and important details", icon: Type },
+  { id: "events", name: "Events & places", detail: "Celebrations, dates and locations", icon: CalendarDays },
+  { id: "look", name: "Design & style", detail: "Artwork, colours, fonts and entrance", icon: Palette },
+  { id: "photo", name: "Photos", detail: "Add an image and position its crop", icon: ImagePlus },
+  { id: "sound", name: "Soundtrack", detail: "Music, nasheeds and audio moments", icon: ListMusic },
+  { id: "extras", name: "Finishing touches", detail: "Countdown and language", icon: Sparkles },
 ];
-const navigatorGroups: { label: string; tasks: Tab[] }[] = [
-  { label: "Invitation", tasks: ["words", "details", "events"] },
-  { label: "Creative", tasks: ["design", "appearance", "photos", "music"] },
-  { label: "Finishing", tasks: ["extras"] },
-];
-const stepText: Record<Tab, { title: string; summary: string }> = {
-  design: { title: "Choose your invitation", summary: "Start with an art-directed design. Every choice updates the real guest experience." },
-  words: { title: "Make it yours", summary: "Names, occasion and the words your guests will remember." },
-  details: { title: "The essentials", summary: "Make the date, venue and practical details effortless to find." },
-  events: { title: "Your celebrations", summary: "Nikah, Walima, ceremony, reception, or just one beautiful event." },
-  photos: { title: "Your photographs", summary: "Add a favourite photo and position it exactly where it belongs." },
-  appearance: { title: "Shape the look", summary: "Refine the palette, lettering and opening experience." },
-  music: { title: "Set the atmosphere", summary: "Explore recordings, listen, select a moment and set how it begins." },
-  extras: { title: "Little personal touches", summary: "Countdown, languages and optional finishing details." },
-};
+const dockIcons = { story: TextT, events: CalendarBlank, look: PaintBrush, photo: ImageSquare, sound: MusicNotes, extras: Confetti };
 const occasions = ["Wedding", "Nikah", "Walima", "Mehndi", "Reception", "Civil ceremony"];
-const tones = [
-  { label: "Warm & heartfelt", text: "We’re so happy to share this day with the people we love most. Please join us." },
-  { label: "Simple & timeless", text: "Come celebrate with us." },
-  { label: "Joyful & personal", text: "A little love, a lot of joy, and a dance floor with your name on it." },
+const sampleNotes = [
+  { label: "Heartfelt", text: "We’re so happy to share this day with the people we love most. Please join us." },
+  { label: "Classic", text: "Together with our families, we request the pleasure of your company as we celebrate our wedding." },
+  { label: "Simple", text: "Come celebrate with us." },
 ];
 
 export function Studio() {
-  const { draft, patch, undo, redo, canUndo, canRedo, state, ready, account, reload } = useStudioDraft();
+  const { draft, patch, undo, redo, canUndo, canRedo, state, account, ready, reload } = useStudioDraft();
   const params = useSearchParams();
-  const [tab, setTab] = useState<Tab>("words");
-  const [open, setOpen] = useState(false);
-  const [sheet, setSheet] = useState(true);
-  const [commandOpen, setCommandOpen] = useState(false);
-  const [commandQuery, setCommandQuery] = useState("");
-  const commandRef = useRef<HTMLInputElement>(null);
-  const [mobilePreview, setMobilePreview] = useState(false);
-  const [focusMode, setFocusMode] = useState(false);
+  const [panel, setPanel] = useState<Panel>("story");
+  const [view, setView] = useState<View>("cover");
+  const [mobileFull, setMobileFull] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const searchInput = useRef<HTMLInputElement>(null);
+  const [notice, setNotice] = useState("");
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
-  const [shareStatus, setShareStatus] = useState("");
+
   const loadEvents = useCallback(async () => {
-    if (!account) {
-      try {
-        const pending = JSON.parse(localStorage.getItem(PENDING_EVENTS_KEY) || "[]") as { id?: string; title: string; startsOn?: string | null; startsAt?: string | null; venue?: string; city?: string; visibility?: "invited" | "everyone" }[];
-        setRawEvents(pending.map((e, i) => ({ id: e.id ?? `local-${i}`, title: e.title, starts_on: e.startsOn ?? null, starts_at_local: e.startsAt ?? null, venue: e.venue ?? "", city: e.city ?? "", visibility: e.visibility ?? "invited" })));
-      } catch { setRawEvents([]); }
+    if (account) {
+      try { setRawEvents((await call("GET", "/api/wedding/events")).events); }
+      catch { setNotice("Events couldn't load. Check your connection and try again."); }
       return;
     }
-    try { setRawEvents((await call("GET", "/api/wedding/events")).events); } catch { /* keep what we have */ }
+    try {
+      const pending = JSON.parse(localStorage.getItem(PENDING_EVENTS_KEY) || "[]") as { id?: string; title: string; startsOn?: string; startsAt?: string; venue?: string; city?: string; visibility?: "invited" | "everyone" }[];
+      setRawEvents(pending.map((e, i) => ({ id: e.id ?? `local-${i}`, title: e.title, starts_on: e.startsOn || null, starts_at_local: e.startsAt || null, venue: e.venue ?? "", city: e.city ?? "", visibility: e.visibility ?? "invited" })));
+    } catch { setRawEvents([]); }
   }, [account]);
-  useEffect(() => { loadEvents(); }, [loadEvents]);
-  const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
-  const shareFeedback = async () => {
-    try {
-      const url = makeFeedbackLink(draft, events);
-      await navigator.clipboard.writeText(url);
-      setShareStatus(draft.photo ? "Link copied. Uploaded photos aren't included in feedback links yet." : "Feedback link copied. Send it to anyone!");
-    } catch { setShareStatus("Couldn’t copy the link. Try again in a secure browser."); }
-  };
-
+  useEffect(() => { void loadEvents(); }, [loadEvents]);
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault(); setCommandOpen((previous) => !previous);
-      }
-      if (event.key === "Escape") setCommandOpen(false);
+    const chosen = params.get("design");
+    if (ready && chosen && designs.some((d) => d.id === chosen) && draft.design !== chosen) patch({ design: chosen as DesignId, accent: "" });
+  }, [ready, params, draft.design, patch]);
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen((o) => !o); }
+      if (event.key === "Escape") { setSearchOpen(false); setMobileFull(false); }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, []);
-  useEffect(() => { if (commandOpen) commandRef.current?.focus(); }, [commandOpen]);
+  useEffect(() => { if (searchOpen) searchInput.current?.focus(); }, [searchOpen]);
 
-  useEffect(() => {
-    const d = params.get("design");
-    if (ready && d && designs.some((x) => x.id === d)) patch({ design: d as DesignId, accent: "" });
-  }, [ready, params, patch]);
-
-  const go = (t: Tab) => {
-    setTab(t);
-    setCommandOpen(false);
-    setCommandQuery("");
-    setSheet(true);
-    setMobilePreview(false);
-    if (t === "details" || t === "events" || t === "words" || t === "extras") setOpen(true);
-    if (t === "design" || t === "appearance" || t === "photos") setOpen(false);
+  const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
+  const select = (id: Panel) => { setPanel(id); setInspectorOpen(true); setSearchOpen(false); setSearch(""); setMobileFull(false); setView(id === "look" || id === "photo" ? "cover" : "inside"); };
+  const tool = tools.find((entry) => entry.id === panel)!;
+  const actionList = tools.filter((t) => `${t.name} ${t.detail}`.toLowerCase().includes(search.toLowerCase()));
+  const share = async () => {
+    try { await navigator.clipboard.writeText(makeFeedbackLink(draft, events)); setNotice("Feedback link copied. It shows a preview, not a live RSVP page."); }
+    catch { setNotice("Couldn't copy the link. Try a secure browser."); }
   };
-  const activeTask = tabs.find((item) => item.id === tab)!;
-  const commandActions = [
-    ...tabs.map((item) => ({ id: item.id, label: item.label, description: stepText[item.id].title, icon: item.icon, action: () => go(item.id) })),
-    { id: "preview", label: "View as a guest", description: "Open the guest experience", icon: Eye, action: () => window.open("/invite", "_blank", "noopener,noreferrer") },
-    { id: "share", label: "Copy feedback link", description: "Share the current draft for feedback", icon: Share2, action: () => void shareFeedback() },
-  ];
-  const filteredCommands = commandActions.filter((item) => `${item.label} ${item.description}`.toLowerCase().includes(commandQuery.trim().toLowerCase()));
+  const saveLabel = state === "saved" ? account ? "Saved to account" : "Saved on this device" : state === "saving" ? "Saving…" : state === "conflict" ? "Changed in another tab" : state === "offline" ? "Offline, not synced" : state === "failed" ? "Save failed" : "Loading…";
+  const missing = [!draft.names.trim() && "Names", !draft.date && "Date", !draft.venue.trim() && !rawEvents.some((e) => e.venue) && "Venue"].filter(Boolean);
 
-  return (
-    <div className="st st-workspace" data-sheet={sheet} data-preview={mobilePreview} data-focus={focusMode}>
-      <header className="st-top">
-        <Link href="/" className="st-logo">wedsent <span className="st-studio-word">/ studio</span></Link>
-        <div className="st-seg" role="group" aria-label="Invitation view">
-          <button type="button" aria-pressed={!open} onClick={() => setOpen(false)}>Opening</button>
-          <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
-        </div>
-        <div className="st-right">
-          <button type="button" className="st-command-trigger" onClick={() => setCommandOpen(true)} aria-label="Find an editing tool"><Search size={15} /><span>Find anything</span><kbd>⌘ K</kbd></button>
-          <div className="st-history" role="group" aria-label="Edit history"><button type="button" aria-label="Undo change" title="Undo change" onClick={undo} disabled={!canUndo}><RotateCcw size={16}/></button><button type="button" aria-label="Redo change" title="Redo change" onClick={redo} disabled={!canRedo}><RotateCw size={16}/></button></div>
-          <SaveBadge state={state} account={!!account} reload={reload} />
-          {account
-            ? <Link href="/dashboard" className="btn btn-dark st-guest"><span>Guests &amp; publish</span></Link>
-            : null}
-          <Link href="/invite" target="_blank" className="btn btn-light st-guest" aria-label="Open the guest invitation in a new tab"><span>Guest view</span> <ArrowUpRight size={16} /></Link>
-          <button type="button" className="btn btn-dark st-guest" onClick={() => void shareFeedback()} aria-label="Copy a shareable invitation link for feedback"><span>Share preview</span><Share2 size={16} /></button>
-        </div>
-      </header>
-      {shareStatus && <div className="st-share-toast" role="status">{shareStatus}</div>}
+  return <div className="atelier" data-full={mobileFull} data-inspector={inspectorOpen}>
+    <header className="atelier-top">
+      <Link href="/" className="atelier-brand">wedsent<span>Studio</span></Link>
+      <div className="atelier-top-middle"><span className="atelier-file">{draft.names || "Your invitation"}</span><span className="atelier-save" data-state={state}>{state === "saving" || state === "loading" ? <LoaderCircle size={13} className="atelier-spin"/> : <span className="atelier-save-dot"/>}{saveLabel}</span>{state === "conflict" && <button onClick={reload}>Reload</button>}</div>
+      <div className="atelier-top-actions">
+        <button className="atelier-icon-button atelier-search-button" type="button" aria-label="Find a tool" title="Find a tool (⌘K)" onClick={() => setSearchOpen(true)}><Search size={18}/></button>
+        <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
+        <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
+        {account && <Link className="atelier-top-link" href="/dashboard">Guests & publish <ArrowRight size={15}/></Link>}
+        <button className="atelier-share" type="button" onClick={() => void share()}><Share2 size={16}/><span>Share for feedback</span></button>
+      </div>
+    </header>
 
-      <nav className="st-rail" aria-label="Invitation editor">
-        <div className="st-rail-heading"><strong>Edit invitation</strong><small>Choose what to change</small></div>
-        {navigatorGroups.map((group) => <div className="st-rail-group" key={group.label}>
-          <span className="st-rail-group-label">{group.label}</span>
-          {group.tasks.map((task) => { const entry = tabs.find((t) => t.id === task)!; return <button type="button" key={task} onClick={() => go(task)} aria-current={tab === task ? "page" : undefined} className="st-rail-child"><entry.icon size={17}/><span>{entry.label}</span>{tab === task && <ChevronRight className="st-rail-active-arrow" size={15}/>}</button>; })}
-        </div>)}
-        <div className="st-rail-bottom"><button type="button" onClick={() => setFocusMode((value) => !value)} title={focusMode ? "Show editor" : "Focus on the preview"} aria-pressed={focusMode}>{focusMode ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}<span>{focusMode ? "Show editor" : "Focus"}</span></button></div>
-      </nav>
+    <nav className="atelier-dock" aria-label="Studio tools">
+      <p className="atelier-dock-title">MAKE IT YOURS</p>
+      {tools.map((item, index) => { const Icon = dockIcons[item.id]; return <button key={item.id} type="button" className="atelier-dock-item" aria-current={panel === item.id ? "page" : undefined} onClick={() => select(item.id)} title={item.detail}><span className="atelier-dock-icon"><Icon size={21} weight={panel === item.id ? "fill" : "regular"}/></span><span>{item.name}</span><small>{String(index + 1).padStart(2, "0")}</small></button>; })}
+      <div className="atelier-dock-bottom"><button type="button" onClick={() => setSearchOpen(true)}><Search size={17}/> Find a tool <kbd>⌘ K</kbd></button><Link href="/dashboard"><Settings2 size={17}/> Wedding dashboard</Link></div>
+    </nav>
 
-      <main className="st-canvas">
-        <div className="st-phone" style={{ ["--bgtone" as string]: specById(draft.design).site.bg }}>
-          <div className="st-preview-label"><span className="st-live-dot" /> Live guest preview <span>·</span> {open ? "Inside" : "Opening"}</div>
-          <Phone label="Live invitation preview">
-            <Invitation data={draft} open={open} onOpenChange={setOpen} events={events} onEditTarget={go} />
-          </Phone>
-          <div className="st-preview-actions"><button type="button" className="st-replay" onClick={() => setOpen(false)} disabled={!open}><RotateCcw size={14} /> Replay opening</button>
-          <button type="button" className="st-replay" onClick={() => go(open ? "details" : "design")}><Pencil size={14} /> Edit {open ? "details" : "cover"}</button></div>
+    <main className="atelier-stage" aria-label="Live invitation composition">
+      <div className="atelier-stage-top"><div><span className="atelier-eyebrow">LIVE COMPOSITION</span><h1>{view === "cover" ? "The first impression" : "Inside the invitation"}</h1></div><div className="atelier-view-switch" role="group" aria-label="Invitation preview state"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Opening</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div></div>
+      <div className="atelier-stage-centre">
+        <div className="atelier-preview-frame" style={{ ["--preview-tone" as string]: specById(draft.design).site.bg }}>
+          <Phone label="Your live invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")} onEditTarget={(target) => select(target === "words" ? "story" : target === "details" || target === "events" ? "events" : "extras")}/></Phone>
         </div>
-        <div className="st-canvas-hint"><Pencil size={14}/> Tap a part of the invitation to edit it</div>
-      </main>
+      </div>
+      <div className="atelier-stage-bottom"><span><Pencil size={14}/> Tap text or details in the preview to edit them</span><div><button type="button" onClick={() => setView("cover")}><RotateCcw size={15}/> Replay</button><button type="button" onClick={() => setMobileFull(true)}><Maximize2 size={15}/> Guest preview</button></div></div>
+      {!missing.length ? <span className="atelier-ready"><Check size={13}/> Essentials added</span> : <button className="atelier-ready atelier-ready--todo" type="button" onClick={() => select("story")}>{missing.length} essential {missing.length === 1 ? "detail" : "details"} to review <ArrowRight size={13}/></button>}
+    </main>
 
-      <aside className="st-panel" aria-label="Edit invitation">
-        <button type="button" className="st-grab" onClick={() => setSheet((s) => !s)} aria-expanded={sheet} aria-label="Toggle editor">
-          <ChevronUp size={20} />
-        </button>
-        <div className="st-panel-navigation">
-          <div className="st-inspector-context"><activeTask.icon size={19}/><div><strong>{activeTask.label}</strong><span>Invitation editor</span></div><button type="button" onClick={() => setCommandOpen(true)} aria-label="Switch editing section"><Search size={18}/></button></div>
-        </div>
-        <div className="st-body" id="studio-editor-content" aria-label={`${activeTask.label} settings`}>
-          <header className="st-task-header">
-            <span className="st-task-counter">YOUR INVITATION <span>{activeTask.label.toUpperCase()}</span></span>
-            <h1>{stepText[tab].title}</h1><p>{stepText[tab].summary}</p>
-          </header>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
-              {tab === "design" && <DesignTab draft={draft} patch={patch} />}
-              {tab === "words" && <WordsTab draft={draft} patch={patch} />}
-              {tab === "details" && <DetailsTab draft={draft} patch={patch} />}
-              {tab === "events" && <EventsTab account={!!account} events={rawEvents} reload={loadEvents} />}
-              {(tab === "photos" || tab === "appearance" || tab === "music" || tab === "extras") && <StyleTab draft={draft} patch={patch} account={!!account} mode={tab} />}
-            </motion.div>
-          </AnimatePresence>
-          <div className="st-task-next"><button type="button" onClick={() => { setMobilePreview(true); setSheet(false); }}><Eye size={16} /> Preview changes</button><button type="button" className="st-task-primary" onClick={() => void shareFeedback()}><Send size={15} /> Share preview</button></div>
-        </div>
-        <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Build mode: your draft saves on this device. Share for feedback creates a working invitation preview link, not a published RSVP invitation."}</p>
-      </aside>
-      <div className="st-mobile-switch" role="group" aria-label="Mobile Studio mode"><button type="button" aria-pressed={!mobilePreview} onClick={() => { setMobilePreview(false); setSheet(true); }}><Pencil size={15} /> Edit</button><button type="button" aria-pressed={mobilePreview} onClick={() => { setMobilePreview(true); setSheet(false); }}><Eye size={15} /> Preview</button></div>
-      {commandOpen && <div className="st-command-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCommandOpen(false); }}>
-        <section className="st-command" role="dialog" aria-modal="true" aria-label="Find editing tools">
-          <div className="st-command-search"><Search size={20}/><input ref={commandRef} value={commandQuery} onChange={(event) => setCommandQuery(event.target.value)} placeholder="What would you like to change?" aria-label="Search actions" onKeyDown={(event) => { if (event.key === "Enter" && filteredCommands.length) { filteredCommands[0].action(); setCommandOpen(false); } }} /><button type="button" aria-label="Close search" onClick={() => setCommandOpen(false)}><X size={18}/></button></div>
-          <div className="st-command-list">{filteredCommands.length ? filteredCommands.map((item) => <button type="button" key={item.id} onClick={() => { item.action(); setCommandOpen(false); }}><item.icon size={19}/><span><strong>{item.label}</strong><small>{item.description}</small></span><ArrowUpRight size={16}/></button>) : <p>No matching tools. Try “music”, “venue” or “design”.</p>}</div>
-          <footer>Press <kbd>Esc</kbd> to close · <kbd>Enter</kbd> for the first result</footer>
-        </section>
-      </div>}
-    </div>
-  );
+    <aside className="atelier-inspector" aria-label={`${tool.name} editor`}>
+      <header className="atelier-inspector-head"><div className="atelier-inspector-icon"><tool.icon size={20}/></div><div><h2>{tool.name}</h2><p>{tool.detail}</p></div><button className="atelier-collapse" type="button" aria-label="Hide editing panel" onClick={() => setInspectorOpen(false)}><X size={18}/></button></header>
+      <div className="atelier-inspector-scroll" key={panel}>
+        {panel === "story" && <StoryEditor draft={draft} patch={patch}/>}
+        {panel === "events" && <EventsEditor account={!!account} draft={draft} patch={patch} events={rawEvents} reload={loadEvents}/>}
+        {panel === "look" && <LookEditor draft={draft} patch={patch} replay={() => setView("cover")}/>}
+        {panel === "photo" && <PhotoEditor draft={draft} patch={patch} account={!!account}/>}
+        {panel === "sound" && <SoundEditor draft={draft} patch={patch} account={!!account}/>}
+        {panel === "extras" && <ExtrasEditor draft={draft} patch={patch}/>}
+      </div>
+      <div className="atelier-inspector-foot"><span><Check size={14}/> Changes appear instantly</span><button type="button" onClick={() => { const index = tools.findIndex((t) => t.id === panel); select(tools[(index + 1) % tools.length].id); }}>Next <ArrowRight size={15}/></button></div>
+    </aside>
+    {!inspectorOpen && <button className="atelier-show-panel" type="button" onClick={() => setInspectorOpen(true)}><Pencil size={17}/> Edit {tool.name}</button>}
+    <div className="atelier-mobile-bar"><button type="button" onClick={() => setMobileFull(true)}><Eye size={17}/> Full preview</button><button type="button" onClick={() => setInspectorOpen((v) => !v)}><Pencil size={17}/>{inspectorOpen ? "Hide tools" : "Edit invitation"}</button></div>
+    {notice && <div className="atelier-toast" role="status">{notice}<button type="button" aria-label="Dismiss notification" onClick={() => setNotice("")}><X size={15}/></button></div>}
+    {mobileFull && <div className="atelier-fullscreen" role="dialog" aria-modal="true" aria-label="Guest invitation preview"><div className="atelier-fullscreen-controls"><button onClick={() => setMobileFull(false)}><ArrowLeft size={17}/> Back to Studio</button><div><button type="button" onClick={() => setView("cover")}>Opening</button><button type="button" onClick={() => setView("inside")}>Inside</button></div></div><div className="atelier-fullscreen-invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")}/></div></div>}
+    {searchOpen && <div className="atelier-search-scrim" onMouseDown={(e) => { if (e.target === e.currentTarget) setSearchOpen(false); }}><section className="atelier-command" role="dialog" aria-modal="true" aria-label="Find editing tools"><div className="atelier-command-input"><Search size={20}/><input ref={searchInput} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search your Studio…" aria-label="Search Studio tools" onKeyDown={(e) => { if (e.key === "Enter" && actionList[0]) select(actionList[0].id); }}/><button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search"><X size={17}/></button></div><div className="atelier-command-results">{actionList.length ? actionList.map((item) => <button type="button" key={item.id} onClick={() => select(item.id)}><item.icon size={19}/><span><strong>{item.name}</strong><small>{item.detail}</small></span><ArrowRight size={16}/></button>) : <p>No tools found. Try “music” or “date”.</p>}</div><footer>Press Esc to close</footer></section></div>}
+  </div>;
 }
 
-function SaveBadge({ state, account, reload }: { state: string; account: boolean; reload: () => void }) {
-  if (state === "conflict")
-    return <span className="st-save st-save--bad"><AlertCircle size={15} /> <b>Changed elsewhere.</b> <button className="st-reload" onClick={reload}>Reload</button></span>;
-  if (state === "offline") return <span className="st-save st-save--bad"><AlertCircle size={15} /> <b>Offline. Changes not saved yet.</b></span>;
-  if (state === "failed") return <span className="st-save st-save--bad"><AlertCircle size={15} /> <b>Couldn’t save.</b></span>;
-  if (state === "saving" || state === "loading") return <span className="st-save"><Loader2 size={15} className="spin" /> <b>Saving</b></span>;
-  return <span className="st-save"><Check size={15} /> <b>{account ? "Saved to your account" : "Saved on this device"}</b></span>;
+function Field({ title, children, hint }: { title: string; children: React.ReactNode; hint?: string }) { return <label className="atelier-field"><span>{title}</span>{children}{hint && <small>{hint}</small>}</label>; }
+function Group({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) { return <section className="atelier-group"><div className="atelier-group-title"><h3>{title}</h3>{note && <p>{note}</p>}</div>{children}</section>; }
+
+function StoryEditor({ draft, patch }: { draft: InviteData; patch: Patch }) {
+  return <>
+    <div className="atelier-intro"><strong>Start with your story.</strong><p>A few details are enough to make the invitation feel like yours. Everything updates as you type.</p></div>
+    <Group title="The couple"><Field title="Names"><input aria-label="Names" maxLength={60} value={draft.names} onChange={(e) => patch({ names: e.target.value })} placeholder="e.g. Amina & Yusuf" aria-invalid={!draft.names.trim()}/></Field>
+      <Field title="Celebration"><select value={occasions.includes(draft.occasion) ? draft.occasion : "other"} onChange={(e) => patch({ occasion: e.target.value === "other" ? "" : e.target.value })}>{occasions.map((o) => <option key={o}>{o}</option>)}<option value="other">Something else</option></select></Field>
+      {!occasions.includes(draft.occasion) && <Field title="Name your celebration"><input value={draft.occasion} maxLength={30} onChange={(e) => patch({ occasion: e.target.value })}/></Field>}
+    </Group>
+    <Group title="Your invitation message" note="A short, genuine note often feels more personal than a formal paragraph."><Field title="Your words"><textarea value={draft.message} maxLength={600} rows={4} onChange={(e) => patch({ message: e.target.value })} placeholder="We would love you to be there…"/></Field>
+      <div className="atelier-preset-list">{sampleNotes.map((s) => <button type="button" key={s.label} aria-pressed={draft.message === s.text} onClick={() => patch({ message: s.text })}><strong>{s.label}</strong><span>{s.text}</span>{draft.message === s.text && <Check size={15}/>}</button>)}</div>
+      <div className="atelier-choice-grid">{(["plain", "framed", "editorial"] as const).map((s) => <button type="button" key={s} aria-pressed={draft.messageStyle === s} onClick={() => patch({ messageStyle: s })}><span className={`atelier-message-style atelier-message-style--${s}`}>Together, always.</span><strong>{s === "plain" ? "Clean" : s === "framed" ? "Bordered" : "Editorial"}</strong></button>)}</div>
+    </Group>
+    <Group title="A little more"><Field title="Dress code"><input value={draft.dress} maxLength={80} onChange={(e) => patch({ dress: e.target.value })} placeholder="Optional, e.g. Black tie"/></Field><Field title="Reply by"><input type="date" value={draft.rsvpBy} onChange={(e) => patch({ rsvpBy: e.target.value })}/></Field></Group>
+  </>;
 }
 
-type TabProps = { draft: InviteData; patch: (p: Partial<InviteData>) => void };
-
-function DesignTab({ draft, patch }: TabProps) {
-  const [mood, setMood] = useState<Mood>("romantic");
-  const [audio, setAudio] = useState<AudioPreference>("undecided");
-  const suggestion = recommendExperience(draft.occasion, mood, audio);
-  return (
-    <div className="st-stack">
-      <div className="st-panel-intro"><span>01 / LOOKS</span><p>Pick a visual world. Your names, events and answers stay exactly as they are.</p></div>
-      <h2 className="st-h">Invitation collection</h2>
-      <p className="st-help st-help--flat">Choose the artwork first. Your content and guest replies are preserved when you change the design.</p>
-      <div className="st-designs">
-        {designs.map((d) => (
-          <div key={d.id} className="st-design" data-on={draft.design === d.id}>
-            <span className="st-thumb"><Invitation data={{ ...draft, design: d.id, accent: "" }} still /></span>
-            <span className="st-design-text">
-              <strong>{d.name}</strong>
-              <span>{d.mood}</span>
-              <em>{d.opening}</em>
-            </span>
-            {draft.design === d.id && <Check className="st-tick" size={18} />}
-            <button type="button" className="st-design-hit" aria-pressed={draft.design === d.id} aria-label={`Use ${d.name}`} onClick={() => patch({ design: d.id, accent: "" })} />
-          </div>
-        ))}
-      </div>
-      <details className="st-guided-choice"><summary><Sparkles size={17} /> Help me choose <ChevronRight size={16} /></summary>
-        <section className="st-recommend" aria-label="Personalised starting point">
-        <p className="st-help st-help--flat">Tell us the feeling you want. Suggestions never lock your choices or change anything until you apply them.</p>
-        <label className="st-field"><span>What feels like you?</span><select value={mood} onChange={(e) => setMood(e.target.value as Mood)}>
-          <option value="minimal">Minimal and modern</option><option value="romantic">Soft and romantic</option><option value="grand">Grand and glamorous</option><option value="heritage">Heritage and detail</option><option value="celebration">Colourful celebration</option>
-        </select></label>
-        <label className="st-field"><span>Soundtrack preference</span><select value={audio} onChange={(e) => setAudio(e.target.value as AudioPreference)}>
-          <option value="undecided">Show me options</option><option value="vocal">Vocals-only nasheed</option><option value="duff">Nasheed with duff</option><option value="instrumental">Instrumental music</option><option value="ambient">Ambient sound</option><option value="silent">No music</option>
-        </select></label>
-        <div className="st-recommend-result"><strong>{suggestion.title}</strong><p>{suggestion.reason}</p><small>{suggestion.audioHint}</small></div>
-        <button type="button" className="btn btn-dark" onClick={() => patch({ design: suggestion.design, opening: suggestion.opening, accent: "", ...(audio === "silent" ? { music: null } : {}) })}>Use this design and opening</button>
-        </section>
-      </details>
-    </div>
-  );
-}
-
-function WordsTab({ draft, patch }: TabProps) {
-  const custom = !occasions.includes(draft.occasion);
-  return (
-    <div className="st-stack st-editorial-controls">
-      <div className="st-control-section"><div className="st-control-heading"><span>01</span><div><h2>The couple</h2><p>Exactly how your names should appear on the invitation.</p></div></div>
-      <label className="st-field">
-        <span>Your names</span>
-        <input value={draft.names} maxLength={60} onChange={(e) => patch({ names: e.target.value })} placeholder="Amina & Yusuf" autoComplete="off" aria-invalid={!draft.names.trim()} />
-        {!draft.names.trim() ? <small className="st-err">Add your names. Guests see “Your names” until you do.</small> : <small>Use “&” or “and” between two names to split them across lines.</small>}
-      </label>
-      </div>
-      <div className="st-control-section"><div className="st-control-heading"><span>02</span><div><h2>The celebration</h2><p>Choose a familiar title, or write your own.</p></div></div>
-      <fieldset className="st-field">
-        <legend>What are you celebrating?</legend>
-        <div className="st-chips">
-          {occasions.map((o) => (
-            <button key={o} type="button" className="st-chip" aria-pressed={draft.occasion === o} onClick={() => patch({ occasion: o })}>{o}</button>
-          ))}
-          <button type="button" className="st-chip" aria-pressed={custom} onClick={() => patch({ occasion: custom ? "Wedding" : "" })}>Other</button>
-        </div>
-        {custom && <input value={draft.occasion} maxLength={30} onChange={(e) => patch({ occasion: e.target.value })} placeholder="Name your occasion" aria-label="Custom occasion" />}
-      </fieldset>
-      </div>
-      <div className="st-control-section"><div className="st-control-heading"><span>03</span><div><h2>A note to your guests</h2><p>A few words, or nothing at all. The layout will adapt.</p></div></div>
-      <label className="st-field">
-        <span>Your message</span>
-        <textarea rows={4} maxLength={300} value={draft.message} onChange={(e) => patch({ message: e.target.value })} />
-        <small>{draft.message.length}/300</small>
-      </label>
-      <p className="st-mini-label">OR TRY A STARTING POINT</p>
-      <div className="st-copy-presets" aria-label="Message starting points">
-        {tones.map((t) => <button key={t.label} type="button" className="st-copy-preset" aria-pressed={draft.message === t.text} onClick={() => patch({ message: t.text })}><strong>{t.label}</strong><span>“{t.text}”</span><small>{draft.message === t.text ? "Selected" : "Use wording"} <ArrowUpRight size={13}/></small></button>)}
-      </div>
-      </div>
-      <div className="st-control-section"><div className="st-control-heading"><span>04</span><div><h2>How it’s presented</h2><p>Choose a typographic treatment for this note.</p></div></div>
-      <div className="st-message-layouts" role="group" aria-label="Message layout">
-        {([{ id: "plain", label: "Minimal" }, { id: "framed", label: "Fine border" }, { id: "editorial", label: "Editorial quote" }] as const).map((style) => (
-          <button type="button" className="st-message-layout" key={style.id} aria-pressed={(draft.messageStyle || "plain") === style.id} onClick={() => patch({ messageStyle: style.id })}><span className={`st-message-sample st-message-sample--${style.id}`}><i />Together, always.<i /></span><strong>{style.label}</strong>{(draft.messageStyle || "plain") === style.id && <Check size={15}/>}</button>
-        ))}
-      </div>
-      </div>
-    </div>
-  );
-}
-
-function DetailsTab({ draft, patch }: TabProps) {
-  const left = daysUntil(draft.date);
-  return (
-    <div className="st-stack">
-      <div className="st-panel-intro"><span>04 / DETAILS</span><p>The practical things guests need to know, kept clear and easy to find.</p></div>
-      <p className="st-help st-help--flat">This is the headline date and venue. Use the Events tab for each ceremony or celebration; guests see the events they’re invited to.</p>
-      <div className="st-row">
-        <label className="st-field">
-          <span>Date</span>
-          <input type="date" value={draft.date} onChange={(e) => patch({ date: e.target.value })} aria-invalid={left === null} />
-        </label>
-        <label className="st-field">
-          <span>Time <i>optional</i></span>
-          <input type="time" value={draft.time} onChange={(e) => patch({ time: e.target.value })} />
-        </label>
-      </div>
-      {left === null && <small className="st-err">Pick a date so guests know when to come.</small>}
-      {left !== null && left < 0 && <small className="st-err">That date has passed.</small>}
-      <label className="st-field">
-        <span>Venue</span>
-        <input value={draft.venue} maxLength={80} onChange={(e) => patch({ venue: e.target.value })} placeholder="The Glasshouse" />
-      </label>
-      <label className="st-field">
-        <span>City</span>
-        <input value={draft.city} maxLength={80} onChange={(e) => patch({ city: e.target.value })} placeholder="London" />
-        <small>Guests get an “Open in Maps” link built from venue and city.</small>
-      </label>
-      <label className="st-field">
-        <span>Dress <i>optional</i></span>
-        <input value={draft.dress} maxLength={80} onChange={(e) => patch({ dress: e.target.value })} placeholder="Formal. Bring a wrap, it gets cool." />
-      </label>
-      <label className="st-field">
-        <span>Reply by <i>optional</i></span>
-        <input type="date" value={draft.rsvpBy} onChange={(e) => patch({ rsvpBy: e.target.value })} />
-      </label>
-    </div>
-  );
-}
-
-function StyleTab({ draft, patch, account, mode }: TabProps & { account: boolean; mode: "photos" | "appearance" | "music" | "extras" }) {
-  const [photoBusy, setPhotoBusy] = useState(false);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-  const [musicBusy, setMusicBusy] = useState(false);
-  const [musicError, setMusicError] = useState<string | null>(null);
-  const [rightsConfirmed, setRightsConfirmed] = useState(false);
-  const [audioPreview, setAudioPreview] = useState("");
-  const [audioPreviewError, setAudioPreviewError] = useState("");
-  const [musicMood, setMusicMood] = useState("nasheed");
-  const [musicRevision, setMusicRevision] = useState(0);
-  useEffect(() => {
-    let active = true;
-    let objectUrl = "";
-    setAudioPreview(""); setAudioPreviewError("");
-    const selected = draft.music;
-    if (!selected) return;
-    if (selected.src !== "local-music") { setAudioPreview(selected.src); return; }
-    readLocalMusic().then((blob) => {
-      if (!active) return;
-      if (!blob) { setAudioPreviewError("This browser no longer has the track. Please upload it again."); return; }
-      objectUrl = URL.createObjectURL(blob);
-      setAudioPreview(objectUrl);
-    }).catch(() => { if (active) setAudioPreviewError("Couldn't load the local track. Please upload again."); });
-    return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
-  }, [draft.music?.src, musicRevision]);
-  const uploadMusic = async (file?: File) => {
-    if (!file) return;
-    if (file.size > 8_000_000 || !/\.mp3$/i.test(file.name) || !rightsConfirmed) {
-      setMusicError("Choose an MP3 below 8 MB and confirm your permission to use the recording."); return;
-    }
-    setMusicBusy(true); setMusicError(null);
+const emptyEvent = { title: "", startsOn: "", startsAt: "", venue: "", city: "", visibility: "invited" as "invited" | "everyone" };
+function EventsEditor({ draft, patch, account, events, reload }: { draft: InviteData; patch: Patch; account: boolean; events: RawEvent[]; reload: () => Promise<void> }) {
+  const [form, setForm] = useState(emptyEvent);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const storeLocal = (next: RawEvent[]) => localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(next.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city, visibility: e.visibility }))));
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setBusy(true); setError("");
+    const payload = { ...form, startsOn: form.startsOn || null, startsAt: form.startsAt || null };
     try {
-      let src = "local-music";
-      if (account) {
-        const res = await fetch("/api/music", { method: "POST", body: file, credentials: "same-origin", headers: { "x-music-rights": "confirmed" } });
-        const result = await res.json();
-        if (!res.ok) throw new Error(result?.error?.message || "Couldn’t upload this MP3.");
-        src = result.src;
-      } else await saveLocalMusic(file);
-      patch({ music: { src, title: file.name.replace(/\.mp3$/i, "").slice(0, 80) } });
-      setMusicRevision((revision) => revision + 1);
-    } catch (e) { setMusicError(e instanceof Error ? e.message : "Couldn’t add music."); }
-    finally { setMusicBusy(false); }
+      if (account) await call(editing ? "PUT" : "POST", editing ? `/api/wedding/events/${editing}` : "/api/wedding/events", payload);
+      else { const item = { id: editing ?? crypto.randomUUID(), title: payload.title, starts_on: payload.startsOn, starts_at_local: payload.startsAt, venue: payload.venue, city: payload.city, visibility: payload.visibility }; storeLocal(editing ? events.map((x) => x.id === editing ? item : x) : [...events, item]); }
+      setForm(emptyEvent); setEditing(null); await reload();
+    } catch (err) { setError(err instanceof Error ? err.message : "Couldn't save the event."); }
+    finally { setBusy(false); }
   };
+  const remove = async (event: RawEvent) => {
+    if (!window.confirm(`Remove ${event.title}? Its replies may be deleted.`)) return;
+    try { if (account) await call("DELETE", `/api/wedding/events/${event.id}`); else storeLocal(events.filter((e) => e.id !== event.id)); await reload(); if (editing === event.id) { setEditing(null); setForm(emptyEvent); } }
+    catch (err) { setError(err instanceof Error ? err.message : "Couldn't remove the event."); }
+  };
+  return <>
+    <div className="atelier-intro"><strong>Where and when?</strong><p>Add one celebration or several. Nikah, Walima, Mehndi and reception are all optional, and guests can be invited to specific events later.</p></div>
+    <Group title="Main date & venue"><div className="atelier-two"><Field title="Date"><input type="date" value={draft.date} aria-label="Date" onChange={(e) => patch({ date: e.target.value })}/></Field><Field title="Time"><input type="time" value={draft.time} onChange={(e) => patch({ time: e.target.value })}/></Field></div>
+      <Field title="Venue"><input aria-label="Venue" maxLength={80} value={draft.venue} onChange={(e) => patch({ venue: e.target.value })} placeholder="The Glasshouse"/></Field>
+      <Field title="Address"><input maxLength={160} value={draft.address} onChange={(e) => patch({ address: e.target.value })} placeholder="Street, postcode"/></Field>
+      <Field title="City"><input maxLength={80} value={draft.city} onChange={(e) => patch({ city: e.target.value })} placeholder="London"/></Field>
+      <p className="atelier-small-note"><MapPin size={13}/> Guests can open directions from their invitation.</p>
+    </Group>
+    <Group title="Event schedule" note="Add individual celebrations when the wedding spans more than one occasion.">
+      {events.length > 0 && <div className="atelier-event-list">{events.map((item) => <div key={item.id} className="atelier-event-row"><div><strong>{item.title}</strong><small>{[item.starts_on, item.starts_at_local, item.venue].filter(Boolean).join(" · ") || "Add time and place"}</small></div><button type="button" aria-label={`Edit ${item.title}`} onClick={() => { setEditing(item.id); setForm({ title: item.title, startsOn: item.starts_on ?? "", startsAt: item.starts_at_local ?? "", venue: item.venue, city: item.city, visibility: item.visibility }); }}><Pencil size={15}/></button><button type="button" aria-label={`Delete ${item.title}`} onClick={() => void remove(item)}><Trash2 size={15}/></button></div>)}</div>}
+      <form className="atelier-event-form" onSubmit={(e) => void save(e)}><h4>{editing ? "Edit celebration" : "Add a celebration"}</h4><Field title="Event name"><input required maxLength={80} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Nikah"/></Field><div className="atelier-two"><Field title="Date"><input type="date" value={form.startsOn} onChange={(e) => setForm({ ...form, startsOn: e.target.value })}/></Field><Field title="Time"><input type="time" value={form.startsAt} onChange={(e) => setForm({ ...form, startsAt: e.target.value })}/></Field></div><Field title="Venue"><input maxLength={80} value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })}/></Field><Field title="City"><input maxLength={80} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}/></Field><Field title="Who can see this event?"><select value={form.visibility} onChange={(e) => setForm({ ...form, visibility: e.target.value as RawEvent["visibility"] })}><option value="invited">Guests invited to it</option><option value="everyone">Anyone with the public link</option></select></Field>{error && <p className="atelier-error" role="alert">{error}</p>}<div className="atelier-form-actions"><button type="submit" disabled={busy || !form.title.trim()}><Plus size={15}/>{editing ? "Save changes" : "Add event"}</button>{editing && <button type="button" onClick={() => { setEditing(null); setForm(emptyEvent); }}>Cancel</button>}</div></form>
+      <p className="atelier-small-note">{account ? "Manage who is invited from the guest dashboard." : "In build mode, events stay in this browser until you create an account."}</p>
+    </Group>
+  </>;
+}
+
+function LookEditor({ draft, patch, replay }: { draft: InviteData; patch: Patch; replay: () => void }) {
+  const spec = specById(draft.design);
+  const selected = paletteOf(spec, draft.palette);
+  return <><div className="atelier-intro"><strong>Choose a visual world.</strong><p>Different invitation compositions, not just colour changes. Your names and events stay in place when you switch.</p></div>
+    <Group title="Invitation designs"><div className="atelier-design-list">{designs.map((d) => <button key={d.id} type="button" aria-pressed={draft.design === d.id} onClick={() => { patch({ design: d.id, palette: "", accent: "", opening: "" }); replay(); }}><span className="atelier-design-thumb" style={{ background: d.bg, color: d.ink }}><Invitation data={{ ...draft, design: d.id, palette: "", accent: "", opening: "" }} still/></span><span><strong>{d.name}</strong><small>{d.mood}</small><em>{d.opening}</em></span>{draft.design === d.id && <Check size={17}/>}</button>)}</div></Group>
+    <Group title="Colour composition"><div className="atelier-palette-grid">{spec.palettes.map((p) => <button type="button" key={p.id} aria-pressed={p.id === selected.id && !draft.accent} onClick={() => patch({ palette: p.id, accent: "" })}><span style={{ background: p.bg, color: p.fg }}><i style={{ background: p.accent }}/><b>A & Y</b></span><strong>{p.name}</strong></button>)}</div><Field title="Custom accent"><input type="color" aria-label="Custom accent colour" value={draft.accent || selected.accent} onChange={(e) => patch({ accent: e.target.value })}/></Field><button className="atelier-text-action" type="button" onClick={() => patch({ accent: "" })}>Use the design colour</button></Group>
+    <Group title="Lettering"><div className="atelier-font-grid"><button type="button" aria-pressed={!draft.type} onClick={() => patch({ type: "" })}>Designer’s choice</button>{FONT_PACKS.filter((f) => f.script || ["classic", "didone", "deco", "italiana", "garamond"].includes(f.id)).map((f) => <button type="button" key={f.id} aria-pressed={draft.type === f.id} onClick={() => patch({ type: f.id })}><span style={{ fontFamily: f.script ?? f.head }}>{(draft.names || "Amina").split(/[ &]/)[0]}</span><small>{f.name}</small></button>)}</div></Group>
+    <Group title="Opening experience" note="The introduction guests see before opening the card. Every motion can be skipped."><div className="atelier-opening-grid"><button type="button" aria-pressed={!draft.opening} onClick={() => { patch({ opening: "" }); replay(); }}><Film size={21}/><strong>Design original</strong><small>The artist’s intended entrance</small></button>{(Object.keys(OPENINGS) as OpeningKind[]).map((key) => <button type="button" key={key} aria-pressed={draft.opening === key} onClick={() => { patch({ opening: key }); replay(); }}><Film size={21}/><strong>{OPENINGS[key].label}</strong><small>{OPENINGS[key].hint}</small></button>)}</div><Field title="Opening line"><select aria-label="Opening line" value={draft.intro === "" || draft.intro === "none" || INTRO_PRESETS.some((p) => p.text === draft.intro) ? draft.intro : "custom"} onChange={(e) => patch({ intro: e.target.value === "custom" ? "Custom introduction" : e.target.value })}><option value="">Design original</option><option value="none">No opening line</option>{INTRO_PRESETS.filter((p) => p.id !== "none").map((p) => <option key={p.id} value={p.text}>{p.label}</option>)}<option value="custom">Write my own</option></select></Field>{draft.intro && draft.intro !== "none" && !INTRO_PRESETS.some((p) => p.text === draft.intro) && <Field title="Custom opening line"><input maxLength={120} value={draft.intro} onChange={(e) => patch({ intro: e.target.value })}/></Field>}</Group>
+  </>;
+}
+
+function PhotoEditor({ draft, patch, account }: { draft: InviteData; patch: Patch; account: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
   const upload = async (file?: File) => {
     if (!file) return;
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 15_000_000) {
-      setPhotoError("Choose a JPEG, PNG or WebP photo smaller than 15 MB."); return;
-    }
-    setPhotoBusy(true); setPhotoError(null);
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 15_000_000) { setError("Use a JPEG, PNG or WebP image under 15 MB."); return; }
+    setBusy(true); setError("");
     try {
       const bitmap = await createImageBitmap(file);
       const scale = Math.min(1, 1800 / Math.max(bitmap.width, bitmap.height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-      const context = canvas.getContext("2d");
-      if (!context) throw new Error("This browser cannot process the photograph.");
-      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      bitmap.close();
-      const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => b ? resolve(b) : reject(new Error("Couldn’t process this image.")), "image/jpeg", 0.8));
-      if (blob.size > 2_500_000) throw new Error("Please choose a smaller photograph.");
-      let src: string;
+      const canvas = document.createElement("canvas"); canvas.width = Math.max(1, Math.round(bitmap.width * scale)); canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const ctx = canvas.getContext("2d"); if (!ctx) throw new Error("Photo processing isn't available in this browser.");
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
+      const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => b ? resolve(b) : reject(new Error("Couldn't process this image.")), "image/jpeg", 0.8));
+      if (blob.size > 2_500_000) throw new Error("Choose a smaller photograph.");
+      let src = "";
       if (account) {
-        const res = await fetch("/api/media", { method: "POST", body: blob, credentials: "same-origin" });
-        const result = await res.json();
-        if (!res.ok) throw new Error(result?.error?.message || "Couldn’t upload your photograph.");
-        src = result.src;
-      } else {
-        src = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Couldn’t read this photograph.")); reader.readAsDataURL(blob);
-        });
-      }
+        const response = await fetch("/api/media", { method: "POST", credentials: "same-origin", body: blob }); const json = await response.json();
+        if (!response.ok) throw new Error(json?.error?.message || "Photo upload failed."); src = json.src;
+      } else src = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Couldn't read the photo.")); reader.readAsDataURL(blob); });
       patch({ photo: { src, fx: 50, fy: 50 } });
-    } catch (e) { setPhotoError(e instanceof Error ? e.message : "Couldn’t add that image."); }
-    finally { setPhotoBusy(false); }
+    } catch (e) { setError(e instanceof Error ? e.message : "Photo upload failed."); }
+    finally { setBusy(false); }
   };
-  const spec = specById(draft.design);
-  const pal = paletteOf(spec, draft.palette);
-  const stationery = spec.layout === "stationery";
-  const custom = draft.accent || pal.accent;
-  return (
-    <div className="st-stack">
-      {mode === "photos" && <>
-      <h2 className="st-h st-section-anchor" id="studio-media">Your photograph</h2>
-      <p className="st-help">Choose a sharp portrait or landscape photo. We optimise it for the invitation and let you position the focal point. Gallery and Arch use photos most prominently.</p>
-      <label className="st-field">
-        <span>{photoBusy ? "Processing photograph…" : draft.photo ? "Replace photograph" : "Upload photograph"}</span>
-        <input type="file" accept="image/jpeg,image/png,image/webp" disabled={photoBusy} onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }} />
-      </label>
-      {draft.photo && <>
-        <div className="st-photo-crop">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={draft.photo.src} alt="Your uploaded photograph, showing the current crop" style={{ objectPosition: `${draft.photo.fx}% ${draft.photo.fy}%` }} />
-        </div>
-        <label className="st-field"><span>Move photo left or right</span><input type="range" min="0" max="100" value={draft.photo.fx} onChange={(e) => patch({ photo: { ...draft.photo!, fx: Number(e.target.value) } })} /></label>
-        <label className="st-field"><span>Move photo up or down</span><input type="range" min="0" max="100" value={draft.photo.fy} onChange={(e) => patch({ photo: { ...draft.photo!, fy: Number(e.target.value) } })} /></label>
-        <button type="button" className="st-chip" onClick={() => patch({ photo: null })}>Remove photograph</button>
-      </>}
-      {photoError && <small className="st-err" role="alert">{photoError}</small>}
-      {!account && <p className="st-help">Build mode: the photo stays in this browser. Signed-in uploads use private owner-scoped storage.</p>}
-      </>}
-      {mode === "appearance" && <>
-      <div className="st-control-heading"><span>01</span><div><h2>Colour story</h2><p>Thoughtfully paired shades for this invitation. Choose a palette or refine the accent.</p></div></div>
-      <div className="st-pals st-palette-cards" id="studio-colours">
-        {spec.palettes.map((p) => (
-          <button key={p.id} type="button" aria-pressed={pal.id === p.id && !draft.accent} onClick={() => patch({ palette: p.id, accent: "" })}>
-            <span className="st-palette-preview" style={{ background: p.bg || "#f2ede6", color: p.fg || "#26221f" }}><i style={{ background: p.accent }} /><b>A &amp; Y</b><em style={{ background: p.soft || p.accent }}/></span><strong>{p.name}</strong>{pal.id === p.id && !draft.accent && <Check size={15} />}
-          </button>
-        ))}
-      </div>
-      <label className="st-widget-colour"><span>Accent colour</span><input type="color" aria-label="Custom accent colour" value={custom} onChange={(e) => patch({ accent: e.target.value })} /><button type="button" onClick={() => patch({ accent: "" })}>Restore palette colour</button></label>
-      <div className="st-control-heading st-control-heading--spaced"><span>02</span><div><h2>The opening scene</h2><p>The first few seconds guests experience. Every motion can be skipped.</p></div></div>
-      <div className="st-opening-grid" id="studio-motion" role="group" aria-label="Opening animation">
-        <button type="button" className="st-opening-option" aria-pressed={!draft.opening} onClick={() => patch({ opening: "" })}><span className="st-opening-symbol">✳</span><strong>Original</strong><small>Designed for this look</small></button>
-        {(Object.keys(OPENINGS) as OpeningKind[]).map((kind) => (
-          <button key={kind} type="button" className="st-opening-option" aria-pressed={draft.opening === kind} title={OPENINGS[kind].hint} onClick={() => patch({ opening: kind })}>
-            <span className={`st-opening-symbol st-opening-symbol--${kind}`} aria-hidden="true"><i /><i /></span><strong>{{ lift: "Lift", bloom: "Bloom", veil: "Veil", focus: "Focus", doors: "Doors", curtain: "Curtain" }[kind]}</strong><small>{OPENINGS[kind].hint}</small>
-          </button>
-        ))}
-      </div>
-      </>}
-      {mode === "extras" && <>
-      <h2 className="st-h st-section-anchor" id="studio-extras">Little extras</h2>
-      <label className="st-widget-toggle">
-        <span><strong>Wedding countdown</strong><small>A sweet live countdown on the invitation</small></span>
-        <input type="checkbox" checked={draft.countdown?.enabled ?? false} onChange={(e) => patch({ countdown: { ...(draft.countdown ?? { style: "type", accent: "", label: "" }), enabled: e.target.checked } })} />
-      </label>
-      {draft.countdown?.enabled && <>
-        <div className="st-chips" role="group" aria-label="Countdown appearance">
-          {([{ id: "type", label: "Editorial" }, { id: "tiles", label: "Soft tiles" }, { id: "dial", label: "Circles" }] as const).map((o) => (
-            <button className="st-chip" key={o.id} type="button" aria-pressed={draft.countdown.style === o.id} onClick={() => patch({ countdown: { ...draft.countdown, style: o.id } })}>{o.label}</button>
-          ))}
-        </div>
-        <label className="st-field"><span>Countdown heading <i>optional</i></span><input maxLength={48} value={draft.countdown.label} placeholder="Until our day" onChange={(e) => patch({ countdown: { ...draft.countdown, label: e.target.value } })} /></label>
-        <label className="st-widget-colour"><span>Countdown colour</span><input type="color" aria-label="Countdown accent colour" value={draft.countdown.accent || pal.accent} onChange={(e) => patch({ countdown: { ...draft.countdown, accent: e.target.value } })} /><button type="button" onClick={() => patch({ countdown: { ...draft.countdown, accent: "" } })}>Use theme colour</button></label>
-      </>}
-      <h2 className="st-h st-section-anchor" id="studio-language">Languages by section</h2>
-      <p className="st-help">Choose the language for labels in each section. Your own names, messages and event descriptions stay exactly as you wrote them.</p>
-      {([{ id: "details", label: "Details and directions" }, { id: "countdown", label: "Countdown" }, { id: "reply", label: "Reply button" }] as const).map((section) => (
-        <label className="st-field" key={section.id}><span>{section.label}</span><select value={draft.languages?.[section.id] ?? "en"} onChange={(e) => patch({ languages: { ...(draft.languages ?? { details: "en", countdown: "en", reply: "en" }), [section.id]: e.target.value as "en" | "fr" | "ar" | "so" } })}>
-          <option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option><option value="so">Soomaali</option>
-        </select></label>
-      ))}
-      </>}
-      {mode === "appearance" && stationery && (
-        <>
-          <h2 className="st-h st-section-anchor" id="studio-lettering">Lettering</h2>
-          <div className="st-types">
-            <button type="button" aria-pressed={draft.type === ""} onClick={() => patch({ type: "" })}><span>Designer’s choice</span></button>
-            {FONT_PACKS.filter((f) => f.script || ["classic", "didone", "deco", "italiana", "garamond"].includes(f.id)).map((f) => (
-              <button key={f.id} type="button" aria-pressed={draft.type === f.id} onClick={() => patch({ type: f.id })} title={f.note}>
-                <span style={{ fontFamily: f.script ?? f.head, fontSize: f.script ? 24 : 18 }}>{(draft.names || "Amina").split(/[ &]/)[0]}</span><small>{f.name}</small>
-              </button>
-            ))}
-          </div>
-          <h2 className="st-h">Opening line <i className="st-opt">optional</i></h2>
-          <select className="st-select" value={INTRO_PRESETS.some((i) => i.text === draft.intro) || draft.intro === "" || draft.intro === "none" ? draft.intro : "__custom"} onChange={(e) => patch({ intro: e.target.value === "__custom" ? "" : e.target.value })} aria-label="Opening line">
-            <option value="">Designer’s choice</option>
-            {Array.from(new Set(INTRO_PRESETS.map((i) => i.group))).map((g) => (
-              <optgroup key={g} label={g}>{INTRO_PRESETS.filter((i) => i.group === g).map((i) => <option key={i.id} value={i.id === "none" ? "none" : i.text}>{i.label}</option>)}</optgroup>
-            ))}
-            <option value="__custom">Write my own…</option>
-          </select>
-          {!INTRO_PRESETS.some((i) => i.text === draft.intro) && draft.intro !== "" && draft.intro !== "none" && (
-            <input className="st-select" value={draft.intro} maxLength={120} onChange={(e) => patch({ intro: e.target.value })} placeholder="Your own opening line" aria-label="Custom opening line" />
-          )}
-        </>
-      )}
-      {mode === "music" && <>
-      <div className="st-sound-current">
-        <span>YOUR INVITATION SOUNDTRACK</span>
-        <strong>{draft.music?.title || "The quiet option"}</strong>
-        <p>{draft.music ? "Selected and saved to your invitation. You can fine-tune its entrance and excerpt below." : "No music yet. Silence is a perfectly good choice, or choose a recording from the collection."}</p>
-        {draft.music && <button type="button" onClick={() => patch({ music: null })}>Remove soundtrack</button>}
-      </div>
-      <h2 className="st-h st-section-anchor" id="studio-music">Explore the collection</h2>
-      <p className="st-help st-help--flat">Listen first, then choose. Uploaded recordings and saved selections are preserved when you change designs.</p>
-      <div className="st-chips" role="group" aria-label="Filter soundtrack mood">
-        {([{ id: "nasheed", label: "Vocals-only nasheed" }, { id: "duff", label: "Duff" }, { id: "instrumental", label: "Instrumental" }] as const).map((mood) => (
-          <button type="button" key={mood.id} className="st-chip" aria-pressed={musicMood === mood.id} onClick={() => setMusicMood(mood.id)}>{mood.label}</button>
-        ))}
-      </div>
-      <div className={`st-album-header st-album-header--${musicMood}`}>
-        <small>WEDSENT SOUND COLLECTION / {musicMood === "nasheed" ? "01" : musicMood === "instrumental" ? "02" : "03"}</small>
-        <strong>{musicMood === "nasheed" ? "Quiet devotion" : musicMood === "instrumental" ? "Ceremony & stillness" : "Voice & rhythm"}</strong>
-        <p>{musicMood === "nasheed" ? "Gentle vocal selections for a meaningful opening." : musicMood === "instrumental" ? "Considered piano and traditional ceremony pieces for the atmosphere you want." : "Duff-led options will appear here once the recordings are individually cleared."}</p>
-      </div>
-      <div className="st-library" aria-label="Soundtrack library">
-        {CURATED_TRACKS.filter((track) => track.category === musicMood).map((track) => (
-          <div key={track.id} className="st-library-track">
-            <div><strong>{track.title}</strong><small>{track.mood} · {track.artist}</small><small><a href={track.source} target="_blank" rel="noopener noreferrer">Source</a> · <a href={track.licenseUrl} target="_blank" rel="noopener noreferrer">{track.license}</a></small></div>
-            <button type="button" className="st-chip" aria-pressed={draft.music?.src === track.src} onClick={() => patch({ music: { src: track.src, title: track.title, startAt: 0, endAt: 15, trigger: "open", volume: .45 } })}>{draft.music?.src === track.src ? "Selected" : "Choose recording"}</button>
-            <audio controls preload="none" src={track.src} aria-label={`Audition ${track.title}`} />
-          </div>
-        ))}
-        {!CURATED_TRACKS.some((track) => track.category === musicMood) && <p className="st-help">No approved recordings in this category yet. You can upload a recording you have permission to use below; we won't fill this section with unrelated beats.</p>}
-      </div>
-      <p className="st-help st-help--flat">The vocals-only source above is hosted by Wikimedia Commons under the licence shown. Its original large FLAC file may not play on every mobile device; a verified optimised MP3 is still needed. We have not independently auditioned its lyrics or certified religious suitability.</p>
-      <h2 className="st-h">Your own recording</h2>
-      <p className="st-help">Add an MP3 that you have permission to use. For build-mode local uploads, only this browser holds the recording.</p>
-      <label className="st-widget-toggle"><span><strong>I have permission to use this recording</strong><small>Only upload music you own or have rights to share with guests.</small></span><input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} /></label>
-      <label className="st-field"><span>{musicBusy ? "Uploading music…" : "Choose MP3 (up to 8 MB)"}</span><input type="file" accept="audio/mpeg,.mp3" disabled={!rightsConfirmed || musicBusy} onChange={(e) => { void uploadMusic(e.target.files?.[0]); e.target.value = ""; }} /></label>
-      {draft.music && audioPreview && <SoundWaveform key={audioPreview} src={audioPreview} title={draft.music.title} start={draft.music.startAt ?? 0} end={draft.music.endAt} onTrim={(startAt, endAt) => patch({ music: { ...draft.music!, startAt, endAt } })} />}
-      {draft.music && <fieldset className="st-audio-trim"><legend>Playback on the invitation</legend><p>Make your favourite moment loop softly. Choose how it plays for guests.</p>
-        <div className="st-audio-trim-fields">
-          <label>Start (seconds)<input type="number" min="0" max="1799" step="1" value={draft.music.startAt ?? 0} onChange={(e) => {
-            const startAt = Math.max(0, Math.min(1799, Number(e.target.value) || 0));
-            patch({ music: { ...draft.music!, startAt, endAt: draft.music!.endAt && draft.music!.endAt <= startAt ? undefined : draft.music!.endAt } });
-          }} /></label>
-          <label>End (seconds)<input type="number" min="1" max="1800" step="1" placeholder="Full track" value={draft.music.endAt ?? ""} onChange={(e) => patch({ music: { ...draft.music!, endAt: e.target.value ? Math.max((draft.music!.startAt ?? 0) + 1, Math.min(1800, Number(e.target.value))) : undefined } })} /></label>
-        </div>
-        <div className="st-audio-trim-fields">
-          <label>When music begins
-            <select className="st-select" value={draft.music.trigger ?? "open"} onChange={(e) => patch({ music: { ...draft.music!, trigger: e.target.value as "load" | "open" | "manual" } })}>
-              <option value="load">When the link loads (browser permitting)</option>
-              <option value="open">After the invitation opens</option>
-              <option value="manual">Only when the guest taps play</option>
-            </select>
-          </label>
-          <label>Background volume ({Math.round((draft.music.volume ?? 0.45) * 100)}%)
-            <input type="range" min="0.05" max="1" step="0.05" value={draft.music.volume ?? 0.45}
-              onChange={(e) => patch({ music: { ...draft.music!, volume: Number(e.target.value) } })} />
-          </label>
-        </div>
-        <p>Audition from your chosen start point in the player above. For a complete track, leave the end time blank. Browser autoplay restrictions apply to every mode.</p>
-      </fieldset>}
-      {draft.music && audioPreviewError && <small className="st-err" role="alert">{audioPreviewError}</small>}
-      <p className="st-help st-help--flat">If a remote recording won't load, check its source or upload an MP3 you can legally use. We are continuing the duff and wedding instrumental selection.</p>
-      {!account && <p className="st-help">Build mode music stays in this browser only. Re-upload once account publishing is enabled.</p>}
-      {musicError && <small className="st-err" role="alert">{musicError}</small>}
-      </>}
-      {mode === "extras" &&
-      <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
-      }
-    </div>
-  );
+  return <><div className="atelier-intro"><strong>Your favourite photograph.</strong><p>One beautiful image can make the invitation personal. Some designs are intentionally typography-only.</p></div><Group title="Photograph"><label className="atelier-upload"><UploadCloud size={26}/><strong>{busy ? "Processing photograph…" : draft.photo ? "Replace your image" : "Choose an image"}</strong><span>JPEG, PNG or WebP · up to 15 MB</span><input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }}/></label>{draft.photo && <><div className="atelier-photo-preview"><img src={draft.photo.src} alt="Your selected photograph" style={{ objectPosition: `${draft.photo.fx}% ${draft.photo.fy}%` }}/></div><Field title="Move crop horizontally"><input type="range" min="0" max="100" value={draft.photo.fx} onChange={(e) => patch({ photo: { ...draft.photo!, fx: Number(e.target.value) } })}/></Field><Field title="Move crop vertically"><input type="range" min="0" max="100" value={draft.photo.fy} onChange={(e) => patch({ photo: { ...draft.photo!, fy: Number(e.target.value) } })}/></Field><button className="atelier-text-action" type="button" onClick={() => patch({ photo: null })}><Trash2 size={14}/> Remove image</button></>}{error && <p className="atelier-error" role="alert">{error}</p>}{!account && <p className="atelier-small-note">Build-mode photos are saved only in this browser.</p>}</Group></>;
 }
 
-const blank = { title: "", startsOn: "", startsAt: "", venue: "", city: "", visibility: "invited" as "invited" | "everyone" };
-function EventsTab({ account, events, reload }: { account: boolean; events: RawEvent[]; reload: () => Promise<void> }) {
-  const [f, setF] = useState(blank);
-  const [editing, setEditing] = useState<string | null>(null);
+function SoundEditor({ draft, patch, account }: { draft: InviteData; patch: Patch; account: boolean }) {
+  const [category, setCategory] = useState<"nasheed" | "duff" | "instrumental">("nasheed");
+  const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault(); setBusy(true); setErr(null);
-    const body = { ...f, startsOn: f.startsOn || null, startsAt: f.startsAt || null };
+  const [error, setError] = useState("");
+  const [preview, setPreview] = useState("");
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    let alive = true; let url = "";
+    const src = draft.music?.src;
+    if (src !== "local-music") return;
+    readLocalMusic().then((blob) => { if (!alive) return; if (!blob) { setError("Local recording missing. Upload it again."); return; } url = URL.createObjectURL(blob); setPreview(url); }).catch(() => { if (alive) setError("Couldn't load your local recording."); });
+    return () => { alive = false; if (url) URL.revokeObjectURL(url); };
+  }, [draft.music?.src, revision]);
+  const upload = async (file?: File) => {
+    if (!file) return;
+    if (!confirmed || !/\.mp3$/i.test(file.name) || file.size > 8_000_000) { setError("Confirm your rights and choose an MP3 smaller than 8 MB."); return; }
+    setBusy(true); setError("");
     try {
-      if (!account) {
-        const next = editing
-          ? events.map((event) => event.id === editing ? { ...event, title: body.title, starts_on: body.startsOn, starts_at_local: body.startsAt, venue: body.venue, city: body.city, visibility: body.visibility } : event)
-          : [...events, { id: crypto.randomUUID(), title: body.title, starts_on: body.startsOn, starts_at_local: body.startsAt, venue: body.venue, city: body.city, visibility: body.visibility }];
-        localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(next.map((event) => ({ id: event.id, title: event.title, startsOn: event.starts_on, startsAt: event.starts_at_local, venue: event.venue, city: event.city, visibility: event.visibility }))));
-      } else if (editing) await call("PUT", `/api/wedding/events/${editing}`, body); else await call("POST", "/api/wedding/events", body);
-      setF(blank); setEditing(null); await reload();
-    } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t save the event."); }
-    setBusy(false);
+      let src = "local-music";
+      if (account) { const r = await fetch("/api/music", { method: "POST", body: file, credentials: "same-origin", headers: { "x-music-rights": "confirmed" } }); const j = await r.json(); if (!r.ok) throw new Error(j?.error?.message || "Couldn't upload the recording."); src = j.src; }
+      else await saveLocalMusic(file);
+      patch({ music: { src, title: file.name.replace(/\.mp3$/i, "").slice(0, 80), startAt: 0, endAt: 15, trigger: "open", volume: .45 } }); setRevision((i) => i + 1);
+    } catch (e) { setError(e instanceof Error ? e.message : "Couldn't upload the recording."); }
+    finally { setBusy(false); }
   };
-  const del = async (id: string, title: string) => {
-    if (!confirm(`Delete “${title}”? Replies to it will be removed.`)) return;
-    try {
-      if (!account) {
-        localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(events.filter((event) => event.id !== id).map((event) => ({ id: event.id, title: event.title, startsOn: event.starts_on, startsAt: event.starts_at_local, venue: event.venue, city: event.city, visibility: event.visibility }))));
-      } else await call("DELETE", `/api/wedding/events/${id}`);
-      if (editing === id) { setEditing(null); setF(blank); }
-      await reload();
-    } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t delete."); }
-  };
-  return (
-    <div className="st-stack">
-      <h2 className="st-h">Events</h2>
-      {events.length === 0 && <p className="st-help st-help--flat">No events yet. Add the first below and it appears in the preview.</p>}
-      <ul className="st-events">
-        {events.map((e) => (
-          <li key={e.id} data-editing={editing === e.id}>
-            <div><strong>{e.title}</strong><span>{[e.starts_on, e.starts_at_local, e.venue].filter(Boolean).join(" · ") || "No details yet"}</span></div>
-            <button type="button" className="st-ico" aria-label={`Edit ${e.title}`} onClick={() => { setEditing(e.id); setF({ title: e.title, startsOn: e.starts_on ?? "", startsAt: e.starts_at_local ?? "", venue: e.venue, city: e.city, visibility: e.visibility }); }}><Pencil size={15} /></button>
-            <button type="button" className="st-ico" aria-label={`Delete ${e.title}`} onClick={() => del(e.id, e.title)}><Trash2 size={15} /></button>
-          </li>
-        ))}
-      </ul>
-      <form className="st-stack" onSubmit={save}>
-        <h3 className="st-h2">{editing ? "Edit event" : "Add an event"}</h3>
-        <label className="st-field"><span>Name</span><input required maxLength={80} value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Nikah" /></label>
-        <div className="st-row">
-          <label className="st-field"><span>Date</span><input type="date" value={f.startsOn} onChange={(e) => setF({ ...f, startsOn: e.target.value })} /></label>
-          <label className="st-field"><span>Time</span><input type="time" value={f.startsAt} onChange={(e) => setF({ ...f, startsAt: e.target.value })} /></label>
-        </div>
-        <label className="st-field"><span>Venue</span><input maxLength={80} value={f.venue} onChange={(e) => setF({ ...f, venue: e.target.value })} /></label>
-        <label className="st-field"><span>City</span><input maxLength={80} value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} /></label>
-        <label className="st-field"><span>Who can see it?</span>
-          <select value={f.visibility} onChange={(e) => setF({ ...f, visibility: e.target.value as "invited" | "everyone" })}>
-            <option value="invited">Only guests invited to it</option><option value="everyone">Anyone with the public link</option>
-          </select></label>
-        {err && <small className="st-err" role="alert">{err}</small>}
-        <div className="st-btns">
-          <button className="btn btn-dark" disabled={busy || !f.title.trim()}>{editing ? "Save event" : <><Plus size={16} /> Add event</>}</button>
-          {editing && <button type="button" className="btn btn-light" onClick={() => { setEditing(null); setF(blank); }}>Cancel</button>}
-        </div>
-        <p className="st-help st-help--flat">{account ? <>Choose who’s invited to each event in <Link href="/dashboard" className="st-inl">Guests</Link>.</> : "These are local build-mode events. Private guest permissions and publishing will be available when account access is enabled."}</p>
-      </form>
-    </div>
-  );
+  const selectedSrc = draft.music?.src === "local-music" ? preview : draft.music?.src || "";
+  return <><div className="atelier-intro"><strong>Set the atmosphere.</strong><p>Listen, pick a moment and decide when your guests hear it. Silence is always an option.</p></div>
+    <div className="atelier-selected-track"><span><Volume2 size={16}/> CURRENT SOUNDTRACK</span><strong>{draft.music?.title || "No music selected"}</strong><p>{draft.music ? "The selected excerpt will play according to your timing settings." : "Your invitation opens quietly until you choose a recording."}</p>{draft.music && <button type="button" onClick={() => patch({ music: null })}>Remove music <Minus size={14}/></button>}</div>
+    <Group title="Browse by sound"><div className="atelier-filter-row" role="group" aria-label="Soundtrack categories">{([{ id: "nasheed", name: "Vocals-only" }, { id: "duff", name: "Duff" }, { id: "instrumental", name: "Instrumental" }] as const).map((c) => <button type="button" key={c.id} aria-pressed={category === c.id} onClick={() => setCategory(c.id)}>{c.name}</button>)}</div><div className="atelier-track-list">{CURATED_TRACKS.filter((t) => t.category === category).map((track) => <div key={track.id} className="atelier-track"><div><strong>{track.title}</strong><small>{track.mood} · {track.artist}</small></div><button type="button" className="atelier-track-select" aria-pressed={draft.music?.src === track.src} onClick={() => patch({ music: { src: track.src, title: track.title, startAt: 0, endAt: 15, trigger: "open", volume: .45 } })}>{draft.music?.src === track.src ? <Check size={17}/> : <Plus size={17}/>}</button><audio controls preload="none" src={track.src} aria-label={`Listen to ${track.title}`}/><small className="atelier-source"><a href={track.source} target="_blank" rel="noreferrer">Source</a> · <a href={track.licenseUrl} target="_blank" rel="noreferrer">{track.license}</a></small></div>)}{!CURATED_TRACKS.some((t) => t.category === category) && <p className="atelier-small-note">Nothing rights-cleared in this collection yet. No unrelated filler tracks.</p>}</div><p className="atelier-small-note">Catalogue candidates still require full production rights review and mobile auditioning.</p></Group>
+    {draft.music && <Group title="Edit your audio moment" note="The waveform lets you drag the start and end of your excerpt.">{selectedSrc && <SoundWaveform key={selectedSrc} src={selectedSrc} title={draft.music.title} start={draft.music.startAt ?? 0} end={draft.music.endAt} onTrim={(startAt, endAt) => patch({ music: { ...draft.music!, startAt, endAt } })}/>}<div className="atelier-two"><Field title="Start at (seconds)"><input type="number" min="0" max="1799" value={draft.music.startAt ?? 0} onChange={(e) => { const startAt = Math.max(0, Math.min(1799, Number(e.target.value) || 0)); patch({ music: { ...draft.music!, startAt, endAt: draft.music!.endAt && draft.music!.endAt <= startAt ? undefined : draft.music!.endAt } }); }}/></Field><Field title="End at (seconds)"><input type="number" min="1" max="1800" placeholder="Full track" value={draft.music.endAt ?? ""} onChange={(e) => patch({ music: { ...draft.music!, endAt: e.target.value ? Math.max((draft.music!.startAt ?? 0) + 1, Math.min(1800, Number(e.target.value))) : undefined } })}/></Field></div><Field title="When should the music start?"><select value={draft.music.trigger ?? "open"} onChange={(e) => patch({ music: { ...draft.music!, trigger: e.target.value as "load" | "open" | "manual" } })}><option value="open">After guests open the invitation</option><option value="manual">When guests press play</option><option value="load">When the link loads (if browser permits)</option></select></Field><Field title={`Volume · ${Math.round((draft.music.volume ?? .45) * 100)}%`}><input type="range" min="0.05" max="1" step="0.05" value={draft.music.volume ?? .45} onChange={(e) => patch({ music: { ...draft.music!, volume: Number(e.target.value) } })}/></Field><p className="atelier-small-note">Browsers may block autoplay until someone taps. Excerpts loop at the selected points.</p></Group>}
+    <Group title="Upload a recording" note="MP3, maximum 8 MB. You need permission to stream it to your guests."><label className="atelier-toggle"><input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)}/><span>I have the rights to use this audio</span></label><label className="atelier-upload"><UploadCloud size={23}/><strong>{busy ? "Uploading…" : "Choose MP3"}</strong><input type="file" accept=".mp3,audio/mpeg" disabled={!confirmed || busy} onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }}/></label>{error && <p role="alert" className="atelier-error">{error}</p>}{!account && <p className="atelier-small-note">Local music won't transfer automatically to another device.</p>}</Group>
+  </>;
+}
+
+function ExtrasEditor({ draft, patch }: { draft: InviteData; patch: Patch }) {
+  return <><div className="atelier-intro"><strong>Little things, beautifully done.</strong><p>All optional. The invitation should still feel complete with these switched off.</p></div><Group title="Wedding countdown"><label className="atelier-toggle"><span>Show days until our wedding</span><input type="checkbox" checked={draft.countdown.enabled} onChange={(e) => patch({ countdown: { ...draft.countdown, enabled: e.target.checked } })}/></label>{draft.countdown.enabled && <><Field title="Countdown title"><input value={draft.countdown.label} maxLength={48} onChange={(e) => patch({ countdown: { ...draft.countdown, label: e.target.value } })} placeholder="Until our day"/></Field><div className="atelier-filter-row">{(["type", "tiles", "dial"] as const).map((s) => <button key={s} type="button" aria-pressed={draft.countdown.style === s} onClick={() => patch({ countdown: { ...draft.countdown, style: s } })}>{s === "type" ? "Editorial" : s === "tiles" ? "Tiles" : "Circles"}</button>)}</div><Field title="Countdown colour"><input type="color" aria-label="Countdown colour" value={draft.countdown.accent || paletteOf(specById(draft.design), draft.palette).accent} onChange={(e) => patch({ countdown: { ...draft.countdown, accent: e.target.value } })}/></Field></>}</Group><Group title="Guest-facing labels" note="These translate selected labels, not your own written message.">{([{ key: "details", label: "Details & directions" }, { key: "countdown", label: "Countdown" }, { key: "reply", label: "Reply button" }] as const).map((field) => <Field title={field.label} key={field.key}><select value={draft.languages[field.key]} onChange={(e) => patch({ languages: { ...draft.languages, [field.key]: e.target.value as "en" | "fr" | "ar" | "so" } })}><option value="en">English</option><option value="ar">العربية</option><option value="so">Soomaali</option><option value="fr">Français</option></select></Field>)}</Group><Group title="Take it further"><Link className="atelier-secondary-link" href="/invite/print" target="_blank">View A5 print layout <ArrowRight size={15}/></Link><p className="atelier-small-note">Print layout is experimental; this isn't a printer-ready proof.</p></Group></>;
 }

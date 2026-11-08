@@ -15,16 +15,16 @@ const email = `e2e${Date.now()}@example.com`;
 
 // Local draft first (signed out), then sign up claims it.
 await p.goto(base + "/studio"); await p.waitForTimeout(800);
-await p.getByRole("navigation", { name: "Invitation editor" }).getByRole("button", { name: "Wording" }).click();
-await p.getByRole("button", { name: "Find an editing tool" }).click();
-await p.getByRole("dialog", { name: "Find editing tools" }).getByRole("textbox", { name: "Search actions" }).fill("music");
-await p.getByRole("dialog", { name: "Find editing tools" }).getByRole("button", { name: /Music/ }).click();
-ok(await p.getByRole("heading", { name: "Set the atmosphere" }).isVisible(), "Studio command search opens soundtrack inspector");
+await p.getByRole("navigation", { name: "Studio tools" }).getByRole("button", { name: /Your words/ }).click();
+await p.getByRole("button", { name: "Find a tool" }).click();
+await p.getByRole("dialog", { name: "Find editing tools" }).getByRole("textbox", { name: "Search Studio tools" }).fill("sound");
+await p.getByRole("dialog", { name: "Find editing tools" }).getByRole("button", { name: /Soundtrack/ }).click();
+ok(await p.getByRole("heading", { name: "Soundtrack" }).isVisible(), "Studio command search opens soundtrack inspector");
 await p.keyboard.press("Control+k");
 ok(await p.getByRole("dialog", { name: "Find editing tools" }).isVisible(), "Studio keyboard command opens search");
 await p.keyboard.press("Escape");
 ok(!(await p.getByRole("dialog", { name: "Find editing tools" }).count()), "Studio command search closes with Escape");
-await p.getByRole("navigation", { name: "Invitation editor" }).getByRole("button", { name: "Wording" }).click();
+await p.getByRole("navigation", { name: "Studio tools" }).getByRole("button", { name: /Your words/ }).click();
 await p.getByLabel("Names").fill("Layla & Omar");
 await p.waitForTimeout(700);
 await p.goto(base + "/signin?next=%2Fstudio");
@@ -36,33 +36,34 @@ ok(true, "sign-up returns to Studio (next param)");
 
 // Draft claimed from local.
 await p.goto(base + "/studio"); await p.waitForTimeout(1200);
-await p.getByRole("navigation", { name: "Invitation editor" }).getByRole("button", { name: "Wording" }).click();
+await p.getByRole("navigation", { name: "Studio tools" }).getByRole("button", { name: /Your words/ }).click();
 ok((await p.getByLabel("Names").inputValue()) === "Layla & Omar", "local draft claimed into account");
-await p.getByRole("navigation", { name: "Invitation editor" }).getByRole("button", { name: "Details" }).click();
-await p.getByLabel("Venue", { exact: true }).fill("Hall of Mirrors");
-await p.getByText("Saved to your account").first().waitFor({ timeout: 10000 }).catch(() => {});
-ok(await p.getByText("Saved to your account").first().isVisible(), "studio autosaves to server");
+await p.getByRole("navigation", { name: "Studio tools" }).getByRole("button", { name: /Events & places/ }).click();
+await p.locator(".atelier-group").first().getByLabel("Venue", { exact: true }).fill("Hall of Mirrors");
+await p.getByText("Saved to account").first().waitFor({ timeout: 10000 }).catch(() => {});
+ok(await p.getByText("Saved to account").first().isVisible(), "studio autosaves to server");
 await p.reload(); await p.waitForTimeout(1200);
-await p.getByRole("navigation", { name: "Invitation editor" }).getByRole("button", { name: "Details" }).click();
-ok((await p.getByLabel("Venue", { exact: true }).inputValue()) === "Hall of Mirrors", "draft persists across reload (server)");
+await p.getByRole("navigation", { name: "Studio tools" }).getByRole("button", { name: /Events & places/ }).click();
+ok((await p.locator(".atelier-group").first().getByLabel("Venue", { exact: true }).inputValue()) === "Hall of Mirrors", "draft persists across reload (server)");
 
 // Events created in the Studio (account-saved), visible in the live preview.
-await p.getByRole("navigation", { name: "Invitation editor" }).getByRole("button", { name: "Events" }).click();
+await p.getByRole("navigation", { name: "Studio tools" }).getByRole("button", { name: /Events & places/ }).click();
 const addEvent = async (title, date, venue, visibility) => {
-  await p.getByLabel("Name", { exact: true }).fill(title);
-  await p.getByLabel("Date", { exact: true }).fill(date);
-  await p.getByLabel("Venue", { exact: true }).fill(venue);
-  await p.getByLabel("Who can see it?").selectOption(visibility);
-  await p.getByRole("button", { name: "Add event" }).click();
+  const eventForm = p.locator(".atelier-event-form");
+  await eventForm.getByLabel("Event name").fill(title);
+  await eventForm.getByLabel("Date", { exact: true }).fill(date);
+  await eventForm.getByLabel("Venue", { exact: true }).fill(venue);
+  await eventForm.getByLabel("Who can see this event?").selectOption(visibility);
+  await eventForm.getByRole("button", { name: "Add event" }).click();
   await p.getByText(title, { exact: true }).first().waitFor({ timeout: 8000 });
 };
 await addEvent("Nikah", "2027-06-12", "City Mosque", "invited");
 await addEvent("Walima", "2027-06-13", "The Glasshouse", "everyone");
-ok((await p.locator(".st-events li").count()) === 2, "studio: two events saved to the account");
+ok((await p.locator(".atelier-event-row").count()) === 2, "studio: two events saved to the account");
 // Edit one.
 await p.getByRole("button", { name: "Edit Nikah" }).click();
-await p.getByLabel("Venue", { exact: true }).fill("Central Mosque");
-await p.getByRole("button", { name: "Save event" }).click();
+await p.locator(".atelier-event-form").getByLabel("Venue", { exact: true }).fill("Central Mosque");
+await p.getByRole("button", { name: "Save changes" }).click();
 await p.getByText("Central Mosque").first().waitFor({ timeout: 8000 }).catch(() => {});
 ok(await p.getByText("Central Mosque").first().isVisible(), "studio: event edit persisted");
 
