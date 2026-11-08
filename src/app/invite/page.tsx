@@ -29,7 +29,7 @@ export default function InvitePage() {
     <main className="guest" style={{ ["--g-bg" as string]: "#101014" }}>
       <div className="guest-wrap">
         <Phone label="Invitation">
-          <Invitation key={round} data={draft} syncChrome open={open} onOpenChange={onOpen} rsvpHref="/invite/rsvp" />
+          <Invitation key={round} data={draft} syncChrome open={open} onOpenChange={onOpen} />
           {open && (
             <button className="guest-replay" onClick={() => { sessionStorage.removeItem(SEEN); setOpen(false); setRound((n) => n + 1); }} aria-label="Replay opening">
               <RotateCcw size={17} />
