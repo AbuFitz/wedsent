@@ -42,6 +42,36 @@
 .in-countdown--dial{border:0}
 .in-countdown--dial .in-count-segment{aspect-ratio:1;border:.9cqw solid color-mix(in srgb,var(--count-tone) 65%,transparent);border-radius:50%;justify-content:center;max-width:27cqw;padding:1cqw}
 .in-countdown--dial .in-count-segment strong{font-size:9cqw}
+.in-count-ornament{width:100%;display:flex;align-items:center;justify-content:center;gap:3cqw;color:var(--count-tone);font:400 6cqw var(--f-head);opacity:.84}
+.in-count-ornament span{display:block;width:19%;height:.2cqw;background:linear-gradient(90deg,transparent,var(--line))}
+.in-count-ornament span:last-child{transform:rotate(180deg)}
+.in-count-ornament i{font-style:normal;line-height:1}
+/* Each invitation world carries its own visual grammar into the countdown,
+   even when two couples select the same timer layout. */
+.in-countdown--theatre{position:relative;margin-block:6cqw;padding:10cqw 4cqw 9cqw;border:.2cqw solid color-mix(in srgb,var(--line) 80%,transparent);background:radial-gradient(ellipse at 50% -25%,color-mix(in srgb,var(--count-tone) 18%,transparent),transparent 72%),linear-gradient(145deg,color-mix(in srgb,var(--soft) 90%,#000),var(--soft));box-shadow:inset 0 0 0 1.1cqw var(--soft),inset 0 0 0 1.3cqw color-mix(in srgb,var(--line) 45%,transparent),0 2cqw 5cqw #00000012}
+.in-countdown--theatre .in-count-title{font-size:6.6cqw;font-style:italic;letter-spacing:.015em}
+.in-countdown--theatre .in-count-segment strong{font-size:11cqw;font-weight:400}
+.in-countdown--theatre .in-count-segment span{font-size:2.7cqw;letter-spacing:.14em;text-transform:uppercase}
+.in-countdown--engraved{border:.25cqw double var(--line);background:repeating-linear-gradient(0deg,transparent 0 1cqw,color-mix(in srgb,var(--line) 5%,transparent) 1cqw 1.1cqw);margin-block:5cqw;padding:8cqw 4cqw}
+.in-countdown--engraved .in-count-title{font-style:italic;font-size:6.2cqw}
+.in-countdown--engraved .in-count-segment{position:relative}
+.in-countdown--engraved .in-count-segment:not(:last-child):after{content:"";position:absolute;right:-1.5cqw;top:20%;height:60%;border-right:.2cqw solid var(--line)}
+.in-countdown--engraved .in-count-segment strong{font-variant-numeric:oldstyle-nums tabular-nums;font-size:11cqw}
+.in-countdown--botanical{border:0;background:radial-gradient(ellipse at 6% 0%,color-mix(in srgb,var(--line) 21%,transparent),transparent 49%),radial-gradient(ellipse at 95% 100%,color-mix(in srgb,var(--a) 13%,transparent),transparent 45%),var(--soft);margin-block:4cqw;padding:9cqw 3cqw;outline:.2cqw solid color-mix(in srgb,var(--line) 50%,transparent);outline-offset:-2cqw}
+.in-countdown--botanical .in-count-title{font-family:var(--f-script,var(--f-head));font-size:7cqw;font-weight:400}
+.in-countdown--botanical .in-count-segment strong{font-weight:400;font-size:11cqw}
+.in-countdown--editorial{align-items:stretch;border-top:.5cqw solid var(--fg);border-bottom:.2cqw solid var(--fg);gap:1cqw;padding:5cqw 0;margin-block:5cqw;background:none}
+.in-countdown--editorial .in-count-ornament{justify-content:flex-start}
+.in-countdown--editorial .in-count-ornament span{display:none}
+.in-countdown--editorial .in-count-title{text-align:left;font-family:var(--f-caps,var(--f-body));font-size:3.3cqw;letter-spacing:.18em;text-transform:uppercase}
+.in-countdown--editorial .in-count-segments{gap:0;justify-content:space-between}
+.in-countdown--editorial .in-count-segment{align-items:flex-start;padding:2cqw 1cqw 1cqw 0}
+.in-countdown--editorial .in-count-segment strong{font-family:var(--f-head);font-size:13cqw;line-height:.9;letter-spacing:-.06em}
+.in-countdown--editorial .in-count-segment span{text-transform:uppercase;letter-spacing:.11em}
+.in-countdown--editorial.in-countdown--tiles .in-count-segment,.in-countdown--editorial.in-countdown--dial .in-count-segment{border:0;border-radius:0;aspect-ratio:auto;background:none;max-width:none}
+.in-countdown--classic .in-count-ornament{opacity:.55}
+.in-countdown--theatre.in-countdown--tiles .in-count-segment,.in-countdown--engraved.in-countdown--tiles .in-count-segment,.in-countdown--botanical.in-countdown--tiles .in-count-segment{background:color-mix(in srgb,var(--soft) 76%,transparent);border-radius:0}
+@media(prefers-reduced-motion:no-preference){.in-countdown--theatre .in-count-ornament i,.in-countdown--botanical .in-count-ornament i{animation:in-count-glint 8s ease-in-out infinite alternate}@keyframes in-count-glint{from{opacity:.5;transform:translateY(0)}to{opacity:1;transform:translateY(-.7cqw)}}}
 .in-map-wrap{width:100%;margin-top:2cqw;text-align:center}
 .in-map-toggle{display:inline-flex;align-items:center;justify-content:center;gap:2cqw;min-height:10cqw;padding:1cqw 2cqw;color:var(--a);font:500 3.4cqw var(--f-body);letter-spacing:.025em;border-bottom:.2cqw solid var(--line)!important}
 .in-map-chevron{transition:transform .25s ease}.in-map-chevron--up{transform:rotate(180deg)}
