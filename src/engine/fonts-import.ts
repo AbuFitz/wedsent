@@ -1,0 +1,20 @@
+// Self-hosted, OFL-licensed fonts (fontsource). @font-face only downloads files a page actually uses.
+import "@fontsource-variable/cormorant-garamond/wght.css";
+import "@fontsource-variable/cormorant-garamond/wght-italic.css";
+import "@fontsource-variable/playfair-display/wght.css";
+import "@fontsource-variable/bodoni-moda/wght.css";
+import "@fontsource-variable/cinzel/wght.css";
+import "@fontsource-variable/jost/wght.css";
+import "@fontsource-variable/eb-garamond/wght.css";
+import "@fontsource-variable/noto-naskh-arabic/wght.css";
+import "@fontsource/great-vibes/400.css";
+import "@fontsource/pinyon-script/400.css";
+import "@fontsource/allura/400.css";
+import "@fontsource/parisienne/400.css";
+import "@fontsource/dm-serif-display/400.css";
+import "@fontsource/italiana/400.css";
+import "@fontsource/marcellus/400.css";
+import "@fontsource/tenor-sans/400.css";
+import "@fontsource/amiri/400.css";
+import "@fontsource/amiri/700.css";
+import "@fontsource/tiro-devanagari-hindi/400.css";

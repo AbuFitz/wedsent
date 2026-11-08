@@ -115,7 +115,7 @@ function Hero({ draft, patch }: { draft: InviteData; patch: (p: Partial<InviteDa
 
 /* ------------------- Scroll-pinned design tour ------------------- */
 
-const stage: Record<DesignId, { bg: string; fg: string }> = {
+const stage: Partial<Record<DesignId, { bg: string; fg: string }>> = {
   zest: { bg: "#17120D", fg: "#FFF3E6" },
   mono: { bg: "#2437F2", fg: "#FFFFFF" },
   nocturne: { bg: "#E9E5DD", fg: "#0E0E10" },
@@ -127,7 +127,7 @@ function Designs({ draft }: { draft: InviteData }) {
   const [i, setI] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (v) => setI(Math.max(0, Math.min(designs.length - 1, Math.floor(v * designs.length * 0.999)))));
   const d = designs[i];
-  const s = stage[d.id];
+  const s = stage[d.id] ?? { bg: d.bg, fg: d.ink };
 
   return (
     <section id="designs" ref={ref} className="tour" style={{ height: `${designs.length * 100 + 40}svh` }}>

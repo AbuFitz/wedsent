@@ -8,6 +8,10 @@ import {
   mapsUrl, onColor, splitNames, type InviteData, type InviteEvent,
 } from "@/lib/designs";
 import "./invitation.css";
+import "@/engine/engine.css";
+import { GatesCover, IrisCover, CurtainCover } from "@/engine/covers";
+import { StationeryCard, resolveIntro } from "@/engine/stationery";
+import { fontPackById, paletteOf, specById, type DesignSpec, type Palette } from "@/engine/registry";
 
 export type InvitationProps = {
   data: InviteData;
@@ -32,15 +36,22 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
     onOpenChange?.(v);
   };
   const accent = accentFor(data);
-  const style = { "--a": accent, "--on-a": onColor(accent) } as CSSProperties;
-  const design = designById(data.design).id;
+  const spec = specById(data.design);
+  const palette = paletteOf(spec, data.palette);
+  const pack = fontPackById(data.type) ?? fontPackById(spec.fonts);
+  const style = {
+    "--a": accent, "--on-a": onColor(accent),
+    ...(palette.bg ? { "--bg": palette.bg, "--fg": palette.fg, "--soft": palette.soft, "--line": palette.line } : {}),
+    ...(pack ? { "--f-head": pack.head, "--f-script": pack.script ?? pack.head, "--f-body": pack.body, "--f-caps": pack.caps ?? pack.body } : {}),
+  } as CSSProperties;
+  const design = spec.id;
 
   return (
-    <div className={`inv inv--${design}`} style={style} data-open={open} {...(still ? { inert: true } : {})}>
-      <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} events={events} greeting={greeting} />
+    <div className={`inv inv--${design}`} style={style} data-open={open} data-layout={spec.layout} {...(still ? { inert: true } : {})}>
+      <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} events={events} greeting={greeting} spec={spec} palette={palette} />
       <AnimatePresence>
         {!open && (
-          <Cover key={design} design={design} data={data} onOpen={() => setOpen(true)} still={!!still} />
+          <Cover key={design} spec={spec} data={data} onOpen={() => setOpen(true)} still={!!still} />
         )}
       </AnimatePresence>
     </div>
@@ -53,14 +64,19 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
 
 type CoverProps = { data: InviteData; onOpen: () => void; still: boolean };
 
-function Cover({ design, ...p }: CoverProps & { design: string }) {
-  if (design === "mono") return <MonoCover {...p} />;
-  if (design === "nocturne") return <NocturneCover {...p} />;
-  return <ZestCover {...p} />;
+function Cover({ spec, ...p }: CoverProps & { spec: DesignSpec }) {
+  switch (spec.opening.kind) {
+    case "shutter": return <MonoCover {...p} />;
+    case "hold": return <NocturneCover {...p} />;
+    case "gates": return <GatesCover spec={spec} {...p} />;
+    case "iris": return <IrisCover spec={spec} {...p} />;
+    case "curtain": return <CurtainCover spec={spec} {...p} />;
+    default: return <ZestCover {...p} seal={spec.id === "botanica"} />;
+  }
 }
 
 /* Zest: tap the envelope ------------------------------------------- */
-function ZestCover({ data, onOpen }: CoverProps) {
+function ZestCover({ data, onOpen, seal }: CoverProps & { seal?: boolean }) {
   const reduced = useReducedMotion();
   const [phase, setPhase] = useState<"idle" | "flap" | "rise" | "away">("idle");
   const timers = useRef<number[]>([]);
@@ -102,9 +118,11 @@ function ZestCover({ data, onOpen }: CoverProps) {
         </span>
         <span className="env-front" />
         <span className="env-flap" />
+        {seal && <span className="env-seal" aria-hidden="true">{(names.a[0] ?? "") + (names.b[0] ?? "")}</span>}
       </button>
+      {seal && <img className="env-sprig" src="/art/rose-wild.webp" alt="" aria-hidden="true" width={688} height={900} />}
 
-      <p className="zest-hint" aria-hidden="true">Tap to open</p>
+      <p className="zest-hint" aria-hidden="true">{seal ? "Tap the seal to open" : "Tap to open"}</p>
       <div className="zest-badge" aria-hidden="true">
         <svg viewBox="0 0 100 100">
           <defs><path id="zest-ring" d="M50 50m-37 0a37 37 0 1 1 74 0a37 37 0 1 1-74 0" /></defs>
@@ -235,7 +253,7 @@ function NocturneCover({ data, onOpen }: CoverProps) {
 /* Inside: details, one layout language per design                     */
 /* ------------------------------------------------------------------ */
 
-function Inside({ data, open, rsvpHref, events, greeting }: { data: InviteData; open: boolean; rsvpHref?: string; events?: InviteEvent[]; greeting?: string }) {
+function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { data: InviteData; open: boolean; rsvpHref?: string; events?: InviteEvent[]; greeting?: string; spec: DesignSpec; palette: Palette }) {
   const design = designById(data.design).id;
   const names = splitNames(data.names);
   const parts = dateParts(data.date);
@@ -277,6 +295,12 @@ function Inside({ data, open, rsvpHref, events, greeting }: { data: InviteData; 
   return (
     <div className="inside" {...(open ? {} : { inert: true })}>
       <div className="inside-scroll">
+        {spec.layout === "stationery" ? (
+          <motion.div {...reveal(0)}>
+            <StationeryCard data={data} spec={spec} palette={palette} greeting={greeting} event={evs?.[0]} />
+            {data.message.trim() && <p className="in-message in-note">{data.message}</p>}
+          </motion.div>
+        ) : (<>
         <motion.header className="in-hero" {...reveal(0)}>
           <p className="in-kicker">{greeting ? `For ${greeting}` : data.occasion || "Celebration"}</p>
           <h2 className="in-names" style={{ fontSize: `${nameSize}cqw` }}>
@@ -288,6 +312,7 @@ function Inside({ data, open, rsvpHref, events, greeting }: { data: InviteData; 
         {data.message.trim() && (
           <motion.p className="in-message" {...reveal(1)}>{data.message}</motion.p>
         )}
+        </>)}
 
         {evs ? evs.map((ev, i) => {
           const p = dateParts(ev.startsOn ?? "");

@@ -3,6 +3,7 @@ import "@fontsource-variable/geist";
 import "@fontsource-variable/bricolage-grotesque/wdth.css";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
+import "@/engine/fonts-import";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 

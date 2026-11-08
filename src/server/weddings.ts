@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DESIGN_IDS } from "@/engine/registry";
 import { getDb, type Q } from "./db";
 import { AppError, bad, conflict, forbidden, notFound } from "./errors";
 import { audit } from "./audit";
@@ -14,7 +15,10 @@ export const ContentSchema = z.object({
   dress: z.string().trim().max(80),
   rsvpBy: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).or(z.literal("")),
   accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).or(z.literal("")),
-  design: z.enum(["zest", "mono", "nocturne"]),
+  design: z.enum(DESIGN_IDS),
+  palette: z.string().max(30).default(""),
+  type: z.string().max(30).default(""),
+  intro: z.string().max(120).default(""),
 });
 export type Content = z.infer<typeof ContentSchema>;
 

@@ -1,4 +1,5 @@
-export type DesignId = "zest" | "mono" | "nocturne";
+import { DESIGNS, DESIGN_IDS, paletteOf, specById, type DesignId } from "@/engine/registry";
+export type { DesignId };
 
 export type InviteData = {
   names: string;
@@ -10,8 +11,11 @@ export type InviteData = {
   message: string;
   dress: string;
   rsvpBy: string; // yyyy-mm-dd or ""
-  accent: string; // "" = design default
+  accent: string; // custom colour override; "" = the palette's accent
   design: DesignId;
+  palette: string; // palette id within the design; "" = the design's first
+  type: string; // font pairing id; "" = the design's own
+  intro: string; // opening line text; "" = the design's default, "none" = no line
 };
 
 export const defaults: InviteData = {
@@ -25,9 +29,15 @@ export const defaults: InviteData = {
   dress: "",
   rsvpBy: "",
   accent: "",
-  design: "zest",
+  design: "botanica",
+  palette: "",
+  type: "",
+  intro: "",
 };
 
+export { DESIGN_IDS };
+
+/** Compatibility view of a design for the marketing site and Studio lists. */
 export type DesignMeta = {
   id: DesignId;
   name: string;
@@ -39,43 +49,15 @@ export type DesignMeta = {
   accents: string[]; // first is the default
 };
 
-export const designs: DesignMeta[] = [
-  {
-    id: "zest",
-    name: "Vermilion",
-    mood: "Warm, artistic, quietly expressive",
-    opening: "Tap the envelope",
-    openingHint: "Flap lifts, card rises, envelope drops away",
-    bg: "#9F4E3B",
-    ink: "#2A1714",
-    accents: ["#9F4E3B", "#875759", "#355C52", "#6F6683", "#946A3D"],
-  },
-  {
-    id: "mono",
-    name: "Monolith",
-    mood: "Big type, hard edges, one colour",
-    opening: "Swipe up",
-    openingHint: "The cover lifts under your thumb like a shutter",
-    bg: "#EDEDE8",
-    ink: "#0C0C0C",
-    accents: ["#2437F2", "#0C0C0C", "#D8342A", "#0F7B5F", "#7A3FF2"],
-  },
-  {
-    id: "nocturne",
-    name: "Nocturne",
-    mood: "Slow, dark, cinematic",
-    opening: "Press and hold",
-    openingHint: "A ring fills while the names come into focus",
-    bg: "#0B0A0F",
-    ink: "#F4EFE6",
-    accents: ["#E8C98A", "#F4EFE6", "#C9A7FF", "#8FD3C2", "#FF8F7A"],
-  },
-];
+export const designs: DesignMeta[] = DESIGNS.map((d) => ({
+  id: d.id, name: d.name, mood: d.blurb, opening: d.opening.label, openingHint: d.opening.hint,
+  bg: d.site.bg, ink: d.site.ink, accents: d.palettes.map((p) => p.accent),
+}));
 
 export const designById = (id: string): DesignMeta =>
   designs.find((d) => d.id === id) ?? designs[0];
 
-export const accentFor = (d: InviteData) => d.accent || designById(d.design).accents[0];
+export const accentFor = (d: InviteData) => d.accent || paletteOf(specById(d.design), d.palette).accent;
 
 const parse = (v: string) => {
   const d = new Date(`${v}T12:00:00`);
