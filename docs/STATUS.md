@@ -75,6 +75,8 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 4. **Data model names.** The directive lists HouseholdMember, EventInvitation, InvitationToken. Implemented equivalents: `guests`, `event_invitees`, `invitations` (token digest). No rename planned.
 
 ## Build order from here (dependency order, one journey at a time)
+**Studio workbench update, 8 Nov:** Replaced the eight-item horizontal category bar and previous/next wizard navigation with four workspaces (Content, Design, Sound, Finishing), local focused task tabs, direct preview edit shortcuts, and a mobile Edit/Preview switch. The existing invitation renderer, draft autosave/conflict handling, owner-only uploads, events API and soundtrack data were retained. `npm run build` and all 40 unit/backend tests passed. Browser viewport interaction and mobile visual QA have **not** been completed; do not call this a verified UX release. Remaining shortcomings include contextual selection directly inside rendered invitation elements, section-specific visual controls beyond the existing fields, a hands-on usability pilot and accessible real-device QA.
+
 1. Design maturity: art pass for Vermilion, Monolith, Nocturne; higher-resolution re-cuts of the hero plates; paper/marble photo textures; a Chinese/East Asian and a Jewish design family; reply inside the invitation card.
 2. Onboarding to publish: guests and sharing inside the guided flow; QR and share sheet.
 4. Sharing: QR, native share sheet, share card.

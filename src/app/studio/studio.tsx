@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight, Eye, PanelLeftClose, PanelLeftOpen, LayoutTemplate, Settings2, Send, MapPin } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
@@ -29,6 +29,14 @@ const tabs: { id: Tab; label: string; icon: typeof Palette }[] = [
   { id: "music", label: "Music", icon: Music2 },
   { id: "extras", label: "Extras", icon: SlidersHorizontal },
 ];
+type Workspace = "compose" | "style" | "sound" | "finish";
+const workspaces: { id: Workspace; label: string; icon: typeof Palette; description: string; tasks: Tab[] }[] = [
+  { id: "compose", label: "Content", icon: LayoutTemplate, description: "The words and practical details", tasks: ["words", "details", "events"] },
+  { id: "style", label: "Design", icon: Palette, description: "The invitation's visual world", tasks: ["design", "appearance", "photos"] },
+  { id: "sound", label: "Sound", icon: Music2, description: "Set the atmosphere", tasks: ["music"] },
+  { id: "finish", label: "Finishing", icon: Settings2, description: "Extra touches and sharing", tasks: ["extras"] },
+];
+const workspaceFor = (task: Tab): Workspace => workspaces.find((area) => area.tasks.includes(task))?.id ?? "compose";
 const stepText: Record<Tab, { title: string; summary: string }> = {
   design: { title: "Choose your invitation", summary: "Start with an art-directed design. Every choice updates the real guest experience." },
   words: { title: "Make it yours", summary: "Names, occasion and the words your guests will remember." },
@@ -49,9 +57,12 @@ const tones = [
 export function Studio() {
   const { draft, patch, state, ready, account, reload } = useStudioDraft();
   const params = useSearchParams();
-  const [tab, setTab] = useState<Tab>("design");
+  const [tab, setTab] = useState<Tab>("words");
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState(true);
+  const [workspace, setWorkspace] = useState<Workspace>("compose");
+  const [mobilePreview, setMobilePreview] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
   const [shareStatus, setShareStatus] = useState("");
   const loadEvents = useCallback(async () => {
@@ -81,15 +92,29 @@ export function Studio() {
 
   const go = (t: Tab) => {
     setTab(t);
+    setWorkspace(workspaceFor(t));
     setSheet(true);
+    setMobilePreview(false);
     if (t === "details" || t === "events" || t === "words" || t === "extras") setOpen(true);
     if (t === "design" || t === "appearance" || t === "photos") setOpen(false);
   };
+  const selectWorkspace = (id: Workspace) => {
+    setWorkspace(id);
+    go(workspaces.find((area) => area.id === id)!.tasks[0]);
+  };
+  const area = workspaces.find((item) => item.id === workspace)!;
+  const activeTask = tabs.find((item) => item.id === tab)!;
+  const previewTargets: { id: Tab; label: string; icon: typeof Palette; position: "cover" | "inside" | "both" }[] = [
+    { id: "words", label: "Names & message", icon: Type, position: "both" },
+    { id: "appearance", label: "Opening & colours", icon: Palette, position: "cover" },
+    { id: "details", label: "Date & venue", icon: MapPin, position: "inside" },
+    { id: "music", label: "Soundtrack", icon: Music2, position: "both" },
+  ];
 
   return (
-    <div className="st" data-sheet={sheet}>
+    <div className="st st-workspace" data-sheet={sheet} data-preview={mobilePreview} data-focus={focusMode}>
       <header className="st-top">
-        <Link href="/" className="st-logo">wedsent</Link>
+        <Link href="/" className="st-logo">wedsent <span className="st-studio-word">/ studio</span></Link>
         <div className="st-seg" role="group" aria-label="Preview">
           <button type="button" aria-pressed={!open} onClick={() => setOpen(false)}>Opening</button>
           <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
@@ -99,21 +124,33 @@ export function Studio() {
           {account
             ? <Link href="/dashboard" className="btn btn-dark st-guest"><span>Guests &amp; publish</span></Link>
             : null}
-          <Link href="/invite" target="_blank" className="btn btn-light st-guest" aria-label="Open the guest invitation in a new tab"><span>View as guest</span> <ArrowUpRight size={16} /></Link>
-          <button type="button" className="btn btn-dark st-guest" onClick={() => void shareFeedback()} aria-label="Copy a shareable invitation link for feedback"><span>Share for feedback</span><Share2 size={16} /></button>
+          <Link href="/invite" target="_blank" className="btn btn-light st-guest" aria-label="Open the guest invitation in a new tab"><span>Guest view</span> <ArrowUpRight size={16} /></Link>
+          <button type="button" className="btn btn-dark st-guest" onClick={() => void shareFeedback()} aria-label="Copy a shareable invitation link for feedback"><span>Share preview</span><Share2 size={16} /></button>
         </div>
       </header>
       {shareStatus && <div className="st-share-toast" role="status">{shareStatus}</div>}
 
+      <nav className="st-rail" aria-label="Studio workspaces">
+        <div className="st-rail-heading">CREATE</div>
+        {workspaces.map((item) => <button key={item.id} type="button" className="st-rail-button" aria-current={workspace === item.id ? "page" : undefined} onClick={() => selectWorkspace(item.id)} title={item.description}>
+          <item.icon size={20} strokeWidth={1.8} /><span>{item.label}</span>
+        </button>)}
+        <div className="st-rail-bottom"><button type="button" onClick={() => setFocusMode((value) => !value)} title={focusMode ? "Show editor" : "Focus on the preview"} aria-pressed={focusMode}>{focusMode ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}<span>{focusMode ? "Show editor" : "Focus"}</span></button></div>
+      </nav>
+
       <main className="st-canvas">
         <div className="st-phone" style={{ ["--bgtone" as string]: specById(draft.design).site.bg }}>
-          <div className="st-preview-label"><span className="st-live-dot" /> Live invitation <span>·</span> {open ? "Inside" : "Opening"}</div>
+          <div className="st-preview-label"><span className="st-live-dot" /> Live guest preview <span>·</span> {open ? "Inside" : "Opening"}</div>
           <Phone label="Live invitation preview">
             <Invitation data={draft} open={open} onOpenChange={setOpen} events={events} />
           </Phone>
-          <button type="button" className="st-replay" onClick={() => setOpen(false)} disabled={!open}>
-            <RotateCcw size={14} /> Replay opening
-          </button>
+          <div className="st-preview-actions"><button type="button" className="st-replay" onClick={() => setOpen(false)} disabled={!open}><RotateCcw size={14} /> Replay opening</button>
+          <button type="button" className="st-replay" onClick={() => go(open ? "details" : "design")}><Pencil size={14} /> Edit {open ? "details" : "cover"}</button></div>
+        </div>
+        <div className="st-preview-shortcuts" aria-label="Edit what you see">
+          <span>QUICK EDIT</span>
+          {previewTargets.filter((target) => target.position === "both" || target.position === (open ? "inside" : "cover")).map((target) => <button type="button" key={target.id} onClick={() => go(target.id)}><target.icon size={15} />{target.label}<ChevronRight size={14} /></button>)}
+          <button type="button" onClick={() => setOpen((value) => !value)}><Eye size={15} />View {open ? "opening" : "inside"}<ChevronRight size={14} /></button>
         </div>
       </main>
 
@@ -121,22 +158,21 @@ export function Studio() {
         <button type="button" className="st-grab" onClick={() => setSheet((s) => !s)} aria-expanded={sheet} aria-label="Toggle editor">
           <ChevronUp size={20} />
         </button>
-        <div className="st-tabs" role="tablist" aria-label="Studio editing areas">
-          {tabs.map((t) => (
-            <button key={t.id} type="button" role="tab" id={`studio-tab-${t.id}`} aria-controls="studio-editor-content" aria-selected={tab === t.id} tabIndex={tab === t.id ? 0 : -1} className="st-tab" onClick={() => go(t.id)} onKeyDown={(event) => {
-              const at = tabs.findIndex((item) => item.id === t.id);
-              const next = event.key === "ArrowRight" ? (at + 1) % tabs.length : event.key === "ArrowLeft" ? (at + tabs.length - 1) % tabs.length : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : -1;
+        <div className="st-panel-navigation">
+          <div className="st-panel-area"><span>{area.label}</span><small>{area.description}</small></div>
+          <div className="st-tabs" role="tablist" aria-label={`${area.label} editing tools`}>
+            {area.tasks.map((id) => { const item = tabs.find((candidate) => candidate.id === id)!; return <button key={id} type="button" role="tab" id={`studio-tab-${id}`} aria-controls="studio-editor-content" aria-selected={tab === id} tabIndex={tab === id ? 0 : -1} className="st-tab" onClick={() => go(id)} onKeyDown={(event) => {
+              const at = area.tasks.indexOf(id);
+              const next = event.key === "ArrowRight" ? (at + 1) % area.tasks.length : event.key === "ArrowLeft" ? (at + area.tasks.length - 1) % area.tasks.length : event.key === "Home" ? 0 : event.key === "End" ? area.tasks.length - 1 : -1;
               if (next === -1) return;
-              event.preventDefault(); go(tabs[next].id);
-              document.getElementById(`studio-tab-${tabs[next].id}`)?.focus();
-            }}>
-              <t.icon size={17} /> <span>{t.label}</span>
-            </button>
-          ))}
+              event.preventDefault(); go(area.tasks[next]);
+              document.getElementById(`studio-tab-${area.tasks[next]}`)?.focus();
+            }}><item.icon size={16} /><span>{item.label}</span></button>; })}
+          </div>
         </div>
         <div className="st-body" id="studio-editor-content" role="tabpanel" aria-labelledby={`studio-tab-${tab}`}>
           <header className="st-task-header">
-            <span className="st-task-counter">YOUR INVITATION <span>{String(tabs.findIndex((t) => t.id === tab) + 1).padStart(2, "0")} / {String(tabs.length).padStart(2, "0")}</span></span>
+            <span className="st-task-counter">EDITING <span>{activeTask.label.toUpperCase()}</span></span>
             <h1>{stepText[tab].title}</h1><p>{stepText[tab].summary}</p>
           </header>
           <AnimatePresence mode="wait" initial={false}>
@@ -148,13 +184,11 @@ export function Studio() {
               {(tab === "photos" || tab === "appearance" || tab === "music" || tab === "extras") && <StyleTab draft={draft} patch={patch} account={!!account} mode={tab} />}
             </motion.div>
           </AnimatePresence>
-          <div className="st-task-next">
-            {tabs.findIndex((t) => t.id === tab) > 0 && <button type="button" onClick={() => go(tabs[tabs.findIndex((t) => t.id === tab) - 1].id)}>Previous</button>}
-            {tabs.findIndex((t) => t.id === tab) < tabs.length - 1 ? <button type="button" className="st-task-primary" onClick={() => go(tabs[tabs.findIndex((t) => t.id === tab) + 1].id)}>Next: {tabs[tabs.findIndex((t) => t.id === tab) + 1].label} <ChevronRight size={16} /></button> : <button type="button" className="st-task-primary" onClick={() => void shareFeedback()}>Share your draft <Share2 size={15} /></button>}
-          </div>
+          <div className="st-task-next"><button type="button" onClick={() => { setMobilePreview(true); setSheet(false); }}><Eye size={16} /> Preview changes</button><button type="button" className="st-task-primary" onClick={() => void shareFeedback()}><Send size={15} /> Share preview</button></div>
         </div>
         <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Build mode: your draft saves on this device. Share for feedback creates a working invitation preview link, not a published RSVP invitation."}</p>
       </aside>
+      <div className="st-mobile-switch" role="group" aria-label="Mobile Studio mode"><button type="button" aria-pressed={!mobilePreview} onClick={() => { setMobilePreview(false); setSheet(true); }}><Pencil size={15} /> Edit</button><button type="button" aria-pressed={mobilePreview} onClick={() => { setMobilePreview(true); setSheet(false); }}><Eye size={15} /> Preview</button></div>
     </div>
   );
 }
@@ -177,20 +211,8 @@ function DesignTab({ draft, patch }: TabProps) {
   return (
     <div className="st-stack">
       <div className="st-panel-intro"><span>01 / LOOKS</span><p>Pick a visual world. Your names, events and answers stay exactly as they are.</p></div>
-      <section className="st-recommend" aria-label="Personalised starting point">
-        <div className="st-recommend-head"><Sparkles size={17} /><strong>Find your starting point</strong></div>
-        <p className="st-help st-help--flat">Tell us the feeling you want. Suggestions never lock your choices or change anything until you apply them.</p>
-        <label className="st-field"><span>What feels like you?</span><select value={mood} onChange={(e) => setMood(e.target.value as Mood)}>
-          <option value="minimal">Minimal and modern</option><option value="romantic">Soft and romantic</option><option value="grand">Grand and glamorous</option><option value="heritage">Heritage and detail</option><option value="celebration">Colourful celebration</option>
-        </select></label>
-        <label className="st-field"><span>Soundtrack preference</span><select value={audio} onChange={(e) => setAudio(e.target.value as AudioPreference)}>
-          <option value="undecided">Show me options</option><option value="vocal">Vocals-only nasheed</option><option value="duff">Nasheed with duff</option><option value="instrumental">Instrumental music</option><option value="ambient">Ambient sound</option><option value="silent">No music</option>
-        </select></label>
-        <div className="st-recommend-result"><strong>{suggestion.title}</strong><p>{suggestion.reason}</p><small>{suggestion.audioHint}</small></div>
-        <button type="button" className="btn btn-dark" onClick={() => patch({ design: suggestion.design, opening: suggestion.opening, accent: "", ...(audio === "silent" ? { music: null } : {}) })}>Use this design and opening</button>
-      </section>
-      <h2 className="st-h">Pick a design</h2>
-      <p className="st-help">Your details carry over when you switch.</p>
+      <h2 className="st-h">Invitation collection</h2>
+      <p className="st-help st-help--flat">Choose the artwork first. Your content and guest replies are preserved when you change the design.</p>
       <div className="st-designs">
         {designs.map((d) => (
           <div key={d.id} className="st-design" data-on={draft.design === d.id}>
@@ -205,6 +227,19 @@ function DesignTab({ draft, patch }: TabProps) {
           </div>
         ))}
       </div>
+      <details className="st-guided-choice"><summary><Sparkles size={17} /> Help me choose <ChevronRight size={16} /></summary>
+        <section className="st-recommend" aria-label="Personalised starting point">
+        <p className="st-help st-help--flat">Tell us the feeling you want. Suggestions never lock your choices or change anything until you apply them.</p>
+        <label className="st-field"><span>What feels like you?</span><select value={mood} onChange={(e) => setMood(e.target.value as Mood)}>
+          <option value="minimal">Minimal and modern</option><option value="romantic">Soft and romantic</option><option value="grand">Grand and glamorous</option><option value="heritage">Heritage and detail</option><option value="celebration">Colourful celebration</option>
+        </select></label>
+        <label className="st-field"><span>Soundtrack preference</span><select value={audio} onChange={(e) => setAudio(e.target.value as AudioPreference)}>
+          <option value="undecided">Show me options</option><option value="vocal">Vocals-only nasheed</option><option value="duff">Nasheed with duff</option><option value="instrumental">Instrumental music</option><option value="ambient">Ambient sound</option><option value="silent">No music</option>
+        </select></label>
+        <div className="st-recommend-result"><strong>{suggestion.title}</strong><p>{suggestion.reason}</p><small>{suggestion.audioHint}</small></div>
+        <button type="button" className="btn btn-dark" onClick={() => patch({ design: suggestion.design, opening: suggestion.opening, accent: "", ...(audio === "silent" ? { music: null } : {}) })}>Use this design and opening</button>
+        </section>
+      </details>
     </div>
   );
 }

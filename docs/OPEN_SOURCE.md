@@ -72,3 +72,14 @@ No source from the projects above has been incorporated into Wedsent as of this 
 | Wikimedia Commons public-domain/CC0 plates (Redouté via Cleveland Museum of Art, Edwin Step, Owen Jones and others) | PD / CC0 | ADOPT with provenance | All botanical and ornament artwork; see `/credits` |
 | Framer marketplace templates/components | Framer licence, in-Framer use | RESEARCH ONLY | Structure and ideas, nothing copied |
 | Procedural SVG botanicals (own code) | n/a | REJECTED | Quality not acceptable; `src/engine/art.tsx` is only used by `/dev/art` |
+
+## Studio interaction research, 8 November 2026
+
+| Source | Licence | Adoption decision | Relevance |
+| --- | --- | --- | --- |
+| [Radix Primitives](https://github.com/radix-ui/primitives) | MIT | Study navigation, tabs and disclosure patterns; no source copied in this slice | Keyboard focus, explicit selected states, narrow inspector surfaces |
+| [Zustand](https://github.com/pmndrs/zustand) | MIT | Defer adoption; existing `useStudioDraft` already owns persistence and server conflicts | Avoid accidentally creating a second draft store with divergent save status |
+| [Atlassian Pragmatic drag and drop](https://github.com/atlassian/pragmatic-drag-and-drop) | Apache-2.0 | Research only | A future reorderable event/section list, with keyboard fallback and server persisted order |
+| [Tiptap](https://github.com/ueberdosis/tiptap) | MIT core, extensions vary | Reject for present plain-text message fields | Rich text is unnecessary and would require a safe schema and HTML sanitization pipeline |
+
+Implementation: a content/design/sound/finishing workbench with task-specific inspectors and preview shortcuts, native keyboard-accessible tabs and disclosure, mobile edit/preview modes. No third-party editor source code was copied; Wavesurfer remains the actual adopted waveform dependency. This is a workflow overhaul of the shell, not a new template renderer or an independent proof of usability.

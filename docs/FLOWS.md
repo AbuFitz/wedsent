@@ -43,7 +43,7 @@ Required cases: draft persists across sign-up and browser refresh; invalid detai
 
 ## F02 — design customization and revision
 
-**Studio task navigation revision (8 Nov 2026):** The editor now keeps the same live renderer and saved draft while moving through independent Design, Wording, Details, Events, Photos, Appearance, Music and Extras areas. No global settings mega-panel. Music has an auditionable collection plus a selected-track region editor (start/end), trigger and volume. Editing a region updates the same wedding content model used by the guest renderer. Studio navigation itself does not publish changes or imply credentials exist.
+**Studio workspace revision (8 Nov 2026):** Couple enters the Content workspace (Wording / Details / Events), changes to Design (Design / Appearance / Photos), Sound (Music), or Finishing (Extras). Workspace selections are persistent UI state only; draft editing still uses the versioned local/server model. Preview shortcuts jump to the matching inspector and select the appropriate opening/inside state. On mobile, Edit and Preview are distinct modes, and changing a workspace returns to Edit. Error paths remain the existing save conflict/offline states, media upload errors, event API errors and unplayable remote soundtrack fallback. A guest preview and feedback link must never be confused with publishing; the share route is explicitly labelled feedback only. The editor does not modify replies or guest entitlements. Sound trimming retains the recording source, start/end, trigger, and volume within the same validated invitation model.
 
 ```mermaid
 stateDiagram-v2
