@@ -19,7 +19,7 @@ function remaining(date: string, time: string) {
   return { days: Math.floor(minutes / 1440), hours: Math.floor((minutes % 1440) / 60), minutes: minutes % 60, done: minutes <= 0 };
 }
 
-export function CountdownWidget({ date, time, config, lang }: { date: string; time: string; config: CountdownConfig; lang: WidgetLanguage }) {
+export function CountdownWidget({ date, time, config, lang, design }: { date: string; time: string; config: CountdownConfig; lang: WidgetLanguage; design?: string }) {
   const [now, setNow] = useState<ReturnType<typeof remaining>>(null);
   useEffect(() => {
     const update = () => setNow(remaining(date, time));
@@ -30,9 +30,14 @@ export function CountdownWidget({ date, time, config, lang }: { date: string; ti
   if (!config.enabled || !date) return null;
   const title = config.label.trim() || label(lang, "countdown");
   const tone = config.accent || "var(--a)";
+  const world = design === "velvet" || design === "gilt" || design === "nocturne" ? "theatre"
+    : design === "heritage" || design === "nikah-etched" || design === "rosewood" ? "engraved"
+    : design === "pearl" || design === "embossed" || design === "botanica" ? "botanical"
+    : design === "gallery" || design === "postmark" || design === "atelier" ? "editorial" : "classic";
   const segments = now ? [{ n: now.days, key: "days" }, { n: now.hours, key: "hours" }, { n: now.minutes, key: "minutes" }] as const : null;
   return (
-    <section className={`in-countdown in-countdown--${config.style}`} style={{ "--count-tone": tone } as CSSProperties} aria-label={title} dir={lang === "ar" ? "rtl" : undefined} lang={lang}>
+    <section className={`in-countdown in-countdown--${config.style} in-countdown--${world}`} style={{ "--count-tone": tone } as CSSProperties} aria-label={title} dir={lang === "ar" ? "rtl" : undefined} lang={lang}>
+      <div className="in-count-ornament" aria-hidden="true"><span /><i>{world === "theatre" ? "✦" : world === "engraved" ? "❦" : world === "botanical" ? "✿" : world === "editorial" ? "·" : "◇"}</i><span /></div>
       <p className="in-count-title">{title}</p>
       {now?.done ? <p className="in-count-done">{label(lang, "soon")}</p> : (
         <div className="in-count-segments">
