@@ -18,7 +18,7 @@ users, sessions, weddings, design_versions (one mutable draft + immutable publis
 - Row-level security is **not** used (single server role); isolation is enforced by owner checks in every service function plus the composite keys. Revisit if Supabase client access is ever exposed.
 
 ## Guest link model
-`token = 24 random bytes (base64url)`. DB stores `sha256(token)` for lookup and `AES-256-GCM(token)` (key from `APP_SECRET`) so hosts can re-copy links. One active invitation per household (partial unique index). Reset revokes and mints a new one in a transaction. Link pages set `noindex`, `no-referrer`, and contain no guest or couple data in server HTML.
+New invitation tokens use 16 cryptographically random bytes (128 bits, 22 base64url characters); legacy 24-byte (32-character) tokens remain valid. The shorter form is still an unguessable bearer capability, not a sequential or public identifier. DB stores `sha256(token)` for lookup and `AES-256-GCM(token)` (key from `APP_SECRET`) so hosts can re-copy links. One active invitation per household (partial unique index). Reset revokes and mints a new one in a transaction. Link pages set `noindex`, `no-referrer`, and contain no guest or couple data in server HTML.
 
 ## RSVP rules implemented
 Transactional, `SELECT … FOR UPDATE` on the invitation (re-validates revocation inside the transaction), idempotency key per submission, per-answer `version` for stale detection, history row only when an answer actually changes, deadline enforced server-side with a host override path, all writes audited.

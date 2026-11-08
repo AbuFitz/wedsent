@@ -21,6 +21,8 @@
 Source of truth for what is real. States: **Verified** = covered by an automated test or a browser run this session. **Partial** = built, with named gaps. **UI only** = looks real, is not. **Planned**. **Blocked** = needs something outside the code.
 
 **Shared invitation revision (8 Nov):** `/share` now displays the invitation without the fake "Try the guest experience" RSVP or Wallet simulator. It remains an encoded, read-only design proof—not a persistent, personalized invite. Actual no-login replies and passes require a private `/r/[token]` household link and a deployed database. The studio no longer offers generic legacy doors/curtains; saved choices resolve to a curated cover. Distinct section interludes and response frames now carry selected visual families through the scroll. TypeScript, 41 tests and production build passed. Mobile browser/device art direction remains unverified; no claim that the full live flow is complete. Connected Supabase project contains the schema but currently has zero weddings, households or invitations. Deployment connection still requires the runtime `DATABASE_URL` to be configured securely.
+
+**Short guest links:** New household invite tokens are 22 URL-safe characters (16 random bytes / 128-bit entropy), down from 32 characters. Existing links are not rotated automatically. A new backend test confirms token length and household resolution (42 tests passing). This shortens personal links without substituting guessable names or sequential IDs.
 Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs` (16 browser checks, cold server), screenshots reviewed at 390 and 1440 widths.
 
 ## Invitation (the creative product)

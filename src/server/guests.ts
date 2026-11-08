@@ -73,7 +73,9 @@ async function assertEventsBelong(q: Q, weddingId: string, eventIds: string[]) {
 }
 
 async function issueInvitation(q: Q, weddingId: string, householdId: string) {
-  const token = newToken();
+  // 128-bit opaque capability: 22 URL-safe characters instead of the old 32.
+  // Existing 24-byte invitation tokens remain valid until their owners rotate them.
+  const token = newToken(16);
   await q.query(`insert into invitations(wedding_id, household_id, token_digest, token_enc) values ($1,$2,$3,$4)`, [weddingId, householdId, sha256(token), encryptToken(token)]);
   return token;
 }

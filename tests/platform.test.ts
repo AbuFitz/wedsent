@@ -169,6 +169,13 @@ describe("household RSVP", () => {
 });
 
 describe("links: revoke, rotate, forwarded", () => {
+  it("issues compact 128-bit guest links that still resolve to the correct household", async () => {
+    const f = await fixture();
+    const household = (await listHouseholds(f.user.id, f.weddingId, "https://wedsent.example")).find((h) => h.id === f.hid)!;
+    const token = household.link!.split("/r/")[1];
+    expect(token).toMatch(/^[A-Za-z0-9_-]{22}$/);
+    expect((await guestView(token)).household.name).toBe(household.name);
+  });
   it("rotation kills the old link immediately and leaves other households untouched", async () => {
     const f = await fixture();
     const h2 = await createHousehold(f.user.id, f.weddingId, { name: "Other", eventIds: [f.walima], guests: [{ name: "Pat" }] });
