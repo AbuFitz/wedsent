@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, CalendarDays, Check, Eye, Film, ImagePlus, Layers3, ListMusic, LoaderCircle, MapPin, Maximize2, Minus, Palette, Pencil, Plus, RotateCcw, RotateCw, Search, Settings2, Share2, Sparkles, Trash2, Type, UploadCloud, Volume2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, Eye, Film, ImagePlus, Layers3, ListMusic, LoaderCircle, MapPin, Maximize2, Minus, Palette, Pencil, Plus, RotateCcw, RotateCw, Search, Settings2, Sparkles, Trash2, Type, UploadCloud, Volume2, X } from "lucide-react";
 import { Confetti, MusicNotes, TextT, CalendarBlank, ImageSquare, PaintBrush } from "@phosphor-icons/react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
@@ -13,7 +13,6 @@ import { FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type OpeningK
 import { useStudioDraft } from "@/lib/use-draft";
 import { saveLocalMusic, readLocalMusic } from "@/lib/local-music";
 import { CURATED_TRACKS } from "@/lib/music-library";
-import { makeFeedbackLink } from "@/lib/feedback-share";
 import { SoundWaveform } from "@/components/studio/sound-waveform";
 import "./studio.css";
 
@@ -91,10 +90,6 @@ export function Studio() {
   const select = (id: Panel) => { setPanel(id); setInspectorOpen(true); setMobileMenuOpen(false); setSearchOpen(false); setSearch(""); setMobileFull(false); setView(id === "look" || id === "photo" ? "cover" : "inside"); };
   const tool = tools.find((entry) => entry.id === panel)!;
   const actionList = tools.filter((t) => `${t.name} ${t.detail}`.toLowerCase().includes(search.toLowerCase()));
-  const share = async () => {
-    try { await navigator.clipboard.writeText(makeFeedbackLink(draft, events)); setNotice("Feedback link copied. It shows a preview, not a live RSVP page."); }
-    catch { setNotice("Couldn't copy the link. Try a secure browser."); }
-  };
   const saveLabel = state === "saved" ? account ? "Saved to account" : "Saved on this device" : state === "saving" ? "Saving…" : state === "conflict" ? "Changed in another tab" : state === "offline" ? "Offline, not synced" : state === "failed" ? "Save failed" : "Loading…";
   const missing = [!draft.names.trim() && "Names", !draft.date && "Date", !draft.venue.trim() && !rawEvents.some((e) => e.venue) && "Venue"].filter(Boolean);
 
@@ -107,7 +102,6 @@ export function Studio() {
         <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
         <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
         {account && <Link className="atelier-top-link" href="/dashboard">Guests & publish <ArrowRight size={15}/></Link>}
-        <button className="atelier-share" type="button" onClick={() => void share()}><Share2 size={16}/><span>Share for feedback</span></button>
       </div>
     </header>
 
