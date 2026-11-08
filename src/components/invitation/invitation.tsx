@@ -213,7 +213,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
           {(data.venue || data.city) && <VenueMap place={[data.venue, data.city].filter(Boolean).join(", ")} mapsHref={mapsUrl(data)} />}
         </motion.section></>)}
 
-        <CountdownWidget date={evs?.[0]?.startsOn ?? data.date} time={evs?.[0]?.startsAt ?? data.time} config={data.countdown ?? { enabled: false, style: "type", accent: "", label: "" }} lang={data.languages?.countdown ?? "en"} />
+        <CountdownWidget date={evs?.[0]?.startsOn ?? data.date} time={evs?.[0]?.startsAt ?? data.time} config={data.countdown ?? { enabled: false, style: "type", accent: "", label: "" }} lang={data.languages?.countdown ?? "en"} design={design} />
 
         <ThemeInterlude design={design} position="details" />
 
