@@ -15,6 +15,13 @@ export const ContentSchema = z.object({
   dress: z.string().trim().max(80),
   rsvpBy: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).or(z.literal("")),
   accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).or(z.literal("")),
+  address: z.string().trim().max(160).default(""),
+  photo: z.object({
+    // Only server-held media or bundled library art. Never data: URLs or third-party hosts.
+    src: z.string().regex(/^(\/media\/[0-9a-f-]{36}|\/art\/[a-z0-9-]+\.(webp|jpg))$/),
+    fx: z.number().min(0).max(100),
+    fy: z.number().min(0).max(100),
+  }).nullable().default(null),
   design: z.enum(DESIGN_IDS),
   palette: z.string().max(30).default(""),
   type: z.string().max(30).default(""),
@@ -126,7 +133,7 @@ export async function getPublishedBySlug(slug: string) {
   );
   if (!r.rowCount) return null;
   // Public payload: design content only. Never guests, tokens or events marked invited-only.
-  const events = await db.query(`select id, title, to_char(starts_on,'YYYY-MM-DD') as "startsOn", to_char(starts_at_local,'HH24:MI') as "startsAt", venue, city from wedding_events where wedding_id=$1 and visibility='everyone' order by starts_on nulls last, starts_at_local nulls last, sort_order`, [r.rows[0].id]);
+  const events = await db.query(`select id, title, to_char(starts_on,'YYYY-MM-DD') as "startsOn", to_char(starts_at_local,'HH24:MI') as "startsAt", venue, address, city from wedding_events where wedding_id=$1 and visibility='everyone' order by starts_on nulls last, starts_at_local nulls last, sort_order`, [r.rows[0].id]);
   return { slug: r.rows[0].slug as string, content: r.rows[0].content as Content, events: events.rows };
 }
 

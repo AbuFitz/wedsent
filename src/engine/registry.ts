@@ -3,9 +3,9 @@
  * palettes + type pairing. Content (names, events...) is separate and survives switching designs.
  * Pure TypeScript, safe to import on the server (validation) and the client (rendering).
  */
-export type OpeningKind = "envelope" | "shutter" | "hold" | "gates" | "iris" | "curtain";
-export type ArtKind = "none" | "wreath" | "peony" | "arch" | "stars" | "mandala" | "paisley";
-export type Shape = "Portrait" | "Arch" | "Frame" | "Full bleed" | "Scalloped";
+export type OpeningKind = "lift" | "bloom" | "veil";
+export type ArtKind = "none" | "plates" | "photo" | "ornament";
+export type Shape = "Portrait" | "Arch" | "Frame" | "Full bleed" | "Minimal";
 
 export type Palette = {
   id: string; name: string;
@@ -32,7 +32,8 @@ export const FONT_PACKS: FontPack[] = [
   { id: "deco", name: "Art deco", note: "Cinzel with Tenor Sans", head: '"Cinzel Variable", serif', body: '"Tenor Sans", sans-serif', caps: '"Cinzel Variable", serif' },
   { id: "italiana", name: "Elegant roman", note: "Italiana with Marcellus", head: '"Italiana", serif', body: '"Marcellus", serif', caps: '"Marcellus", serif' },
   { id: "garamond", name: "Literary", note: "EB Garamond throughout", head: '"EB Garamond Variable", serif', body: '"EB Garamond Variable", serif', caps: '"EB Garamond Variable", serif' },
-  { id: "editorial", name: "Editorial", note: "Instrument Serif with Geist", head: '"Instrument Serif", serif', body: '"Geist Variable", sans-serif', caps: '"Geist Variable", sans-serif' },
+  { id: "editorial2", name: "Editorial", note: "Newsreader, high contrast", head: '"Newsreader Variable", Georgia, serif', body: '"Geist Variable", sans-serif', caps: '"Geist Variable", sans-serif' },
+  { id: "editorial", name: "Display", note: "Instrument Serif with Geist", head: '"Instrument Serif", serif', body: '"Geist Variable", sans-serif', caps: '"Geist Variable", sans-serif' },
   { id: "display", name: "Heritage display", note: "DM Serif Display with Jost", head: '"DM Serif Display", serif', body: '"Jost Variable", sans-serif', caps: '"Jost Variable", sans-serif' },
 ];
 export const fontPackById = (id: string | undefined) => FONT_PACKS.find((f) => f.id === id);
@@ -58,7 +59,7 @@ export type DesignSpec = {
   id: DesignId; name: string; family: string; blurb: string;
   styles: string[]; colours: string[]; shape: Shape; cultures: string[];
   opening: { kind: OpeningKind; label: string; hint: string };
-  layout: "stationery" | "cards" | "editorial" | "chapters";
+  layout: "stationery";
   fonts: string;            // default FontPack id (or "own" for designs with bespoke CSS type)
   art: ArtKind;
   palettes: Palette[];
@@ -67,30 +68,58 @@ export type DesignSpec = {
   site: { bg: string; ink: string };  // marketing-page tone for this design
 };
 
-export const DESIGN_IDS = ["botanica", "arch", "zellige", "marigold", "zest", "mono", "nocturne"] as const;
+export const DESIGN_IDS = ["botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
 export type DesignId = (typeof DESIGN_IDS)[number];
 
 const pal = (id: string, name: string, accent: string, rest: Partial<Palette> = {}): Palette => ({ id, name, accent, ...rest });
 
+export const OPENINGS: Record<OpeningKind, { label: string; hint: string }> = {
+  lift: { label: "Swipe to open", hint: "The cover lifts away like a sheet of paper" },
+  bloom: { label: "Tap to open", hint: "The invitation opens outward from where you touch" },
+  veil: { label: "Tap to open", hint: "The cover softly clears to reveal the invitation" },
+};
+
 export const DESIGNS: DesignSpec[] = [
   {
-    id: "botanica", name: "Botanica", family: "Botanical", blurb: "Antique botanical plates around formal calligraphy, sealed in a lined envelope.",
+    id: "gallery", name: "Gallery", family: "Editorial", blurb: "Your photograph, full bleed, with your names set large like a magazine cover.",
+    styles: ["Full Bleed Photo", "Modern", "Elegant & Formal"], colours: ["Neutral Tones", "Black & White", "Earthy"], shape: "Full bleed", cultures: ["Any wedding", "Civil", "Evening", "Nikah"],
+    opening: { kind: "lift", ...OPENINGS.lift }, layout: "stationery", fonts: "editorial2", art: "photo", intro: "none", sample: { names: "Hannah & James", occasion: "Wedding" },
+    site: { bg: "#E9E4DB", ink: "#1D1A15" },
+    palettes: [
+      pal("ink", "Ink", "#1D1A15", { bg: "#F4F1EA", fg: "#1D1A15", soft: "#FBF9F4", line: "#CFC8B8" }),
+      pal("sand", "Sand", "#8A6E4B", { bg: "#EFE6D8", fg: "#2D2318", soft: "#F8F2E8", line: "#CDBB9F" }),
+      pal("sage", "Sage", "#4F6B57", { bg: "#E8EDE4", fg: "#1F2D24", soft: "#F4F7F1", line: "#BFCDBB" }),
+      pal("rose", "Rose", "#9A4A57", { bg: "#F5E9E6", fg: "#3A1E24", soft: "#FBF4F2", line: "#DDBFC0" }),
+    ],
+  },
+  {
+    id: "linen", name: "Linen", family: "Minimal", blurb: "Almost nothing but type: thin rules, generous space and a single quiet accent.",
+    styles: ["Simple & Minimalist", "Modern", "Calligraphy"], colours: ["Neutral Tones", "Black & White"], shape: "Minimal", cultures: ["Any wedding", "Civil", "Church"],
+    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "didone", art: "none", intro: "none", sample: { names: "Clara & Theo", occasion: "Wedding" },
+    site: { bg: "#F1EFEA", ink: "#1B1B19" },
+    palettes: [
+      pal("bone", "Bone", "#1B1B19", { bg: "#F6F4EF", fg: "#1B1B19", soft: "#FBFAF7", line: "#D8D4CA" }),
+      pal("slate", "Slate", "#3E4A57", { bg: "#EDEFF1", fg: "#1E252C", soft: "#F7F8F9", line: "#C5CBD1" }),
+      pal("clay", "Clay", "#8C4A35", { bg: "#F3EBE4", fg: "#3A2218", soft: "#FAF5F1", line: "#DCC9BC" }),
+      pal("moss", "Moss", "#55623F", { bg: "#EEF0E7", fg: "#242B18", soft: "#F7F8F2", line: "#CDD3BC" }),
+    ],
+  },
+  {
+    id: "botanica", name: "Botanica", family: "Botanical", blurb: "Antique botanical plates around formal calligraphy on warm paper.",
     styles: ["Floral & Botanical", "Calligraphy", "Classic & Traditional"], colours: ["Earthy", "Neutral Tones", "Pastel"], shape: "Portrait", cultures: ["Any wedding", "Church", "Garden"],
-    opening: { kind: "envelope", label: "Break the seal", hint: "Tap the wax seal; the flap lifts and the card rises" },
-    layout: "stationery", fonts: "pinyon", art: "wreath", intro: "families", sample: { names: "Eleanor & James", occasion: "Wedding" },
+    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "pinyon", art: "plates", intro: "families", sample: { names: "Eleanor & James", occasion: "Wedding" },
     site: { bg: "#E8E1D3", ink: "#2A2F26" },
     palettes: [
-      pal("rose", "Pink peony", "#B9697A", { bg: "#F7F1E6", fg: "#3B2A2A", soft: "#FBF7EF", line: "#D9C7B8", art: ["peony-pink", "rose-wild"] }),
+      pal("rose", "Pink peony", "#A8566A", { bg: "#F7F1E6", fg: "#3B2A2A", soft: "#FBF7EF", line: "#D9C7B8", art: ["peony-pink", "rose-wild"] }),
       pal("crimson", "Crimson", "#8E2B42", { bg: "#F5EEE3", fg: "#3A1D24", soft: "#FAF5EC", line: "#D6C2B2", art: ["peony-crimson", "rose-red"] }),
-      pal("blush", "Blush rose", "#C58A86", { bg: "#F8F0E8", fg: "#40292A", soft: "#FCF7F1", line: "#DDC8BB", art: ["peony-paxton", "rose-sprig"] }),
+      pal("blush", "Blush rose", "#9E5F5B", { bg: "#F8F0E8", fg: "#40292A", soft: "#FCF7F1", line: "#DDC8BB", art: ["peony-paxton", "rose-sprig"] }),
       pal("olive", "Olive & cream", "#6E7A44", { bg: "#F5F1E4", fg: "#2F3320", soft: "#FAF7EC", line: "#D3CDAE", art: ["olive-b", "rose-sprig"] }),
     ],
   },
   {
-    id: "arch", name: "Foil Arch", family: "Contemporary romantic", blurb: "A tall arched window in gold foil, opened like double doors.",
+    id: "arch", name: "Arch", family: "Contemporary romantic", blurb: "Your photograph in a tall arched window, edged in fine gold line.",
     styles: ["Modern", "Elegant & Formal", "Simple & Minimalist"], colours: ["Earthy", "Pastel", "Ivory & Gold"], shape: "Arch", cultures: ["Any wedding", "Nikah", "Civil", "Church"],
-    opening: { kind: "gates", label: "Open the doors", hint: "Swipe or tap and the arched doors part" },
-    layout: "stationery", fonts: "classic", art: "arch", intro: "none", sample: { names: "Amara & Daniel", occasion: "Wedding" },
+    opening: { kind: "bloom", ...OPENINGS.bloom }, layout: "stationery", fonts: "classic", art: "photo", intro: "none", sample: { names: "Amara & Daniel", occasion: "Wedding" },
     site: { bg: "#EBD9CC", ink: "#3B2218" },
     palettes: [
       pal("terracotta", "Terracotta", "#A85A40", { bg: "#EBD3C5", fg: "#4A271B", soft: "#FAF1EA", line: "#C9A24B", art: ["peony-pink", "rose-sprig"] }),
@@ -100,10 +129,9 @@ export const DESIGNS: DesignSpec[] = [
     ],
   },
   {
-    id: "zellige", name: "Zellige", family: "Heritage", blurb: "Gold geometry on deep emerald, a lattice that opens like a lantern.",
+    id: "zellige", name: "Zellige", family: "Heritage", blurb: "Gold geometry from historic ornament plates, with room for an opening line in your language.",
     styles: ["Classic & Traditional", "Glam", "Maximalism"], colours: ["Jewel", "Ivory & Gold", "Metallic"], shape: "Frame", cultures: ["Nikah", "Walima", "Arabic", "Persian", "Turkish", "Moroccan"],
-    opening: { kind: "iris", label: "Touch the star", hint: "The lattice blooms open from the centre" },
-    layout: "stationery", fonts: "classic", art: "stars", intro: "bismillah", sample: { names: "Aisha & Yusuf", occasion: "Nikah" },
+    opening: { kind: "lift", ...OPENINGS.lift }, layout: "stationery", fonts: "classic", art: "ornament", intro: "bismillah", sample: { names: "Aisha & Yusuf", occasion: "Nikah" },
     site: { bg: "#0F3D33", ink: "#F3E7C4" },
     palettes: [
       pal("emerald", "Emerald & gold", "#C9A24B", { bg: "#0F3D33", fg: "#F3E7C4", soft: "#14493D", line: "#B8923F", art: ["orn-moresque-b", "orn-tile-a"] }),
@@ -113,41 +141,16 @@ export const DESIGNS: DesignSpec[] = [
     ],
   },
   {
-    id: "marigold", name: "Marigold", family: "Celebration", blurb: "Saffron, magenta and teal with paisley, opened like parting curtains.",
-    styles: ["Maximalism", "Bold & Typographic", "Hand Drawn"], colours: ["Bright", "Jewel"], shape: "Scalloped", cultures: ["Mehndi", "Haldi", "Sangeet", "Shaadi", "Dholki"],
-    opening: { kind: "curtain", label: "Draw the curtains", hint: "Tap and the drapes part to reveal the invitation" },
-    layout: "stationery", fonts: "display", art: "paisley", intro: "shubh", sample: { names: "Priya & Arjun", occasion: "Mehndi" },
+    id: "marigold", name: "Marigold", family: "Celebration", blurb: "Warm saffron, magenta and real marigold plates for mehndi, haldi and sangeet.",
+    styles: ["Maximalism", "Bold & Typographic", "Hand Drawn"], colours: ["Bright", "Jewel"], shape: "Portrait", cultures: ["Mehndi", "Haldi", "Sangeet", "Shaadi", "Dholki"],
+    opening: { kind: "bloom", ...OPENINGS.bloom }, layout: "stationery", fonts: "display", art: "plates", intro: "shubh", sample: { names: "Priya & Arjun", occasion: "Mehndi" },
     site: { bg: "#F6B93B", ink: "#3A1030" },
     palettes: [
       pal("saffron", "Saffron & magenta", "#B0245B", { bg: "#FBE4A6", fg: "#3A1030", soft: "#FFF3CF", line: "#E5A93C", art: ["marigold-african", "marigold-orange"] }),
-      pal("rani", "Rani pink", "#D6336C", { bg: "#FDE1EA", fg: "#4A1230", soft: "#FFF1F5", line: "#F0A6C0", art: ["marigold-orange", "marigold-french"] }),
+      pal("rani", "Rani pink", "#C42B64", { bg: "#FDE1EA", fg: "#4A1230", soft: "#FFF1F5", line: "#F0A6C0", art: ["marigold-orange", "marigold-french"] }),
       pal("peacock", "Peacock", "#0F5C5A", { bg: "#D8EFEA", fg: "#0A2E2D", soft: "#EEF9F6", line: "#8CC7BE", art: ["marigold-french", "marigold-african"] }),
-      pal("coral", "Coral & teal", "#E0603F", { bg: "#FFE5D8", fg: "#3C1B12", soft: "#FFF3EC", line: "#F0B49C", art: ["marigold-orange", "marigold-african"] }),
+      pal("coral", "Coral & teal", "#B9482A", { bg: "#FFE5D8", fg: "#3C1B12", soft: "#FFF3EC", line: "#F0B49C", art: ["marigold-orange", "marigold-african"] }),
     ],
-  },
-  {
-    id: "zest", name: "Vermilion", family: "Stationery", blurb: "Warm clay and cream: a paper card tucked in a lined envelope.",
-    styles: ["Classic & Traditional", "Simple & Minimalist"], colours: ["Earthy", "Neutral Tones"], shape: "Portrait", cultures: ["Any wedding"],
-    opening: { kind: "envelope", label: "Tap the envelope", hint: "Flap lifts, card rises, envelope drops away" },
-    layout: "cards", fonts: "own", art: "none", intro: "none", sample: { names: "Amina & Yusuf", occasion: "Wedding" },
-    site: { bg: "#9F4E3B", ink: "#2A1714" },
-    palettes: ["#9F4E3B", "#875759", "#355C52", "#6F6683", "#946A3D"].map((a, i) => pal(["clay", "rose", "forest", "dusk", "ochre"][i], ["Clay", "Rose", "Forest", "Dusk", "Ochre"][i], a)),
-  },
-  {
-    id: "mono", name: "Monolith", family: "Bold typographic", blurb: "Huge condensed type, hard rules and one colour. A shutter you pull up.",
-    styles: ["Bold & Typographic", "Modern"], colours: ["Black & White", "Bright"], shape: "Full bleed", cultures: ["Any wedding"],
-    opening: { kind: "shutter", label: "Swipe up", hint: "The cover lifts under your thumb like a shutter" },
-    layout: "editorial", fonts: "own", art: "none", intro: "none", sample: { names: "Hannah & James", occasion: "Wedding" },
-    site: { bg: "#EDEDE8", ink: "#0C0C0C" },
-    palettes: ["#2437F2", "#0C0C0C", "#D8342A", "#0F7B5F", "#7A3FF2"].map((a, i) => pal(["cobalt", "ink", "red", "green", "violet"][i], ["Cobalt", "Ink", "Signal red", "Green", "Violet"][i], a)),
-  },
-  {
-    id: "nocturne", name: "Nocturne", family: "Cinematic", blurb: "Near-black with gold foil and slow light. Hold the ring to begin.",
-    styles: ["Elegant & Formal", "Glam"], colours: ["Black & White", "Metallic"], shape: "Full bleed", cultures: ["Any wedding", "Evening"],
-    opening: { kind: "hold", label: "Press and hold", hint: "A ring fills while the names come into focus" },
-    layout: "chapters", fonts: "own", art: "none", intro: "families", sample: { names: "Layla & Omar", occasion: "Wedding" },
-    site: { bg: "#0B0A0F", ink: "#F4EFE6" },
-    palettes: ["#E8C98A", "#F4EFE6", "#C9A7FF", "#8FD3C2", "#FF8F7A"].map((a, i) => pal(["gold", "pearl", "amethyst", "jade", "coral"][i], ["Gold", "Pearl", "Amethyst", "Jade", "Coral"][i], a)),
   },
 ];
 

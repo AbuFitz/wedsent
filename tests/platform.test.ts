@@ -263,3 +263,36 @@ describe("import and export", () => {
     expect(csv).toContain("no reply");
   });
 });
+
+describe("photos and addresses", () => {
+  const jpeg = () => { const b = new Uint8Array(2000); b[0] = 0xff; b[1] = 0xd8; b[2] = 0xff; return b; };
+  it("stores an owner's photo, serves it publicly, and sniffs the real type", async () => {
+    const { saveMedia, readMedia } = await import("@/server/media");
+    const o = await newOwner();
+    const m = await saveMedia(o.user.id, o.weddingId, jpeg());
+    expect(m.src).toMatch(/^\/media\/[0-9a-f-]{36}$/);
+    const got = await readMedia(m.id);
+    expect(got.mime).toBe("image/jpeg");
+    expect(got.data.length).toBe(2000);
+  });
+  it("rejects non-images, oversize files and other tenants", async () => {
+    const { saveMedia } = await import("@/server/media");
+    const a = await newOwner(), b = await newOwner();
+    expect(await code(saveMedia(a.user.id, a.weddingId, new TextEncoder().encode("<script>alert(1)</script>")))).toBe("invalid");
+    expect(await code(saveMedia(a.user.id, a.weddingId, new Uint8Array(0)))).toBe("invalid");
+    const big = jpeg(); const huge = new Uint8Array(2_600_000); huge.set(big.slice(0, 3));
+    expect(await code(saveMedia(a.user.id, a.weddingId, huge))).toBe("too_large");
+    expect(await code(saveMedia(b.user.id, a.weddingId, jpeg()))).toBe("not_found");
+  });
+  it("draft content accepts server photos and library art but never data: URLs or foreign hosts", async () => {
+    const o = await newOwner();
+    const d = await getDraft(o.user.id, o.weddingId);
+    const ok = { src: "/media/123e4567-e89b-12d3-a456-426614174000", fx: 30, fy: 60 };
+    await saveDraft(o.user.id, o.weddingId, content({ photo: ok, address: "1 High Street, N1 1AA" } as any), d.rev);
+    expect((await getDraft(o.user.id, o.weddingId)).content).toMatchObject({ photo: ok, address: "1 High Street, N1 1AA" });
+    for (const src of ["data:image/png;base64,AAAA", "https://evil.example/x.jpg", "/media/../etc/passwd", "javascript:1"]) {
+      const cur = await getDraft(o.user.id, o.weddingId);
+      expect(await code(saveDraft(o.user.id, o.weddingId, content({ photo: { src, fx: 1, fy: 1 } } as any), cur.rev)), src).toBe("invalid");
+    }
+  });
+});

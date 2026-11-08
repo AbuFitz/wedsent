@@ -1,15 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLineUp, DoorOpen, EnvelopeSimple, HandTap, Sparkle, MaskHappy } from "@phosphor-icons/react";
+import { ArrowLineUp, Sparkle, Eye } from "@phosphor-icons/react";
 import { Invitation } from "@/components/invitation/invitation";
 import { paletteOf, type DesignSpec, type OpeningKind } from "@/engine/registry";
 import { sampleData, sampleEvents } from "./samples";
 import "./gallery.css";
 
-export const OPENING_ICON: Record<OpeningKind, typeof EnvelopeSimple> = { envelope: EnvelopeSimple, gates: DoorOpen, iris: Sparkle, curtain: MaskHappy, shutter: ArrowLineUp, hold: HandTap };
-export const OPENING_NAME: Record<OpenKind, string> = { envelope: "Envelope", gates: "Doors", iris: "Lattice", curtain: "Curtains", shutter: "Shutter", hold: "Press & hold" };
-type OpenKind = OpeningKind;
+export const OPENING_ICON: Record<OpeningKind, typeof Sparkle> = { lift: ArrowLineUp, bloom: Sparkle, veil: Eye };
+export const OPENING_NAME: Record<OpeningKind, string> = { lift: "Lifts away", bloom: "Opens outward", veil: "Soft reveal" };
 
 /** One design as a product shot: the cover and the inside, live, on the design's own backdrop. */
 export function DesignCard({ spec, href, names }: { spec: DesignSpec; href?: string; names?: string }) {
@@ -19,7 +18,7 @@ export function DesignCard({ spec, href, names }: { spec: DesignSpec; href?: str
   const bg = paletteOf(spec, pal).bg ?? spec.site.bg;
   return (
     <article className="dc">
-      <div className="dc-stage" style={{ ["--stage" as string]: spec.id === "zest" || spec.id === "mono" || spec.id === "nocturne" ? spec.site.bg : bg }}>
+      <div className="dc-stage" style={{ ["--stage" as string]: bg }}>
         <Link href={to} className="dc-hit" aria-label={`Preview ${spec.name}`} />
         <span className="dc-ph dc-ph--back"><Invitation data={{ ...sampleData(spec, pal), ...(names ? { names } : {}) }} still /></span>
         <span className="dc-ph dc-ph--front"><Invitation data={{ ...sampleData(spec, pal), ...(names ? { names } : {}) }} events={sampleEvents(spec)} open still /></span>

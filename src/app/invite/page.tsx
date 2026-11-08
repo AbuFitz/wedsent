@@ -26,7 +26,7 @@ export default function InvitePage() {
 
   if (!ready) return <div className="guest" />;
   return (
-    <main className="guest" style={{ ["--g-bg" as string]: designById(draft.design).id === "nocturne" ? "#18161d" : "#101014" }}>
+    <main className="guest" style={{ ["--g-bg" as string]: "#101014" }}>
       <div className="guest-wrap">
         <Phone label="Invitation">
           <Invitation key={round} data={draft} open={open} onOpenChange={onOpen} rsvpHref="/invite/rsvp" />

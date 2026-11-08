@@ -43,7 +43,7 @@ export async function guestView(token: string) {
   const guests = (await db.query(`select id, display_name, is_child from guests where household_id=$1 order by created_at`, [r.householdId])).rows;
   const ids = guests.map((g) => g.id);
   const events = (await db.query(
-    `select distinct e.id, e.title, to_char(e.starts_on,'YYYY-MM-DD') as starts_on, to_char(e.starts_at_local,'HH24:MI') as starts_at_local, e.venue, e.city, e.sort_order from wedding_events e
+    `select distinct e.id, e.title, to_char(e.starts_on,'YYYY-MM-DD') as starts_on, to_char(e.starts_at_local,'HH24:MI') as starts_at_local, e.venue, e.address, e.city, e.sort_order from wedding_events e
      join event_invitees ei on ei.event_id = e.id where ei.guest_id = any($1::uuid[]) order by starts_on nulls last, starts_at_local nulls last, e.sort_order`, [ids])).rows;
   const invited = (await db.query(`select event_id, guest_id from event_invitees where guest_id = any($1::uuid[])`, [ids])).rows;
   const answers = (await db.query(`select event_id, guest_id, status, note, version from event_responses where guest_id = any($1::uuid[])`, [ids])).rows;
@@ -54,7 +54,7 @@ export async function guestView(token: string) {
     deadline: r.deadline?.toISOString() ?? null,
     locked,
     guests: guests.map((g) => ({ id: g.id, name: g.display_name, child: g.is_child })),
-    events: events.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city })),
+    events: events.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, address: e.address, city: e.city })),
     invited: invited.map((i) => ({ eventId: i.event_id, guestId: i.guest_id })),
     answers: answers.map((a) => ({ eventId: a.event_id, guestId: a.guest_id, status: a.status, note: a.note, version: a.version })),
   };

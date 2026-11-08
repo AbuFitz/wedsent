@@ -9,7 +9,7 @@ import "./guest.css";
 export function PublicInvite({ content, rsvpHref, note, events }: { content: InviteData; rsvpHref?: string; note?: string; events?: InviteEvent[] }) {
   const [open, setOpen] = useState(false);
   return (
-    <main className="guest" style={{ ["--g-bg" as string]: content.design === "nocturne" ? "#18161d" : "#101014" }}>
+    <main className="guest" style={{ ["--g-bg" as string]: "#101014" }}>
       <div className="guest-wrap">
         <Phone label="Invitation"><Invitation data={content} open={open} onOpenChange={setOpen} rsvpHref={rsvpHref} events={events} /></Phone>
         {note && <p className="guest-note">{note}</p>}

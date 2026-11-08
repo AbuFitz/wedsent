@@ -12,6 +12,7 @@ export const EventInput = z.object({
   startsAt: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional(),
   venue: z.string().trim().max(80).default(""),
   city: z.string().trim().max(80).default(""),
+  address: z.string().trim().max(160).default(""),
   visibility: z.enum(["invited", "everyone"]).default("invited"),
 });
 export const GuestInput = z.object({ name: Name, email: z.string().trim().email().max(254).nullable().optional().or(z.literal("")), child: z.boolean().default(false) });
@@ -31,16 +32,16 @@ const parse = <T>(s: z.ZodType<T>, v: unknown) => {
 export async function listEvents(userId: string, weddingId: string) {
   const db = await getDb();
   await assertOwner(db, userId, weddingId);
-  return (await db.query(`select id, title, to_char(starts_on,'YYYY-MM-DD') as starts_on, to_char(starts_at_local,'HH24:MI') as starts_at_local, venue, city, visibility, sort_order from wedding_events where wedding_id=$1 order by starts_on nulls last, starts_at_local nulls last, sort_order, created_at`, [weddingId])).rows;
+  return (await db.query(`select id, title, to_char(starts_on,'YYYY-MM-DD') as starts_on, to_char(starts_at_local,'HH24:MI') as starts_at_local, venue, address, city, visibility, sort_order from wedding_events where wedding_id=$1 order by starts_on nulls last, starts_at_local nulls last, sort_order, created_at`, [weddingId])).rows;
 }
 export async function createEvent(userId: string, weddingId: string, input: unknown) {
   const e = parse(EventInput, input);
   const db = await getDb();
   await assertOwner(db, userId, weddingId);
   const r = await db.query(
-    `insert into wedding_events(wedding_id,title,starts_on,starts_at_local,venue,city,visibility,sort_order)
-     values ($1,$2,$3,$4,$5,$6,$7,(select coalesce(max(sort_order),0)+1 from wedding_events where wedding_id=$1)) returning id`,
-    [weddingId, e.title, e.startsOn ?? null, e.startsAt ?? null, e.venue, e.city, e.visibility],
+    `insert into wedding_events(wedding_id,title,starts_on,starts_at_local,venue,city,address,visibility,sort_order)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,(select coalesce(max(sort_order),0)+1 from wedding_events where wedding_id=$1)) returning id`,
+    [weddingId, e.title, e.startsOn ?? null, e.startsAt ?? null, e.venue, e.city, e.address, e.visibility],
   );
   await audit(db, { weddingId, actor: "owner", actorId: userId, action: "event.created", targetKind: "event", targetId: r.rows[0].id });
   return r.rows[0].id as string;
@@ -50,8 +51,8 @@ export async function updateEvent(userId: string, weddingId: string, eventId: st
   const db = await getDb();
   await assertOwner(db, userId, weddingId);
   const r = await db.query(
-    `update wedding_events set title=$3, starts_on=$4, starts_at_local=$5, venue=$6, city=$7, visibility=$8 where id=$1 and wedding_id=$2`,
-    [eventId, weddingId, e.title, e.startsOn ?? null, e.startsAt ?? null, e.venue, e.city, e.visibility],
+    `update wedding_events set title=$3, starts_on=$4, starts_at_local=$5, venue=$6, city=$7, address=$8, visibility=$9 where id=$1 and wedding_id=$2`,
+    [eventId, weddingId, e.title, e.startsOn ?? null, e.startsAt ?? null, e.venue, e.city, e.address, e.visibility],
   );
   if (!r.rowCount) throw notFound("Event not found");
   await audit(db, { weddingId, actor: "owner", actorId: userId, action: "event.updated", targetKind: "event", targetId: eventId });

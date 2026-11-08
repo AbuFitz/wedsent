@@ -33,7 +33,7 @@ export function ReplyFlow({ token }: { token: string }) {
   const missing = pairs.filter((p) => !pick[p]);
   const anyAttending = Object.values(pick).some((s) => s === "attending");
 
-  if (err) return <main className="rs rs--zest"><div className="rs-shell"><div className="rs-card"><h1 className="rs-h">{err.status === 404 ? "This link isn’t active" : "Something went wrong"}</h1><p className="rs-sub">{err.status === 404 ? "Ask the couple for a fresh link." : err.message}</p></div></div></main>;
+  if (err) return <main className="rs rs--botanica"><div className="rs-shell"><div className="rs-card"><h1 className="rs-h">{err.status === 404 ? "This link isn’t active" : "Something went wrong"}</h1><p className="rs-sub">{err.status === 404 ? "Ask the couple for a fresh link." : err.message}</p></div></div></main>;
   if (!view) return <main className="rs" />;
 
   const c = view.content;

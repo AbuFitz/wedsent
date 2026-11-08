@@ -14,7 +14,7 @@ describe("design engine registry", () => {
     for (const d of DESIGNS) {
       expect(d.palettes.length, d.id).toBeGreaterThanOrEqual(4);
       expect(new Set(d.palettes.map((p) => p.id)).size, d.id).toBe(d.palettes.length);
-      expect(["envelope", "shutter", "hold", "gates", "iris", "curtain"]).toContain(d.opening.kind);
+      expect(["lift", "bloom", "veil"]).toContain(d.opening.kind);
     }
   });
   it("every referenced artwork file, font pack and intro preset exists", () => {

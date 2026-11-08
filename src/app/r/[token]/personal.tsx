@@ -24,7 +24,7 @@ export function PersonalInvite({ token }: { token: string }) {
   );
   if (!view) return <main className="guest" />;
   return (
-    <main className="guest" style={{ ["--g-bg" as string]: view.content.design === "nocturne" ? "#18161d" : "#101014" }}>
+    <main className="guest" style={{ ["--g-bg" as string]: "#101014" }}>
       <div className="guest-wrap">
         <Phone label="Invitation">
           <Invitation data={view.content} open={open} onOpenChange={(v) => { setOpen(v); if (v) sessionStorage.setItem(`opened:${token.slice(0, 10)}`, "1"); }} rsvpHref={`/r/${token}/reply`} events={view.events} greeting={view.household.name} />

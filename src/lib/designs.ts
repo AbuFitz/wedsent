@@ -1,6 +1,9 @@
 import { DESIGNS, DESIGN_IDS, paletteOf, specById, type DesignId } from "@/engine/registry";
 export type { DesignId };
 
+/** A cover photograph. `src` is /media/<id> (uploaded), /art/<file> (library artwork) or a data: URL (signed-out local draft). fx/fy are the focal point, 0-100. */
+export type Photo = { src: string; fx: number; fy: number };
+
 export type InviteData = {
   names: string;
   occasion: string;
@@ -12,6 +15,8 @@ export type InviteData = {
   dress: string;
   rsvpBy: string; // yyyy-mm-dd or ""
   accent: string; // custom colour override; "" = the palette's accent
+  address: string; // street and postcode (optional)
+  photo: Photo | null; // cover photograph (upload or library artwork) with focal point
   design: DesignId;
   palette: string; // palette id within the design; "" = the design's first
   type: string; // font pairing id; "" = the design's own
@@ -29,6 +34,8 @@ export const defaults: InviteData = {
   dress: "",
   rsvpBy: "",
   accent: "",
+  address: "",
+  photo: null,
   design: "botanica",
   palette: "",
   type: "",
@@ -93,7 +100,7 @@ export function daysUntil(v: string) {
 }
 
 export function mapsUrl(d: InviteData) {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([d.venue, d.city].filter(Boolean).join(", "))}`;
+  return eventMapsUrl(d);
 }
 
 /** Split "Amina & Yusuf" into display lines. Falls back to one line. */
@@ -111,6 +118,7 @@ export function loadDraft(): InviteData {
     if (!raw) return defaults;
     const parsed = { ...defaults, ...JSON.parse(raw) };
     parsed.design = designById(parsed.design).id;
+    if (parsed.photo && typeof parsed.photo.src !== "string") parsed.photo = null;
     return parsed;
   } catch {
     return defaults;
@@ -174,10 +182,12 @@ function hashCode(s: string) {
 }
 
 /** An event as the invitation renders it. Dates are plain yyyy-mm-dd / HH:mm strings. */
-export type InviteEvent = { id: string; title: string; startsOn: string | null; startsAt: string | null; venue: string; city: string };
+export type InviteEvent = { id: string; title: string; startsOn: string | null; startsAt: string | null; venue: string; city: string; address?: string };
 
-export const eventMapsUrl = (e: { venue: string; city: string }) =>
-  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([e.venue, e.city].filter(Boolean).join(", "))}`;
+export const eventMapsUrl = (e: { venue: string; city: string; address?: string }) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([e.venue, e.address, e.city].filter(Boolean).join(", "))}`;
+export const appleMapsUrl = (e: { venue: string; city: string; address?: string }) =>
+  `https://maps.apple.com/?q=${encodeURIComponent([e.venue, e.address, e.city].filter(Boolean).join(", "))}`;
 
 /** A real .ics for one event. */
 export function buildEventIcs(e: InviteEvent, couple: string) {

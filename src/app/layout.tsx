@@ -4,6 +4,8 @@ import "@fontsource-variable/bricolage-grotesque/wdth.css";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "@/engine/fonts-import";
+import "@fontsource-variable/newsreader/index.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
