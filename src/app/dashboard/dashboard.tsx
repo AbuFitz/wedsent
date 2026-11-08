@@ -3,9 +3,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, Copy, Download, ExternalLink, Link2, MessageCircle, Plus, RefreshCw, Trash2, Upload } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, Link2, Plus, RefreshCw, Trash2, Upload } from "lucide-react";
 import { call, ApiError } from "@/lib/api-client";
 import { friendlyDate } from "@/lib/designs";
+import { ShareInvitation } from "@/components/share/share-invitation";
 import "./dashboard.css";
 
 type Event = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
@@ -90,7 +91,6 @@ function Overview({ w, events, hh, act, go }: { w: Wedding; events: Event[]; hh:
     { done: guests > 0, title: "Add your guests", sub: `${guests} ${guests === 1 ? "person" : "people"} in ${hh.length} ${hh.length === 1 ? "household" : "households"}.`, action: <button className="btn btn-light" onClick={() => go("Guests")}>Add guests</button> },
     { done: !!live, title: "Publish and share", sub: live ? "Your invitation is live." : "Makes your invitation and every guest link work.", action: null },
   ];
-  const share = url ? `Join us: ${url}` : "";
   return (
     <div className="db-stack">
       <h1 className="db-h">{live ? "You’re live." : "Let’s get you ready to send."}</h1>
@@ -113,7 +113,7 @@ function Overview({ w, events, hh, act, go }: { w: Wedding; events: Event[]; hh:
               <a className="btn btn-light" href={url} target="_blank" rel="noreferrer"><ExternalLink size={16} /> Open</a>
             </div>
             <div className="db-row">
-              <a className="btn btn-light" href={`https://wa.me/?text=${encodeURIComponent(share)}`} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Share on WhatsApp</a>
+              <ShareInvitation url={url} title={w.content.names || "Our wedding invitation"} label="Share invitation / QR" />
               <button className="btn btn-dark" onClick={() => act(() => call("POST", "/api/wedding/publish").catch(publishErr(setProblems)), "Latest changes are live")}>Publish latest changes</button>
             </div>
             <p className="db-muted">Edits in the Studio stay as a draft until you publish again. Your link never changes.</p>
@@ -235,7 +235,7 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
               <div><strong>{h.name}</strong><p className="db-muted">{h.guests.length} {h.guests.length === 1 ? "person" : "people"} · {h.lastOpenedAt ? "Opened their link" : "Link not opened yet"}</p></div>
               <div className="db-row">
                 {h.link && <button className="btn btn-light" onClick={() => { navigator.clipboard.writeText(h.link!); say("Link copied"); }}><Link2 size={16} /> Copy link</button>}
-                {h.link && <a className="btn btn-light" target="_blank" rel="noreferrer" href={`https://wa.me/?text=${encodeURIComponent(`You’re invited: ${h.link}`)}`}><MessageCircle size={16} /> WhatsApp</a>}
+                {h.link && <ShareInvitation url={h.link} title={h.name} privateLink label="Share / QR" />}
                 <button className="db-icon" title="Make a new link (the old one stops working)" aria-label="Reset link" onClick={() => confirm("Make a new link? The old one will stop working.") && act(() => call("POST", `/api/wedding/households/${h.id}/rotate`), "New link created")}><RefreshCw size={16} /></button>
                 <button className="db-icon" aria-label={`Delete ${h.name}`} onClick={() => confirm(`Delete ${h.name} and their replies?`) && act(() => call("DELETE", `/api/wedding/households/${h.id}`), "Household deleted")}><Trash2 size={16} /></button>
               </div>
