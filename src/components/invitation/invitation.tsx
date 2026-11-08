@@ -9,7 +9,7 @@ import {
 } from "@/lib/designs";
 import "./invitation.css";
 import "@/engine/engine.css";
-import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover, KeepsakeCover } from "@/engine/covers";
+import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover, KeepsakeCover, RosewoodCover, VelvetStageCover } from "@/engine/covers";
 import { StationeryCard } from "@/engine/stationery";
 import { fontPackById, paletteOf, specById, OPENINGS, type DesignSpec, type Palette } from "@/engine/registry";
 import { CountdownWidget, label } from "./widgets";
@@ -82,6 +82,8 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
 type CoverProps = { data: InviteData; onOpen: () => void; still: boolean };
 
 function Cover({ spec, ...p }: CoverProps & { spec: DesignSpec }) {
+  if (spec.id === "rosewood" && (!p.data.opening || p.data.opening === "doors")) return <RosewoodCover spec={spec} {...p} />;
+  if (spec.id === "velvet" && (!p.data.opening || p.data.opening === "curtain")) return <VelvetStageCover spec={spec} {...p} />;
   if (["pearl", "embossed", "gilt"].includes(spec.id) && (!p.data.opening || p.data.opening === specById(spec.id).opening.kind)) return <KeepsakeCover spec={spec} {...p} />;
   switch (spec.opening.kind) {
     case "lift": return <LiftCover spec={spec} {...p} />;

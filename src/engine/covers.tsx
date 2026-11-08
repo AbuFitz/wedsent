@@ -9,11 +9,62 @@ import { splitNames } from "@/lib/designs";
 type P = { data: InviteData; spec: DesignSpec; onOpen: () => void; still: boolean };
 const ease = [0.22, 0.8, 0.2, 1] as const;
 
+function Initials({ names }: { names: string }) {
+  const n = splitNames(names);
+  return <>{n.a.trim().charAt(0).toLocaleUpperCase() || "·"}<i>&amp;</i>{n.b.trim().charAt(0).toLocaleUpperCase() || "·"}</>;
+}
+
+/** Raised wax with initials rendered independently of the artwork. */
+export function WaxSeal({ names, className = "" }: { names: string; className?: string }) {
+  return <span className={`cv-wax ${className}`} aria-hidden="true"><span className="cv-wax-initials"><Initials names={names} /></span></span>;
+}
+
+/** An actual envelope object: raised wax lifts, flap folds, then the letter slides out. */
+export function RosewoodCover({ data, spec, onOpen, still }: P) {
+  const reduced = useReducedMotion();
+  const [opening, setOpening] = useState(false);
+  useEffect(() => {
+    if (!opening) return;
+    const timer = window.setTimeout(onOpen, 1520);
+    return () => window.clearTimeout(timer);
+  }, [opening, onOpen]);
+  const start = () => { if (opening || still) return; if (reduced) onOpen(); else setOpening(true); };
+  return <motion.section className="cover cv cv-rosewood" aria-label="Wax-sealed wedding envelope" exit={{ opacity: 0, transition: { duration: .13 } }}>
+    <motion.div className="cv-rosewood-letter" aria-hidden="true" animate={opening ? { y: "-16%", scale: 1.025 } : { y: "8%", scale: .9 }} transition={{ duration: 1.06, delay: .32, ease: [.22,.78,.14,1] }}><StationeryCard data={data} spec={spec} palette={paletteOf(spec, data.palette)} fill /></motion.div>
+    <motion.div className="cv-rosewood-envelope" aria-hidden="true" animate={opening ? { y: "73%", rotateX: 9 } : { y: "0%", rotateX: 0 }} transition={{ duration: 1.06, delay: .35, ease: [.3,.65,.19,1] }}>
+      <div className="cv-rosewood-back" />
+      <div className="cv-rosewood-pocket" />
+      <motion.div className="cv-rosewood-flap" animate={opening ? { rotateX: -160 } : { rotateX: 0 }} transition={{ duration: .78, delay: .17, ease: [.2,.68,.16,1] }} />
+    </motion.div>
+    <motion.div className="cv-rosewood-stamp" aria-hidden="true" animate={opening ? { opacity: 0, scale: .65, y: -22, rotate: -18 } : { opacity: 1, scale: 1, y: 0, rotate: -5 }} transition={{ duration: .45 }}><WaxSeal names={data.names} /></motion.div>
+    <motion.span className="cv-rosewood-instruction" animate={{ opacity: opening ? 0 : 1 }}>TOGETHER WITH THEIR FAMILIES <small>TOUCH THE SEAL TO OPEN</small></motion.span>
+    <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Break the wax seal and open the invitation" />
+  </motion.section>;
+}
+
+/** Physically separate fabric panels with staggered curtain pull and a still card behind. */
+export function VelvetStageCover({ data, spec, onOpen, still }: P) {
+  const reduced = useReducedMotion();
+  const [opening, setOpening] = useState(false);
+  useEffect(() => { if (!opening) return; const t = window.setTimeout(onOpen, 1500); return () => window.clearTimeout(t); }, [opening, onOpen]);
+  const start = () => { if (opening || still) return; if (reduced) onOpen(); else setOpening(true); };
+  return <motion.section className="cover cv cv-velvet" aria-label="Velvet curtain invitation" exit={{ opacity: 0, transition: { duration: .16 } }}>
+    <motion.div className="cv-velvet-card" aria-hidden="true" animate={{ scale: opening ? 1.025 : .93, filter: opening ? "brightness(1)" : "brightness(.64)" }} transition={{ duration: 1.22, ease }}><StationeryCard data={data} spec={spec} palette={paletteOf(spec, data.palette)} fill /></motion.div>
+    <div className="cv-velvet-top" aria-hidden="true" />
+    <div className="cv-velvet-pair" aria-hidden="true">
+      <motion.div className="cv-velvet-drape cv-velvet-left" animate={opening ? { x: "-99%", scaleX: .72 } : { x: 0, scaleX: 1 }} transition={{ duration: 1.34, delay: .12, ease: [.38,.06,.14,1] }} />
+      <motion.div className="cv-velvet-drape cv-velvet-right" animate={opening ? { x: "99%", scaleX: .72 } : { x: 0, scaleX: 1 }} transition={{ duration: 1.34, delay: .18, ease: [.38,.06,.14,1] }} />
+    </div>
+    <motion.div className="cv-velvet-emblem" aria-hidden="true" animate={opening ? { opacity: 0, scale: 1.12 } : { opacity: 1, scale: 1 }} transition={{ duration: .38 }}><span><Initials names={data.names} /></span></motion.div>
+    <motion.span className="cv-velvet-instruction" animate={{ opacity: opening ? 0 : 1 }}>PULL BACK THE CURTAIN</motion.span>
+    <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Draw the curtains and reveal the invitation" />
+  </motion.section>;
+}
+
 /** Material-led, phased openings. The card is real HTML; only its physical sleeve is animated. */
 export function KeepsakeCover({ data, spec, onOpen, still }: P) {
   const reduced = useReducedMotion();
   const [opening, setOpening] = useState(false);
-  const names = splitNames(data.names);
   const lift = spec.id === "embossed";
   const dark = spec.id === "gilt";
   useEffect(() => {
@@ -38,7 +89,7 @@ export function KeepsakeCover({ data, spec, onOpen, still }: P) {
         </>}
       </div>
       <motion.div className="cv-pearl-seal" aria-hidden="true" animate={opening ? { opacity: 0, scale: .84, y: lift ? -70 : -15, rotate: dark ? -12 : 12 } : { opacity: 1, scale: 1, y: 0, rotate: 0 }} transition={{ duration: .44, ease: [.2,.7,.2,1] }}>
-        <span className="cv-pearl-seal-inner">{names.a.slice(0, 1)}<i>&amp;</i>{names.b.slice(0, 1)}</span>
+        <span className="cv-pearl-seal-inner"><Initials names={data.names} /></span>
       </motion.div>
       <motion.span className="cv-pearl-caption" animate={opening ? { opacity: 0, y: 14 } : { opacity: 1, y: 0 }} transition={{ duration: .28 }}>{lift ? "LIFT TO REVEAL" : "TAP THE SEAL TO OPEN"}</motion.span>
       <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label={`Open ${spec.name} invitation`} />

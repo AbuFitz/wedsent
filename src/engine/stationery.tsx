@@ -56,6 +56,7 @@ export function StationeryCard({ data, spec, palette, greeting, event, fill }: {
       {spec.id === "postmark" && <><div className="sc-postmark-photo" aria-hidden="true">{photo ? <PhotoFill photo={photo}/> : <span className="sc-postmark-placeholder"/>}</div><span className="sc-postmark-stamp" aria-hidden="true">SAVE<br/>THE DATE</span><span className="sc-postmark-rule" aria-hidden="true"/></>}
       {spec.id === "pearl" && <><span className="sc-pearl-sheen" aria-hidden="true"/><span className="sc-pearl-rule" aria-hidden="true" /></>}
       {(spec.id === "embossed" || spec.id === "gilt") && <span className="sc-material-light" aria-hidden="true" />}
+      {(spec.id === "rosewood" || spec.id === "velvet") && <span className="sc-material-light" aria-hidden="true" />}
       {spec.id === "botanica" && (<><Cut id={A ?? "peony-pink"} className="sc-a1" /><Cut id={B ?? "rose-wild"} className="sc-a2" /><Cut id="olive-b" className="sc-a3" /></>)}
       {spec.id === "gallery" && (
         <div className="sc-photo" aria-hidden={!photo}>

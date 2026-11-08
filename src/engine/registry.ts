@@ -68,11 +68,11 @@ export type DesignSpec = {
   site: { bg: string; ink: string };  // marketing-page tone for this design
 };
 
-export const DESIGN_IDS = ["pearl", "embossed", "gilt", "atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
+export const DESIGN_IDS = ["pearl", "embossed", "gilt", "rosewood", "velvet", "atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
 export type DesignId = (typeof DESIGN_IDS)[number];
 /** The original set remains renderable for existing invitations, but is not offered to new couples. */
 /** Old schemes remain readable for previously saved invitations, but the public gallery is rebuilt. */
-export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "embossed", "gilt"];
+export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "embossed", "rosewood", "velvet", "gilt"];
 
 const pal = (id: string, name: string, accent: string, rest: Partial<Palette> = {}): Palette => ({ id, name, accent, ...rest });
 
@@ -117,6 +117,28 @@ export const DESIGNS: DesignSpec[] = [
       pal("aubergine", "Aubergine foil", "#D8BC86", { bg: "#2D2028", soft: "#261B22", fg: "#F3E1C4", line: "#AF8D67" }),
       pal("forest", "Forest foil", "#D8C28B", { bg: "#1A2722", soft: "#15221C", fg: "#F0E3C6", line: "#A99D6F" }),
       pal("navy", "Navy foil", "#D7C799", { bg: "#19202C", soft: "#161B25", fg: "#E8E1CD", line: "#A9A080" }),
+    ],
+  },
+  {
+    id: "rosewood", name: "Rosewood Letter", family: "Sealed envelope", blurb: "A rose-coloured cotton-paper envelope, sculpted wax seal and letterpress invitation with bronze botanical detailing.",
+    styles: ["Luxury", "Romantic", "Floral & Botanical"], colours: ["Pastel", "Earthy", "Neutral Tones"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Civil", "Garden"],
+    opening: { kind: "doors", label: "Break the wax seal", hint: "The embossed seal lifts and a folded envelope reveals the invitation" }, layout: "stationery", fonts: "garamond", art: "none", intro: "families", sample: { names: "Layla & Omar", occasion: "Wedding" },
+    site: { bg: "#DAC8BE", ink: "#5F3637" }, palettes: [
+      pal("rose", "Rosewood", "#793C43", { bg: "#E8D9D2", soft: "#F4E8DC", fg: "#4E3335", line: "#AD8275" }),
+      pal("wine", "Burgundy", "#6A2835", { bg: "#E6D7D3", soft: "#F6EADF", fg: "#503035", line: "#B58D7E" }),
+      pal("moss", "Moss envelope", "#51614D", { bg: "#DCE0D5", soft: "#F3EDE1", fg: "#384138", line: "#B4A28B" }),
+      pal("clay", "Warm clay", "#81533D", { bg: "#E9D9CE", soft: "#FAF0E4", fg: "#513D33", line: "#BE9984" }),
+    ],
+  },
+  {
+    id: "velvet", name: "Velvet Theatre", family: "Ceremonial curtain", blurb: "Realistic velvet folds draw apart to reveal an ivory invitation stamped with raised gold ornament.",
+    styles: ["Luxury", "Elegant & Formal", "Art Deco"], colours: ["Jewel", "Ivory & Gold", "Metallic"], shape: "Portrait", cultures: ["Any wedding", "Walima", "Reception", "Evening"],
+    opening: { kind: "curtain", label: "Draw the velvet curtains", hint: "Two heavy fabric panels part under soft theatre lighting" }, layout: "stationery", fonts: "italiana", art: "none", intro: "pleasure", sample: { names: "Selina & Idris", occasion: "Wedding" },
+    site: { bg: "#2F202E", ink: "#E8D2AA" }, palettes: [
+      pal("plum", "Aubergine velvet", "#6B4058", { bg: "#E7DCD2", soft: "#F7EEDD", fg: "#382E2D", line: "#A68C65" }),
+      pal("wine", "Wine velvet", "#713744", { bg: "#E6D8D4", soft: "#F6EEE4", fg: "#3D3030", line: "#AE8E68" }),
+      pal("forest", "Forest velvet", "#3D624E", { bg: "#DBE0D6", soft: "#F4EDE0", fg: "#393C32", line: "#9E946D" }),
+      pal("navy", "Midnight velvet", "#365672", { bg: "#D9DFE4", soft: "#F6EDE1", fg: "#323640", line: "#B59A75" }),
     ],
   },
   {
