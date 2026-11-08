@@ -239,16 +239,17 @@
 .sc--rosewood .sc-date,.sc--velvet .sc-date{letter-spacing:.22em;font-size:2.7cqw}
 .sc--rosewood .sc-venue,.sc--velvet .sc-venue{font-family:var(--f-head);font-size:3.6cqw;font-style:normal;letter-spacing:.06em}
 
-.cv-rosewood{background:linear-gradient(145deg,#b99d96,#e6d3c9 50%,#b18d87);perspective:1300px;isolation:isolate}
+.cv-rosewood{background:linear-gradient(145deg,color-mix(in srgb,var(--a) 36%,#eee0d2),#e6d3c9 50%,color-mix(in srgb,var(--a) 40%,#d7b9a6));perspective:1300px;isolation:isolate}
 .cv-rosewood-letter{position:absolute;inset:2.5cqw;z-index:1;box-shadow:0 4cqw 8cqw #38252263;pointer-events:none}
 .cv-rosewood-letter>.sc{inset:0}
 .cv-rosewood-envelope{position:absolute;inset:0;z-index:3;perspective:1200px;transform-style:preserve-3d;pointer-events:none}
-.cv-rosewood-back{position:absolute;inset:0;background:linear-gradient(145deg,#b98882,#e2bbb2 48%,#ab7976);box-shadow:inset 0 0 8cqw #4b252537}
-.cv-rosewood-pocket{position:absolute;inset:28% 0 0;background:linear-gradient(150deg,#eccbc0 6%,#c69691 58%,#ad7777);clip-path:polygon(0 0,50% 58%,100% 0,100% 100%,0 100%);filter:drop-shadow(0 -1cqw 2cqw #70403a53)}
+.cv-rosewood-back{position:absolute;inset:0;background:linear-gradient(145deg,color-mix(in srgb,var(--a) 58%,#e8c5ad),color-mix(in srgb,var(--a) 25%,#f8e6db) 48%,color-mix(in srgb,var(--a) 66%,#9b706a));box-shadow:inset 0 0 8cqw #4b252537}
+.cv-rosewood-pocket{position:absolute;inset:28% 0 0;background:linear-gradient(150deg,color-mix(in srgb,var(--a) 22%,#fff0e3) 6%,color-mix(in srgb,var(--a) 54%,#e4c3ae) 58%,color-mix(in srgb,var(--a) 75%,#997063));clip-path:polygon(0 0,50% 58%,100% 0,100% 100%,0 100%);filter:drop-shadow(0 -1cqw 2cqw #70403a53)}
 .cv-rosewood-pocket::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(55deg,#fff3e60e 0 1px,transparent 1px 5px);opacity:.4}
-.cv-rosewood-flap{position:absolute;left:0;right:0;top:0;height:66%;transform-origin:top center;backface-visibility:hidden;clip-path:polygon(0 0,100% 0,50% 98%);background:linear-gradient(165deg,#e6c3b9,#c2928d 55%,#a66d69);box-shadow:0 2cqw 5cqw #72433c6b;filter:drop-shadow(0 1cqw 1cqw #71454152)}
+.cv-rosewood-flap{position:absolute;left:0;right:0;top:0;height:66%;transform-origin:top center;backface-visibility:hidden;clip-path:polygon(0 0,100% 0,50% 98%);background:linear-gradient(165deg,color-mix(in srgb,var(--a) 25%,#f9e2d6),color-mix(in srgb,var(--a) 48%,#dab6a5) 55%,color-mix(in srgb,var(--a) 70%,#a7736b));box-shadow:0 2cqw 5cqw #72433c6b;filter:drop-shadow(0 1cqw 1cqw #71454152)}
 .cv-rosewood-stamp{position:absolute;z-index:4;left:50%;top:59%;translate:-50% -50%;width:33cqw;height:33cqw;filter:drop-shadow(0 1.2cqw 1.4cqw #421b1b83);pointer-events:none}
-.cv-wax{display:block;position:relative;width:100%;height:100%;background:url('/art/burgundy-wax-seal.webp') center/contain no-repeat;filter:drop-shadow(0 .3cqw .6cqw #300c1757)}
+.cv-wax{display:block;position:relative;width:100%;height:100%;background:url('/art/burgundy-wax-seal.webp') center/contain no-repeat;filter:drop-shadow(0 .3cqw .6cqw #300c1757);isolation:isolate}
+.cv-wax::before{content:"";position:absolute;inset:0;background:var(--a);opacity:.82;mix-blend-mode:color;mask:url('/art/burgundy-wax-seal.webp') center/contain no-repeat;pointer-events:none}
 .cv-wax-initials{position:absolute;left:50%;top:50%;translate:-50% -51%;font:400 10cqw "Pinyon Script",cursive;white-space:nowrap;color:#f6d9ba;text-shadow:0 -.3cqw .45cqw #310710,0 .2cqw .3cqw #d25a67;letter-spacing:-.03em}
 .cv-wax-initials i{font:italic .42em Georgia,serif;padding:0 .07em}
 .cv-rosewood-instruction{position:absolute;left:50%;bottom:7%;translate:-50% 0;z-index:4;text-align:center;white-space:nowrap;color:#fff0e6;text-shadow:0 1px 6px #632f2c;font:3cqw var(--f-head);font-style:italic;pointer-events:none}
@@ -256,17 +257,19 @@
 .cv-rosewood .cv-hit:focus-visible{outline:.8cqw solid #f7e9d2;outline-offset:-2cqw}
 
 /* Velvet Theatre — cloth panels slide with independent weight and directional shadows. */
-.cv-velvet{background:#251525;isolation:isolate}
+.cv-velvet{background:color-mix(in srgb,var(--a) 40%,#100e15);isolation:isolate}
 .cv-velvet-card{position:absolute;inset:5cqw 7cqw;z-index:1;box-shadow:0 2cqw 8cqw #09020ab8;pointer-events:none}
 .cv-velvet-card>.sc{inset:0;border-radius:.8cqw}
 .cv-velvet-pair{position:absolute;inset:0;display:flex;z-index:3;overflow:hidden;pointer-events:none}
-.cv-velvet-drape{width:53%;height:100%;flex:none;background-image:linear-gradient(90deg,#09000a82,transparent 22%,#ffece50e 46%,#130211a6 90%),url('/art/burgundy-velvet.webp');background-size:100% 100%,190% 100%;box-shadow:inset 0 0 3cqw #17021aa8,3cqw 0 6cqw #0a000cc9;will-change:transform}
+.cv-velvet-drape{position:relative;width:53%;height:100%;flex:none;background-image:linear-gradient(90deg,#09000a82,transparent 22%,#ffece50e 46%,#130211a6 90%),url('/art/burgundy-velvet.webp');background-size:100% 100%,190% 100%;box-shadow:inset 0 0 3cqw #17021aa8,3cqw 0 6cqw #0a000cc9;will-change:transform;isolation:isolate}
+.cv-velvet-drape::before{content:"";position:absolute;inset:0;background:var(--a);mix-blend-mode:color;opacity:.9;pointer-events:none}
+.cv-velvet-drape::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,#0005 0%,transparent 8%,#fff2 15%,transparent 22%,#0004 31%);background-size:65% 100%;mix-blend-mode:soft-light;pointer-events:none}
 .cv-velvet-left{background-position:center,left center;transform-origin:left center}
 .cv-velvet-right{margin-left:-6%;background-position:center,right center;transform-origin:right center;box-shadow:inset 0 0 3cqw #17021aa8,-3cqw 0 6cqw #0a000cc9}
-.cv-velvet-top{position:absolute;z-index:4;left:0;right:0;top:0;height:6cqw;background:linear-gradient(#392534,#1c091e);box-shadow:0 .4cqw 2cqw #020003;pointer-events:none}
-.cv-velvet-emblem{position:absolute;z-index:4;left:50%;top:49%;translate:-50% -50%;width:33cqw;height:33cqw;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 35% 27%,#efd6ae,#c19858 39%,#6a472a 75%,#c2a06d);box-shadow:0 1cqw 3cqw #13030ebd,inset 0 .5cqw 1cqw #f9d6a68c;border:.7cqw double #e2c189;pointer-events:none}
-.cv-velvet-emblem::before{content:"";position:absolute;inset:2cqw;border:.3cqw solid #8b683d;border-radius:50%;box-shadow:inset 0 .4cqw 1cqw #f7eac255}
-.cv-velvet-emblem span{position:relative;font:12cqw "Pinyon Script",cursive;color:#35251f;text-shadow:0 .2cqw .2cqw #fff2c1;white-space:nowrap}.cv-velvet-emblem i{font:italic .42em Georgia,serif;padding:0 .05em}
+.cv-velvet-top{position:absolute;z-index:4;left:0;right:0;top:0;height:6cqw;background:linear-gradient(color-mix(in srgb,var(--a) 48%,#322532),color-mix(in srgb,var(--a) 35%,#100815));box-shadow:0 .4cqw 2cqw #020003;pointer-events:none}
+.cv-velvet-emblem{position:absolute;z-index:4;left:50%;top:49%;translate:-50% -50%;width:37cqw;height:37cqw;display:grid;place-items:center;background:url('/art/pearl-medallion.webp') center/contain no-repeat;filter:drop-shadow(0 1cqw 2cqw #13030ebd);pointer-events:none;isolation:isolate}
+.cv-velvet-emblem::before{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--a) 65%,#dcb974);mix-blend-mode:color;opacity:.34;mask:url('/art/pearl-medallion.webp') center/contain no-repeat;pointer-events:none}
+.cv-velvet-emblem span{position:relative;font:10cqw "Pinyon Script",cursive;color:#483529;text-shadow:0 .2cqw .2cqw #fff2c1;white-space:nowrap}.cv-velvet-emblem i{font:italic .42em Georgia,serif;padding:0 .05em}
 .cv-velvet-instruction{position:absolute;bottom:8%;left:50%;translate:-50% 0;z-index:4;white-space:nowrap;color:#fff5df;font:2.8cqw var(--f-caps);letter-spacing:.24em;text-shadow:0 .3cqw 1cqw #0d000c;pointer-events:none}
 .cv-velvet .cv-hit:focus-visible{outline:.8cqw solid #efd7af;outline-offset:-2cqw}
 @media(prefers-reduced-motion:reduce){.cv-rosewood-letter,.cv-rosewood-envelope,.cv-rosewood-flap,.cv-rosewood-stamp,.cv-velvet-card,.cv-velvet-drape{will-change:auto;transition:none!important}}
