@@ -164,7 +164,7 @@ export function Start() {
         <p className="s8-help">Guests tap or swipe to reveal your invitation. You can change this again in Studio.</p>
         <div className="s8-openings" role="group" aria-label="Invitation opening">
           <button type="button" aria-pressed={!d.opening} onClick={() => { patch({ opening: "" }); setOpen(false); }}><strong>Designer’s choice</strong><span>{OPENINGS[spec.opening.kind].hint}</span></button>
-          {(["lift", "bloom", "veil", "focus", "doors", "curtain"] as OpeningKind[]).map((kind) => (
+          {(["lift", "bloom", "veil", "focus"] as OpeningKind[]).map((kind) => (
             <button key={kind} type="button" aria-pressed={d.opening === kind} onClick={() => { patch({ opening: kind }); setOpen(false); }}>
               <strong>{kind === "lift" ? "Paper lift" : kind === "bloom" ? "Touch reveal" : kind === "veil" ? "Soft veil" : kind === "focus" ? "Focus reveal" : kind === "doors" ? "Opening doors" : "Drawing curtains"}</strong>
               <span>{OPENINGS[kind].hint}</span>

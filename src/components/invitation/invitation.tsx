@@ -9,7 +9,7 @@ import {
 } from "@/lib/designs";
 import "./invitation.css";
 import "@/engine/engine.css";
-import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover, KeepsakeCover, RosewoodCover, VelvetStageCover, EngravedLetterCover } from "@/engine/covers";
+import { LiftCover, BloomCover, VeilCover, FocusCover, KeepsakeCover, RosewoodCover, VelvetStageCover, EngravedLetterCover } from "@/engine/covers";
 import { StationeryCard } from "@/engine/stationery";
 import { fontPackById, paletteOf, specById, OPENINGS, type DesignSpec, type Palette } from "@/engine/registry";
 import { CountdownWidget, label } from "./widgets";
@@ -43,7 +43,8 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
   };
   const accent = accentFor(data);
   const original = specById(data.design);
-  const spec = data.opening && OPENINGS[data.opening] ? { ...original, opening: { kind: data.opening, ...OPENINGS[data.opening] } } : original;
+  // Historical generic door/curtain settings now resolve to the design's own art-directed cover.
+  const spec = data.opening && data.opening !== "doors" && data.opening !== "curtain" && OPENINGS[data.opening] ? { ...original, opening: { kind: data.opening, ...OPENINGS[data.opening] } } : original;
   const palette = paletteOf(spec, data.palette);
   useEffect(() => {
     if (!syncChrome) return;
@@ -93,8 +94,8 @@ function Cover({ spec, ...p }: CoverProps & { spec: DesignSpec }) {
     case "lift": return <LiftCover spec={spec} {...p} />;
     case "bloom": return <BloomCover spec={spec} {...p} />;
     case "focus": return <FocusCover spec={spec} {...p} />;
-    case "doors": return <DoorsCover spec={spec} {...p} />;
-    case "curtain": return <CurtainCover spec={spec} {...p} />;
+    case "doors": return <RosewoodCover spec={spec} {...p} />;
+    case "curtain": return <VelvetStageCover spec={spec} {...p} />;
     default: return <VeilCover spec={spec} {...p} />;
   }
 }
@@ -168,6 +169,8 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
         )}
         </>)}
 
+        <ThemeInterlude design={design} position="opening" />
+
         {evs ? evs.map((ev, i) => {
           const p = dateParts(ev.startsOn ?? "");
           const t = friendlyTime(ev.startsAt ?? "");
@@ -212,6 +215,8 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
 
         <CountdownWidget date={evs?.[0]?.startsOn ?? data.date} time={evs?.[0]?.startsAt ?? data.time} config={data.countdown ?? { enabled: false, style: "type", accent: "", label: "" }} lang={data.languages?.countdown ?? "en"} />
 
+        <ThemeInterlude design={design} position="details" />
+
         {data.dress.trim() && (
           <motion.section data-studio-edit="details" className="in-card in-dress" {...reveal(4)}>
             <h3 className="in-label">{label(data.languages?.details ?? "en", "dress")}</h3>
@@ -220,6 +225,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
         )}
 
         <motion.div data-studio-edit="extras" className="in-actions" {...reveal(5)}>
+          <p className="in-response-kicker">THE PLEASURE OF YOUR COMPANY</p>
           {rsvpHref ? (
             <Link className="in-rsvp" href={rsvpHref}>{label(data.languages?.reply ?? "en", "reply")}</Link>
           ) : (
@@ -237,6 +243,15 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
       </div>
     </div>
   );
+}
+
+/** A second visual vocabulary for the scroll, separate from the illustration on the opening card. */
+function ThemeInterlude({ design, position }: { design: string; position: "opening" | "details" }) {
+  return <div className={`in-interlude in-interlude--${position}`} aria-hidden="true">
+    <span className="in-interlude-rule" />
+    <span className="in-interlude-emblem">{design === "velvet" ? "✦" : design === "heritage" ? "❧" : design === "nikah-etched" ? "۞" : design === "rosewood" ? "✤" : design === "gilt" ? "◇" : "✿"}</span>
+    <span className="in-interlude-rule" />
+  </div>;
 }
 
 /** An opt-in map reveal; only load Google Maps after a guest chooses to view it. */

@@ -20,6 +20,23 @@
 .inv[data-layout=stationery] .in-section-overline{font:500 2.7cqw var(--f-caps);letter-spacing:.28em;color:var(--a);padding:0 0 2cqw}
 
 /* Every visual family continues beyond its cover: sections, rhythm and actions are art-directed. */
+.in-interlude{display:flex;align-items:center;justify-content:center;gap:4cqw;min-height:17cqw;margin:2cqw 0;color:var(--a);opacity:.8;flex-shrink:0}
+.in-interlude-rule{width:24cqw;max-width:28%;height:.2cqw;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+.in-interlude-emblem{font:normal 8cqw var(--f-head);line-height:1;text-shadow:0 .3cqw .3cqw #ffffff60}
+.in-interlude--details{transform:scale(.7);opacity:.56;margin:-3cqw 0}
+.in-response-kicker{font:500 2.8cqw var(--f-caps);letter-spacing:.18em;text-align:center;color:var(--a);max-width:80cqw}
+.inv--velvet .in-interlude{color:#d6b684;background:linear-gradient(90deg,transparent,#bea17215,transparent)}
+.inv--velvet .in-interlude-rule{background:linear-gradient(90deg,transparent,#d9b88b,transparent)}
+.inv--velvet .in-response-kicker{color:#d9b88b}
+.inv--rosewood .in-interlude-emblem{filter:drop-shadow(0 .35cqw .25cqw #85634355)}
+.inv--rosewood .in-actions{padding:9cqw 5cqw 11cqw;background:var(--soft);border:.2cqw solid var(--line);box-shadow:inset 0 0 0 1.3cqw var(--soft),inset 0 0 0 1.5cqw var(--line),0 2cqw 5cqw #39231719}
+.inv--heritage .in-interlude,.inv--nikah-etched .in-interlude{border-block:.15cqw solid color-mix(in srgb,var(--line) 54%,transparent);margin:3cqw 4cqw}
+.inv--heritage .in-interlude-emblem,.inv--nikah-etched .in-interlude-emblem{font-size:9cqw}
+.inv--heritage .in-actions,.inv--nikah-etched .in-actions{background:var(--soft);border:.25cqw solid var(--line);margin:0 3cqw;padding:9cqw 5cqw}
+.inv--pearl .in-interlude-emblem,.inv--embossed .in-interlude-emblem{color:var(--line);text-shadow:0 -.25cqw .35cqw #fff,0 .3cqw .4cqw #7e62506b}
+.inv--gilt .in-interlude{color:#deb77e}.inv--gilt .in-interlude-rule{background:linear-gradient(90deg,transparent,#d6b77c,transparent)}
+.inv--gilt .in-actions{background:#242019;border:.25cqw solid #806947;margin:2cqw;padding:8cqw 5cqw}
+.inv--gilt .in-response-kicker{color:#d6b77c}
 .inv--velvet .inside{background:linear-gradient(155deg,color-mix(in srgb,var(--a) 17%,#1a121a),#161318 64%);color:#f3e4cf}
 .inv--velvet .inside-scroll{gap:8cqw}
 .inv--velvet .in-card{background:#f5eddf;color:#3d3435;border:1.2cqw double #ba9a6b;border-radius:0;padding:9cqw 5cqw;box-shadow:0 2cqw 6cqw #0008}
