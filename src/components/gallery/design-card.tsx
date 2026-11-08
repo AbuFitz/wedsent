@@ -7,8 +7,8 @@ import { paletteOf, type DesignSpec, type OpeningKind } from "@/engine/registry"
 import { sampleData, sampleEvents } from "./samples";
 import "./gallery.css";
 
-export const OPENING_ICON: Record<OpeningKind, typeof Sparkle> = { lift: ArrowLineUp, bloom: Sparkle, veil: Eye };
-export const OPENING_NAME: Record<OpeningKind, string> = { lift: "Lifts away", bloom: "Opens outward", veil: "Soft reveal" };
+export const OPENING_ICON: Record<OpeningKind, typeof Sparkle> = { lift: ArrowLineUp, bloom: Sparkle, veil: Eye, focus: Eye };
+export const OPENING_NAME: Record<OpeningKind, string> = { lift: "Lifts away", bloom: "Opens outward", veil: "Soft reveal", focus: "Editorial focus" };
 
 /** One design as a product shot: the cover and the inside, live, on the design's own backdrop. */
 export function DesignCard({ spec, href, names }: { spec: DesignSpec; href?: string; names?: string }) {

@@ -9,9 +9,9 @@ import {
 } from "@/lib/designs";
 import "./invitation.css";
 import "@/engine/engine.css";
-import { LiftCover, BloomCover, VeilCover } from "@/engine/covers";
+import { LiftCover, BloomCover, VeilCover, FocusCover } from "@/engine/covers";
 import { StationeryCard } from "@/engine/stationery";
-import { fontPackById, paletteOf, specById, type DesignSpec, type Palette } from "@/engine/registry";
+import { fontPackById, paletteOf, specById, OPENINGS, type DesignSpec, type Palette } from "@/engine/registry";
 
 export type InvitationProps = {
   data: InviteData;
@@ -36,7 +36,8 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
     onOpenChange?.(v);
   };
   const accent = accentFor(data);
-  const spec = specById(data.design);
+  const original = specById(data.design);
+  const spec = data.opening && OPENINGS[data.opening] ? { ...original, opening: { kind: data.opening, ...OPENINGS[data.opening] } } : original;
   const palette = paletteOf(spec, data.palette);
   const pack = fontPackById(data.type) ?? fontPackById(spec.fonts);
   const style = {
@@ -64,6 +65,7 @@ function Cover({ spec, ...p }: CoverProps & { spec: DesignSpec }) {
   switch (spec.opening.kind) {
     case "lift": return <LiftCover spec={spec} {...p} />;
     case "bloom": return <BloomCover spec={spec} {...p} />;
+    case "focus": return <FocusCover spec={spec} {...p} />;
     default: return <VeilCover spec={spec} {...p} />;
   }
 }

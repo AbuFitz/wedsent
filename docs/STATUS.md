@@ -2,6 +2,8 @@
 
 **Build-mode access update (8 Nov):** Signed-out onboarding now goes directly to Studio, and Studio supports local-only creation, editing and deletion of events. No sign-in is needed to explore invitation designs and the editor. This does **not** bypass owner authentication for server-side guest lists, publishing or private links; those actions remain account-protected. Local drafts/events are tied to the browser and can be lost if its storage is cleared.
 
+**Intro variety update (8 Nov):** The design engine has four opening treatments: lift, touch bloom, veil, and editorial focus. Studio's Style panel allows a non-destructive opening override, with design-specific defaults. It is saved with the wedding draft, validated by the server, and inherits keyboard/reduced-motion handling. This is a foundation for more deliberately art-directed motion, not a complete template library.
+
 Source of truth for what is real. States: **Verified** = covered by an automated test or a browser run this session. **Partial** = built, with named gaps. **UI only** = looks real, is not. **Planned**. **Blocked** = needs something outside the code.
 Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs` (16 browser checks, cold server), screenshots reviewed at 390 and 1440 widths.
 

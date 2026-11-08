@@ -3,7 +3,7 @@
  * palettes + type pairing. Content (names, events...) is separate and survives switching designs.
  * Pure TypeScript, safe to import on the server (validation) and the client (rendering).
  */
-export type OpeningKind = "lift" | "bloom" | "veil";
+export type OpeningKind = "lift" | "bloom" | "veil" | "focus";
 export type ArtKind = "none" | "plates" | "photo" | "ornament";
 export type Shape = "Portrait" | "Arch" | "Frame" | "Full bleed" | "Minimal";
 
@@ -77,6 +77,7 @@ export const OPENINGS: Record<OpeningKind, { label: string; hint: string }> = {
   lift: { label: "Swipe to open", hint: "The cover lifts away like a sheet of paper" },
   bloom: { label: "Tap to open", hint: "The invitation opens outward from where you touch" },
   veil: { label: "Tap to open", hint: "The cover softly clears to reveal the invitation" },
+  focus: { label: "Reveal the moment", hint: "Typography moves into focus as the invitation is revealed" },
 };
 
 export const DESIGNS: DesignSpec[] = [
@@ -95,7 +96,7 @@ export const DESIGNS: DesignSpec[] = [
   {
     id: "linen", name: "Linen", family: "Minimal", blurb: "Almost nothing but type: thin rules, generous space and a single quiet accent.",
     styles: ["Simple & Minimalist", "Modern", "Calligraphy"], colours: ["Neutral Tones", "Black & White"], shape: "Minimal", cultures: ["Any wedding", "Civil", "Church"],
-    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "didone", art: "none", intro: "none", sample: { names: "Clara & Theo", occasion: "Wedding" },
+    opening: { kind: "focus", ...OPENINGS.focus }, layout: "stationery", fonts: "didone", art: "none", intro: "none", sample: { names: "Clara & Theo", occasion: "Wedding" },
     site: { bg: "#F1EFEA", ink: "#1B1B19" },
     palettes: [
       pal("bone", "Bone", "#1B1B19", { bg: "#F6F4EF", fg: "#1B1B19", soft: "#FBFAF7", line: "#D8D4CA" }),

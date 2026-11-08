@@ -7,7 +7,7 @@ import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, 
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
-import { FONT_PACKS, INTRO_PRESETS, paletteOf, specById } from "@/engine/registry";
+import { FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type OpeningKind } from "@/engine/registry";
 import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
 import "./studio.css";
@@ -237,6 +237,16 @@ function StyleTab({ draft, patch }: TabProps) {
         <label className="st-swatch st-swatch--custom" aria-label="Custom accent colour" title="Custom accent colour">
           <input type="color" value={custom} onChange={(e) => patch({ accent: e.target.value })} />
         </label>
+      </div>
+      <h2 className="st-h">Opening motion</h2>
+      <p className="st-help">Choose how your invitation opens. Replay it on the phone to feel the difference.</p>
+      <div className="st-chips" role="group" aria-label="Opening animation">
+        <button type="button" className="st-chip" aria-pressed={!draft.opening} onClick={() => patch({ opening: "" })}>Designer’s choice</button>
+        {(Object.keys(OPENINGS) as OpeningKind[]).map((kind) => (
+          <button key={kind} type="button" className="st-chip" aria-pressed={draft.opening === kind} title={OPENINGS[kind].hint} onClick={() => patch({ opening: kind })}>
+            {{ lift: "Lift", bloom: "Bloom", veil: "Veil", focus: "Focus" }[kind]}
+          </button>
+        ))}
       </div>
       {stationery && (
         <>

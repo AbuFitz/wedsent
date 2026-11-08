@@ -14,7 +14,7 @@ describe("design engine registry", () => {
     for (const d of DESIGNS) {
       expect(d.palettes.length, d.id).toBeGreaterThanOrEqual(4);
       expect(new Set(d.palettes.map((p) => p.id)).size, d.id).toBe(d.palettes.length);
-      expect(["lift", "bloom", "veil"]).toContain(d.opening.kind);
+      expect(["lift", "bloom", "veil", "focus"]).toContain(d.opening.kind);
     }
   });
   it("every referenced artwork file, font pack and intro preset exists", () => {
@@ -44,6 +44,8 @@ describe("design engine registry", () => {
     const b = { ...a, design: "zellige" as const, palette: "", type: "", intro: "" };
     expect(b.names).toBe(a.names);
     expect(specById("zellige").intro).toBe("bismillah");
+    expect(ContentSchema.safeParse({ ...defaults, opening: "focus" }).success).toBe(true);
+    expect(ContentSchema.safeParse({ ...defaults, opening: "not-a-motion" }).success).toBe(false);
   });
   it("filter facets cover every design", () => {
     for (const d of DESIGNS) { expect(FACETS.shape).toContain(d.shape); expect(FACETS.opening).toContain(d.opening.kind); }

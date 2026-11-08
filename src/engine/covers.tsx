@@ -28,6 +28,24 @@ export function VeilCover({ data, spec, onOpen }: P) {
   );
 }
 
+/** Editorial focus: a restrained typographic reveal with a distinct depth and timing. */
+export function FocusCover({ data, spec, onOpen, still }: P) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.section
+      className="cover cv"
+      aria-label="Invitation cover"
+      exit={reduced ? { opacity: 0, transition: { duration: 0.12 } } : {
+        opacity: 0, scale: 0.96, y: -20, filter: "blur(5px)",
+        transition: { duration: 0.7, ease },
+      }}
+    >
+      <Face data={data} spec={spec} hint={spec.opening.label} />
+      <button type="button" className="cv-hit" onClick={onOpen} disabled={still} aria-label="Open invitation" />
+    </motion.section>
+  );
+}
+
 /** The invitation opens outward from where you touch. */
 export function BloomCover({ data, spec, onOpen, still }: P) {
   const r = useMotionValue(0);

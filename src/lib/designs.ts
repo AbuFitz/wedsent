@@ -1,4 +1,4 @@
-import { DESIGNS, DESIGN_IDS, paletteOf, specById, type DesignId } from "@/engine/registry";
+import { DESIGNS, DESIGN_IDS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
 export type { DesignId };
 
 /** A cover photograph. `src` is /media/<id> (uploaded), /art/<file> (library artwork) or a data: URL (signed-out local draft). fx/fy are the focal point, 0-100. */
@@ -21,6 +21,7 @@ export type InviteData = {
   palette: string; // palette id within the design; "" = the design's first
   type: string; // font pairing id; "" = the design's own
   intro: string; // opening line text; "" = the design's default, "none" = no line
+  opening: OpeningKind | ""; // "" = the design's art-directed opening; otherwise a selected motion
 };
 
 export const defaults: InviteData = {
@@ -40,6 +41,7 @@ export const defaults: InviteData = {
   palette: "",
   type: "",
   intro: "",
+  opening: "",
 };
 
 export { DESIGN_IDS };

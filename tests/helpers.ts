@@ -4,7 +4,7 @@ import { createEvent, createHousehold, listHouseholds } from "@/server/guests";
 import { guestView } from "@/server/rsvp";
 
 let n = 0;
-export const content = (o: Partial<Content> = {}): Content => ({ names: "Amina & Yusuf", occasion: "Wedding", date: "2027-06-12", time: "16:00", venue: "The Glasshouse", city: "London", message: "Join us", dress: "", rsvpBy: "", accent: "", address: "", photo: null, design: "botanica", palette: "", type: "", intro: "", ...o });
+export const content = (o: Partial<Content> = {}): Content => ({ names: "Amina & Yusuf", occasion: "Wedding", date: "2027-06-12", time: "16:00", venue: "The Glasshouse", city: "London", message: "Join us", dress: "", rsvpBy: "", accent: "", address: "", photo: null, design: "botanica", palette: "", type: "", intro: "", opening: "", ...o });
 
 export async function newOwner() {
   const { user } = await signUp(`owner${++n}-${Date.now()}@example.com`, "correct horse battery", `ip${n}`);
