@@ -155,3 +155,63 @@
 .st-widget-colour input{height:40px;width:50px;border:0;padding:0;background:none;cursor:pointer}
 .st-widget-colour button{border:1px solid var(--line);border-radius:99px;background:#fff;padding:9px 12px;font-size:12px}
 .st-share-toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:40;background:#191919;color:#fff;padding:12px 18px;border-radius:12px;max-width:min(460px,calc(100vw - 24px));box-shadow:0 12px 35px rgba(0,0,0,.22);font-size:13px;text-align:center}
+
+/* Studio 2026: a task workspace with one focused editor and one real preview. */
+.st{grid-template-columns:minmax(345px,420px) minmax(0,1fr);grid-template-rows:62px minmax(0,1fr)}
+.st-panel{border-right:1px solid #e4e4e2}
+.st-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:2px;padding:14px 14px 12px;scrollbar-width:thin;scroll-snap-type:x proximity;flex-shrink:0}
+.st-tab{min-width:max-content;flex:0 0 auto;flex-direction:row;gap:7px;border:1px solid transparent;border-radius:9px;padding:10px 12px;margin:0;font-size:12.5px;scroll-snap-align:center}
+.st-tab[aria-selected=true]{background:#111;color:#fff;border-color:#111}
+.st-tab[aria-selected=true] svg{color:#fff}
+.st-tab:hover:not([aria-selected=true]){background:#f4f4f2}
+.st-body{padding:23px 24px 60px;scrollbar-gutter:stable}
+.st-task-header{display:flex;flex-direction:column;gap:9px;padding:4px 0 24px;margin-bottom:22px;border-bottom:1px solid #e4e4e0}
+.st-task-counter{font-size:10px;letter-spacing:.13em;color:#777;font-weight:750;display:flex;justify-content:space-between}
+.st-task-counter span{font-variant-numeric:tabular-nums}
+.st-task-header h1{font-family:var(--display);font-size:clamp(29px,3vw,36px);line-height:1.08;font-weight:700;letter-spacing:-.055em}
+.st-task-header p{font-size:13.5px;line-height:1.55;color:#6d6d6c;max-width:34ch}
+.st-panel-intro{display:none}
+.st-task-next{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.st-task-next button{display:inline-flex;align-items:center;gap:5px;min-height:40px;padding:0 14px;border-radius:8px;background:transparent;border:1px solid var(--line);font-size:13px;font-weight:650}
+.st-task-next button:first-child:not(.st-task-primary){margin-right:auto}
+.st-task-next .st-task-primary{background:#111;color:#fff;border-color:#111;margin-left:auto}
+.st-preview-label{display:flex;align-items:center;gap:7px;align-self:center;color:#666;letter-spacing:.01em;font-size:12px;font-weight:600}
+.st-live-dot{width:7px;height:7px;border-radius:50%;background:#4d9573;box-shadow:0 0 0 3px rgba(77,149,115,.13)}
+.st-phone{gap:12px}
+.st-replay{font-size:12px;background:#fff;border-radius:8px;min-height:33px}
+.st-note{line-height:1.45}
+.st-library-track{grid-template-columns:1fr auto;border-radius:10px;gap:8px;padding:14px}
+.st-library-track audio{order:3;max-height:36px}
+.st-library-track .st-chip{border-radius:7px}
+.st-album-header{border-radius:10px;padding:18px}
+.st-sound-current{background:#151515;color:#fff;padding:20px 19px;border-radius:11px;display:flex;flex-direction:column;gap:8px}
+.st-sound-current>span{font-size:10px;letter-spacing:.14em;color:#b9b9b9;font-weight:750}
+.st-sound-current strong{font-family:var(--display);font-size:24px;letter-spacing:-.035em;line-height:1.1}
+.st-sound-current p{font-size:12.5px;line-height:1.5;color:#c8c8c8}
+.st-sound-current button{border:1px solid #707070;color:#fff;border-radius:7px;align-self:flex-start;padding:8px 12px;font-size:12px;margin-top:3px}
+.st-wave{display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid #dededb;background:#fff;border-radius:11px}
+.st-wave-title{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.st-wave-title strong{font-size:13px}.st-wave-title span{font-size:11px;color:#777;font-variant-numeric:tabular-nums;text-align:right}
+.st-wave-visual{min-height:88px;overflow:hidden}
+.st-wave-actions{display:flex;gap:8px}.st-wave-actions button{display:flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:650}
+.st-wave-actions button:disabled{opacity:.5}
+.st-wave-native{width:100%;height:38px}
+.st-wave-fallback{font-size:12px;color:#777}
+.st-audio-trim{border-radius:10px}
+.st-audio-trim-fields{grid-template-columns:1fr 1fr}
+@media(max-width:860px){
+  .st{grid-template-columns:1fr;grid-template-rows:56px minmax(0,1fr) auto}
+  .st-panel{max-height:min(65dvh,540px);height:var(--sheet);border-radius:18px 18px 0 0}
+  .st-tabs{padding:4px 8px 9px;gap:4px;scroll-padding:8px}
+  .st-tab{padding:8px 12px;min-height:40px;font-size:12px;flex-direction:row;gap:5px;border-radius:8px}
+  .st-tab svg{display:block;width:15px;height:15px}
+  .st-body{padding:12px 19px 40px;scrollbar-gutter:auto}
+  .st-task-header{gap:6px;padding:0 0 13px;margin-bottom:17px}
+  .st-task-header h1{font-size:25px}.st-task-header p{font-size:12.5px;max-width:none}
+  .st-phone{gap:7px}
+  .st-preview-label{font-size:10px}
+  .st-replay{min-height:28px;font-size:10px;padding:0 9px}
+  .st[data-sheet=false]{--sheet:98px}
+  .st-audio-trim-fields{grid-template-columns:1fr}
+}
+@media(max-width:390px){.st-task-header h1{font-size:23px}.st-tab span{white-space:nowrap}}

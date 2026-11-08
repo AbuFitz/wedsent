@@ -15,7 +15,7 @@ const email = `e2e${Date.now()}@example.com`;
 
 // Local draft first (signed out), then sign up claims it.
 await p.goto(base + "/studio"); await p.waitForTimeout(800);
-await p.getByRole("tab", { name: "Words" }).click();
+await p.getByRole("tab", { name: "Wording" }).click();
 await p.getByLabel("Names").fill("Layla & Omar");
 await p.waitForTimeout(700);
 await p.getByRole("link", { name: /Save & publish/ }).click();
@@ -27,7 +27,7 @@ ok(true, "sign-up returns to Studio (next param)");
 
 // Draft claimed from local.
 await p.goto(base + "/studio"); await p.waitForTimeout(1200);
-await p.getByRole("tab", { name: "Words" }).click();
+await p.getByRole("tab", { name: "Wording" }).click();
 ok((await p.getByLabel("Names").inputValue()) === "Layla & Omar", "local draft claimed into account");
 await p.getByRole("tab", { name: "Details" }).click();
 await p.getByLabel("Venue", { exact: true }).fill("Hall of Mirrors");

@@ -43,6 +43,8 @@ Required cases: draft persists across sign-up and browser refresh; invalid detai
 
 ## F02 — design customization and revision
 
+**Studio task navigation revision (8 Nov 2026):** The editor now keeps the same live renderer and saved draft while moving through independent Design, Wording, Details, Events, Photos, Appearance, Music and Extras areas. No global settings mega-panel. Music has an auditionable collection plus a selected-track region editor (start/end), trigger and volume. Editing a region updates the same wedding content model used by the guest renderer. Studio navigation itself does not publish changes or imply credentials exist.
+
 ```mermaid
 stateDiagram-v2
  [*] --> Draft

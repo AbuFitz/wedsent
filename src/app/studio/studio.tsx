@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2 } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
@@ -14,17 +14,31 @@ import { readLocalMusic, saveLocalMusic } from "@/lib/local-music";
 import { recommendExperience, type Mood, type AudioPreference } from "@/lib/recommendations";
 import { CURATED_TRACKS } from "@/lib/music-library";
 import { makeFeedbackLink } from "@/lib/feedback-share";
+import { SoundWaveform } from "@/components/studio/sound-waveform";
 import "./studio.css";
 
-type Tab = "design" | "words" | "details" | "events" | "style";
+type Tab = "design" | "words" | "details" | "events" | "photos" | "appearance" | "music" | "extras";
 type RawEvent = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
 const tabs: { id: Tab; label: string; icon: typeof Palette }[] = [
-  { id: "design", label: "Looks", icon: Sparkles },
-  { id: "words", label: "Words", icon: Type },
-  { id: "events", label: "Events", icon: CalendarRange },
+  { id: "design", label: "Design", icon: Sparkles },
+  { id: "words", label: "Wording", icon: Type },
   { id: "details", label: "Details", icon: CalendarDays },
-  { id: "style", label: "Finishing", icon: Palette },
+  { id: "events", label: "Events", icon: CalendarRange },
+  { id: "photos", label: "Photos", icon: ImageIcon },
+  { id: "appearance", label: "Appearance", icon: Palette },
+  { id: "music", label: "Music", icon: Music2 },
+  { id: "extras", label: "Extras", icon: SlidersHorizontal },
 ];
+const stepText: Record<Tab, { title: string; summary: string }> = {
+  design: { title: "Choose your invitation", summary: "Start with an art-directed design. Every choice updates the real guest experience." },
+  words: { title: "Make it yours", summary: "Names, occasion and the words your guests will remember." },
+  details: { title: "The essentials", summary: "Make the date, venue and practical details effortless to find." },
+  events: { title: "Your celebrations", summary: "Nikah, Walima, ceremony, reception, or just one beautiful event." },
+  photos: { title: "Your photographs", summary: "Add a favourite photo and position it exactly where it belongs." },
+  appearance: { title: "Shape the look", summary: "Refine the palette, lettering and opening experience." },
+  music: { title: "Set the atmosphere", summary: "Explore recordings, listen, select a moment and set how it begins." },
+  extras: { title: "Little personal touches", summary: "Countdown, languages and optional finishing details." },
+};
 const occasions = ["Wedding", "Nikah", "Walima", "Mehndi", "Reception", "Civil ceremony"];
 const tones = [
   { label: "Warm", text: "We’re so happy to share this day with the people we love most. Please join us." },
@@ -68,8 +82,8 @@ export function Studio() {
   const go = (t: Tab) => {
     setTab(t);
     setSheet(true);
-    if (t === "details" || t === "events") setOpen(true);
-    if (t === "design" || t === "style") setOpen(false);
+    if (t === "details" || t === "events" || t === "words" || t === "extras") setOpen(true);
+    if (t === "design" || t === "appearance" || t === "photos") setOpen(false);
   };
 
   return (
@@ -93,6 +107,7 @@ export function Studio() {
 
       <main className="st-canvas">
         <div className="st-phone" style={{ ["--bgtone" as string]: specById(draft.design).site.bg }}>
+          <div className="st-preview-label"><span className="st-live-dot" /> Live invitation <span>·</span> {open ? "Inside" : "Opening"}</div>
           <Phone label="Live invitation preview">
             <Invitation data={draft} open={open} onOpenChange={setOpen} events={events} />
           </Phone>
@@ -106,7 +121,7 @@ export function Studio() {
         <button type="button" className="st-grab" onClick={() => setSheet((s) => !s)} aria-expanded={sheet} aria-label="Toggle editor">
           <ChevronUp size={20} />
         </button>
-        <div className="st-tabs" role="tablist">
+        <div className="st-tabs" role="tablist" aria-label="Studio editing areas">
           {tabs.map((t) => (
             <button key={t.id} type="button" role="tab" id={`studio-tab-${t.id}`} aria-controls="studio-editor-content" aria-selected={tab === t.id} tabIndex={tab === t.id ? 0 : -1} className="st-tab" onClick={() => go(t.id)} onKeyDown={(event) => {
               const at = tabs.findIndex((item) => item.id === t.id);
@@ -120,15 +135,23 @@ export function Studio() {
           ))}
         </div>
         <div className="st-body" id="studio-editor-content" role="tabpanel" aria-labelledby={`studio-tab-${tab}`}>
+          <header className="st-task-header">
+            <span className="st-task-counter">YOUR INVITATION <span>{String(tabs.findIndex((t) => t.id === tab) + 1).padStart(2, "0")} / {String(tabs.length).padStart(2, "0")}</span></span>
+            <h1>{stepText[tab].title}</h1><p>{stepText[tab].summary}</p>
+          </header>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
               {tab === "design" && <DesignTab draft={draft} patch={patch} />}
               {tab === "words" && <WordsTab draft={draft} patch={patch} />}
               {tab === "details" && <DetailsTab draft={draft} patch={patch} />}
               {tab === "events" && <EventsTab account={!!account} events={rawEvents} reload={loadEvents} />}
-              {tab === "style" && <StyleTab draft={draft} patch={patch} account={!!account} />}
+              {(tab === "photos" || tab === "appearance" || tab === "music" || tab === "extras") && <StyleTab draft={draft} patch={patch} account={!!account} mode={tab} />}
             </motion.div>
           </AnimatePresence>
+          <div className="st-task-next">
+            {tabs.findIndex((t) => t.id === tab) > 0 && <button type="button" onClick={() => go(tabs[tabs.findIndex((t) => t.id === tab) - 1].id)}>Previous</button>}
+            {tabs.findIndex((t) => t.id === tab) < tabs.length - 1 ? <button type="button" className="st-task-primary" onClick={() => go(tabs[tabs.findIndex((t) => t.id === tab) + 1].id)}>Next: {tabs[tabs.findIndex((t) => t.id === tab) + 1].label} <ChevronRight size={16} /></button> : <button type="button" className="st-task-primary" onClick={() => void shareFeedback()}>Share your draft <Share2 size={15} /></button>}
+          </div>
         </div>
         <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Build mode: your draft saves on this device. Share for feedback creates a working invitation preview link, not a published RSVP invitation."}</p>
       </aside>
@@ -264,7 +287,7 @@ function DetailsTab({ draft, patch }: TabProps) {
   );
 }
 
-function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
+function StyleTab({ draft, patch, account, mode }: TabProps & { account: boolean; mode: "photos" | "appearance" | "music" | "extras" }) {
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [musicBusy, setMusicBusy] = useState(false);
@@ -347,12 +370,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
   const custom = draft.accent || pal.accent;
   return (
     <div className="st-stack">
-      <div className="st-panel-intro"><span>05 / FINISHING</span><p>Fine-tune the look, motion, soundtrack and little details of your invitation.</p></div>
-      <nav className="st-section-nav" aria-label="Finishing options">
-        {([{ id: "media", title: "Photo" }, { id: "colours", title: "Colour" }, { id: "motion", title: "Opening" }, { id: "extras", title: "Widgets" }, { id: "language", title: "Language" }, { id: "lettering", title: "Type" }, { id: "music", title: "Audio" }] as const).map((s) => (
-          <button key={s.id} type="button" onClick={() => document.getElementById(`studio-${s.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}>{s.title}</button>
-        ))}
-      </nav>
+      {mode === "photos" && <>
       <h2 className="st-h st-section-anchor" id="studio-media">Your photograph</h2>
       <p className="st-help">Choose a sharp portrait or landscape photo. We optimise it for the invitation and let you position the focal point. Gallery and Arch use photos most prominently.</p>
       <label className="st-field">
@@ -370,6 +388,8 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
       </>}
       {photoError && <small className="st-err" role="alert">{photoError}</small>}
       {!account && <p className="st-help">Build mode: the photo stays in this browser. Signed-in uploads use private owner-scoped storage.</p>}
+      </>}
+      {mode === "appearance" && <>
       <h2 className="st-h st-section-anchor" id="studio-colours">Colours</h2>
       <p className="st-help">Each design has its own palettes. Text colour adjusts so it stays readable.</p>
       <div className="st-pals">
@@ -392,6 +412,8 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           </button>
         ))}
       </div>
+      </>}
+      {mode === "extras" && <>
       <h2 className="st-h st-section-anchor" id="studio-extras">Little extras</h2>
       <label className="st-widget-toggle">
         <span><strong>Wedding countdown</strong><small>A sweet live countdown on the invitation</small></span>
@@ -413,7 +435,8 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           <option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option><option value="so">Soomaali</option>
         </select></label>
       ))}
-      {stationery && (
+      </>}
+      {mode === "appearance" && stationery && (
         <>
           <h2 className="st-h st-section-anchor" id="studio-lettering">Lettering</h2>
           <div className="st-types">
@@ -437,8 +460,15 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           )}
         </>
       )}
-      <h2 className="st-h st-section-anchor" id="studio-music">Music</h2>
-      <p className="st-help st-help--flat">Choose what feels right for your celebration. We've retired the generic demo beats. This small collection is being curated recording by recording, with source and rights information visible.</p>
+      {mode === "music" && <>
+      <div className="st-sound-current">
+        <span>YOUR INVITATION SOUNDTRACK</span>
+        <strong>{draft.music?.title || "The quiet option"}</strong>
+        <p>{draft.music ? "Selected and saved to your invitation. You can fine-tune its entrance and excerpt below." : "No music yet. Silence is a perfectly good choice, or choose a recording from the collection."}</p>
+        {draft.music && <button type="button" onClick={() => patch({ music: null })}>Remove soundtrack</button>}
+      </div>
+      <h2 className="st-h st-section-anchor" id="studio-music">Explore the collection</h2>
+      <p className="st-help st-help--flat">Listen first, then choose. Uploaded recordings and saved selections are preserved when you change designs.</p>
       <div className="st-chips" role="group" aria-label="Filter soundtrack mood">
         {([{ id: "nasheed", label: "Vocals-only nasheed" }, { id: "duff", label: "Duff" }, { id: "instrumental", label: "Instrumental" }] as const).map((mood) => (
           <button type="button" key={mood.id} className="st-chip" aria-pressed={musicMood === mood.id} onClick={() => setMusicMood(mood.id)}>{mood.label}</button>
@@ -453,19 +483,19 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
         {CURATED_TRACKS.filter((track) => track.category === musicMood).map((track) => (
           <div key={track.id} className="st-library-track">
             <div><strong>{track.title}</strong><small>{track.mood} · {track.artist}</small><small><a href={track.source} target="_blank" rel="noopener noreferrer">Source</a> · <a href={track.licenseUrl} target="_blank" rel="noopener noreferrer">{track.license}</a></small></div>
-            <audio controls preload="none" src={track.src} aria-label={`Listen to ${track.title}`} />
-            <button type="button" className="st-chip" aria-pressed={draft.music?.src === track.src} onClick={() => patch({ music: { src: track.src, title: track.title, startAt: 0, endAt: 15 } })}>{draft.music?.src === track.src ? "Selected" : "Use 15s loop"}</button>
+            <button type="button" className="st-chip" aria-pressed={draft.music?.src === track.src} onClick={() => patch({ music: { src: track.src, title: track.title, startAt: 0, endAt: 15, trigger: "open", volume: .45 } })}>{draft.music?.src === track.src ? "Selected" : "Choose recording"}</button>
+            <audio controls preload="none" src={track.src} aria-label={`Audition ${track.title}`} />
           </div>
         ))}
         {!CURATED_TRACKS.some((track) => track.category === musicMood) && <p className="st-help">No approved recordings in this category yet. You can upload a recording you have permission to use below; we won't fill this section with unrelated beats.</p>}
       </div>
       <p className="st-help st-help--flat">The vocals-only source above is hosted by Wikimedia Commons under the licence shown. Its original large FLAC file may not play on every mobile device; a verified optimised MP3 is still needed. We have not independently auditioned its lyrics or certified religious suitability.</p>
-      <p className="st-help">Add your own permitted MP3. The invitation attempts music after the opening gesture; browsers may require the guest to tap play. A visible control always lets them pause or resume.</p>
+      <h2 className="st-h">Your own recording</h2>
+      <p className="st-help">Add an MP3 that you have permission to use. For build-mode local uploads, only this browser holds the recording.</p>
       <label className="st-widget-toggle"><span><strong>I have permission to use this recording</strong><small>Only upload music you own or have rights to share with guests.</small></span><input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} /></label>
       <label className="st-field"><span>{musicBusy ? "Uploading music…" : "Choose MP3 (up to 8 MB)"}</span><input type="file" accept="audio/mpeg,.mp3" disabled={!rightsConfirmed || musicBusy} onChange={(e) => { void uploadMusic(e.target.files?.[0]); e.target.value = ""; }} /></label>
-      {draft.music && <div className="st-music-selected"><span>Selected: {draft.music.title}</span><button type="button" className="st-chip" onClick={() => patch({ music: null })}>Remove music</button></div>}
-      {draft.music && audioPreview && <div className="st-audio-preview"><label htmlFor="studio-track-player">Listen to your selected track</label><audio id="studio-track-player" key={audioPreview} controls preload="metadata" src={audioPreview} onError={() => setAudioPreviewError("The selected MP3 could not play. Try another file or re-upload it.")} /></div>}
-      {draft.music && <fieldset className="st-audio-trim"><legend>Playback excerpt <small>optional</small></legend><p>Choose where guests hear the track from. The audio loops within the selected section.</p>
+      {draft.music && audioPreview && <SoundWaveform key={audioPreview} src={audioPreview} title={draft.music.title} start={draft.music.startAt ?? 0} end={draft.music.endAt} onTrim={(startAt, endAt) => patch({ music: { ...draft.music!, startAt, endAt } })} />}
+      {draft.music && <fieldset className="st-audio-trim"><legend>Playback on the invitation</legend><p>Make your favourite moment loop softly. Choose how it plays for guests.</p>
         <div className="st-audio-trim-fields">
           <label>Start (seconds)<input type="number" min="0" max="1799" step="1" value={draft.music.startAt ?? 0} onChange={(e) => {
             const startAt = Math.max(0, Math.min(1799, Number(e.target.value) || 0));
@@ -489,10 +519,13 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
         <p>Audition from your chosen start point in the player above. For a complete track, leave the end time blank. Browser autoplay restrictions apply to every mode.</p>
       </fieldset>}
       {draft.music && audioPreviewError && <small className="st-err" role="alert">{audioPreviewError}</small>}
-      <p className="st-help st-help--flat">If a selected track will not play on your device, remove it and use a properly licensed MP3 upload instead. We are continuing the duff and wedding instrumental selection.</p>
+      <p className="st-help st-help--flat">If a remote recording won't load, check its source or upload an MP3 you can legally use. We are continuing the duff and wedding instrumental selection.</p>
       {!account && <p className="st-help">Build mode music stays in this browser only. Re-upload once account publishing is enabled.</p>}
       {musicError && <small className="st-err" role="alert">{musicError}</small>}
+      </>}
+      {mode === "extras" &&
       <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
+      }
     </div>
   );
 }

@@ -18,6 +18,8 @@ Research date: 2026-11-07. GitHub repository presence does not imply permission 
 
 ## Visual and design building blocks
 
+- [wavesurfer.js](https://github.com/katspaugh/wavesurfer.js): BSD-3-Clause. **ADOPTED for Studio music editing (8 Nov 2026)**, with its official Regions plugin for draggable excerpt selection and playback. The audio source itself is a separate licence concern; remote tracks may deny waveform decoding, so native audio fallback remains available. No upstream code copied.
+
 - [Motion](https://github.com/motiondivision/motion): MIT. Candidate for controlled entrance/transitions, reduced-motion and touch interaction.
 - [Howler.js](https://github.com/goldfire/howler.js): MIT. Browser audio layer; track copyrights separate from player library.
 - [React Three Fiber](https://github.com/pmndrs/react-three-fiber): MIT. Evaluate selectively for one or two cinematic designs; CSS 3D may be faster and lighter.
