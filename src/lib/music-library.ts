@@ -49,16 +49,4 @@ export const CURATED_TRACKS = [
     licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
     note: "Musopen sourced recording; licence and performer provenance should be rechecked before paid release.",
   },
-  {
-    id: "bridal-chorus",
-    title: "Bridal Chorus",
-    artist: "Richard Wagner · European Archive recording",
-    mood: "Ceremonial · traditional entrance",
-    category: "instrumental" as const,
-    src: "/library/bridal-chorus",
-    source: "https://commons.wikimedia.org/wiki/File:Richard_Wagner_-_Treulich_geführt,_version_2.ogg",
-    license: "CC0 1.0 (Commons record)",
-    licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
-    note: "Traditional ceremony selection; sourced from European Archive via Musopen.",
-  },
 ] as const;

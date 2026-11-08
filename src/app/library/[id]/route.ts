@@ -11,7 +11,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const commonsMp3: Record<string, string> = {
     "satie-gymnopedie": "Gymnopedie No. 1..ogg",
     "chopin-nocturne": "Chopin - Nocturne Op. posth. 72 no. 1.ogg",
-    "bridal-chorus": "Richard Wagner - Treulich geführt, version 2.ogg",
   };
   const commonsFile = commonsMp3[id];
   if (commonsFile) {
