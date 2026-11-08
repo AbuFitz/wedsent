@@ -9,33 +9,39 @@ import { splitNames } from "@/lib/designs";
 type P = { data: InviteData; spec: DesignSpec; onOpen: () => void; still: boolean };
 const ease = [0.22, 0.8, 0.2, 1] as const;
 
-/** A separate envelope face: the invitation text stays on the card beneath it. */
-export function PearlCover({ data, onOpen, still }: P) {
+/** Material-led, phased openings. The card is real HTML; only its physical sleeve is animated. */
+export function KeepsakeCover({ data, spec, onOpen, still }: P) {
   const reduced = useReducedMotion();
   const [opening, setOpening] = useState(false);
   const names = splitNames(data.names);
+  const lift = spec.id === "embossed";
+  const dark = spec.id === "gilt";
   useEffect(() => {
     if (!opening) return;
-    const timer = window.setTimeout(onOpen, 1250);
+    const timer = window.setTimeout(onOpen, lift ? 1320 : 1480);
     return () => window.clearTimeout(timer);
-  }, [opening, onOpen]);
+  }, [opening, onOpen, lift]);
   const start = () => {
     if (still || opening) return;
     if (reduced) onOpen();
     else setOpening(true);
   };
   return (
-    <motion.section className="cover cv cv-pearl" aria-label="Pearlescent floral envelope" exit={{ opacity: 0, transition: { duration: 0.18 } }}>
-      <div className="cv-pearl-paper" aria-hidden="true" />
+    <motion.section className={`cover cv cv-keepsake cv-keepsake--${spec.id}`} aria-label={`${spec.name} invitation envelope`} exit={{ opacity: 0, transition: { duration: 0.16 } }}>
+      <motion.div className="cv-keepsake-card" aria-hidden="true" animate={opening ? { scale: 1.035, y: lift ? 18 : -8, filter: "brightness(1.06)" } : { scale: .955, y: 8, filter: "brightness(.9)" }} transition={{ duration: 1.2, ease }}>
+        <StationeryCard data={data} spec={spec} palette={paletteOf(spec, data.palette)} fill />
+      </motion.div>
       <div className="cv-pearl-panels" aria-hidden="true">
-        <motion.div className="cv-pearl-panel cv-pearl-panel--left" animate={opening ? { rotateY: -115, x: "-5%" } : { rotateY: 0, x: 0 }} transition={{ duration: 1.18, ease: [0.24, 0.7, 0.12, 1] }} />
-        <motion.div className="cv-pearl-panel cv-pearl-panel--right" animate={opening ? { rotateY: 115, x: "5%" } : { rotateY: 0, x: 0 }} transition={{ duration: 1.18, ease: [0.24, 0.7, 0.12, 1] }} />
+        {lift ? <motion.div className="cv-keepsake-sleeve" animate={opening ? { y: "-110%", rotateX: -11, opacity: .86 } : { y: "0%", rotateX: 0, opacity: 1 }} transition={{ duration: 1.2, ease: [.25,.74,.13,1] }} /> : <>
+          <motion.div className="cv-pearl-panel cv-pearl-panel--left" animate={opening ? { rotateY: -117, x: "-9%", filter: "brightness(.68)" } : { rotateY: 0, x: 0, filter: "brightness(1)" }} transition={{ duration: 1.28, delay: .13, ease: [0.2, .74, .1, 1] }} />
+          <motion.div className="cv-pearl-panel cv-pearl-panel--right" animate={opening ? { rotateY: 117, x: "9%", filter: "brightness(.68)" } : { rotateY: 0, x: 0, filter: "brightness(1)" }} transition={{ duration: 1.28, delay: .13, ease: [0.2, .74, .1, 1] }} />
+        </>}
       </div>
-      <motion.div className="cv-pearl-seal" aria-hidden="true" animate={opening ? { opacity: 0, scale: 1.2, rotate: 12 } : { opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: .46 }}>
+      <motion.div className="cv-pearl-seal" aria-hidden="true" animate={opening ? { opacity: 0, scale: .84, y: lift ? -70 : -15, rotate: dark ? -12 : 12 } : { opacity: 1, scale: 1, y: 0, rotate: 0 }} transition={{ duration: .44, ease: [.2,.7,.2,1] }}>
         <span className="cv-pearl-seal-inner">{names.a.slice(0, 1)}<i>&amp;</i>{names.b.slice(0, 1)}</span>
       </motion.div>
-      <motion.span className="cv-pearl-caption" animate={opening ? { opacity: 0 } : { opacity: 1 }}>TAP TO OPEN</motion.span>
-      <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Open the floral invitation" />
+      <motion.span className="cv-pearl-caption" animate={opening ? { opacity: 0, y: 14 } : { opacity: 1, y: 0 }} transition={{ duration: .28 }}>{lift ? "LIFT TO REVEAL" : "TAP THE SEAL TO OPEN"}</motion.span>
+      <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label={`Open ${spec.name} invitation`} />
     </motion.section>
   );
 }

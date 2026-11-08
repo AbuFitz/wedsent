@@ -192,3 +192,37 @@
 .cv-pearl-seal-inner{position:relative;z-index:1;font-family:"Pinyon Script",cursive;font-size:12cqw;letter-spacing:-.04em;white-space:nowrap;text-shadow:0 .2cqw #fff9eb}.cv-pearl-seal-inner i{font-family:Georgia,serif;font-size:.4em;font-style:italic;padding:0 .05em}
 .cv-pearl-caption{position:absolute;z-index:3;bottom:7%;left:50%;translate:-50% 0;font-family:var(--f-caps);font-size:2.9cqw;letter-spacing:.3em;color:#5e5044;text-shadow:0 1px 1px #fff8ee;white-space:nowrap}
 .cv-pearl .cv-hit:focus-visible{outline:.7cqw solid #9d774a;outline-offset:-2cqw}
+
+/* New material system — photographic relief with live, accessible text layered over it. */
+.sc--embossed,.sc--gilt{aspect-ratio:2/3;isolation:isolate;background-position:center;background-repeat:no-repeat;background-size:100% 100%;box-shadow:0 1.5cqw 6cqw #1e160d40,0 0 0 .25cqw color-mix(in srgb,var(--line) 80%,transparent)}
+.sc--embossed{background-image:url('/art/embossed-ivory.webp');color:#514334}
+.sc--gilt{background-image:url('/art/gilded-night.webp');color:var(--fg)}
+.sc-material-light{position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,#fff9f118 12%,transparent 34%,#fff8e00d 48%,transparent 62%);mix-blend-mode:screen}
+.sc--embossed .sc-text,.sc--gilt .sc-text{justify-content:center;padding:23cqw 12cqw 22cqw;gap:3cqw}
+.sc--embossed .sc-line{font-family:var(--f-head);font-size:3.9cqw;letter-spacing:.02em}
+.sc--embossed .sc-names{font-family:var(--f-head);font-weight:400;font-size:12.8cqw!important;line-height:1.02;color:#514334;letter-spacing:-.04em}
+.sc--embossed .sc-and{font-family:var(--f-head);font-size:.4em;margin:.17em 0}
+.sc--embossed .sc-intro{text-transform:none;letter-spacing:.04em;font-family:var(--f-head);font-style:italic;font-size:4cqw}
+.sc--embossed .sc-date,.sc--embossed .sc-venue{font-family:var(--f-caps);letter-spacing:.15em;font-size:3cqw;font-style:normal;text-transform:uppercase}
+.sc--gilt .sc-text{padding:21cqw 14cqw;gap:3.4cqw;text-shadow:0 .15cqw .5cqw #020100}
+.sc--gilt .sc-line{font-family:var(--f-head);font-style:normal;text-transform:uppercase;letter-spacing:.24em;font-size:2.9cqw}
+.sc--gilt .sc-intro{font-size:2.8cqw;letter-spacing:.16em}
+.sc--gilt .sc-names{font-family:var(--f-head);font-size:10cqw!important;font-weight:400;letter-spacing:.07em;line-height:1.16;text-transform:uppercase;color:#ead5a7}
+.sc--gilt .sc-and{font-size:.44em;letter-spacing:0}
+.sc--gilt .sc-date,.sc--gilt .sc-venue{font-family:var(--f-caps);font-size:3cqw;letter-spacing:.15em;color:#e0c28b}
+
+/* A cardstock object and sleeve under raking light, with depth driven by transforms. */
+.cv-keepsake{background:var(--bg);overflow:hidden;perspective:1200px;isolation:isolate}
+.cv-keepsake-card{position:absolute;inset:2cqw;z-index:0;filter:drop-shadow(0 2cqw 4cqw #2b20194d);transform-origin:center 50%;pointer-events:none}
+.cv-keepsake-card .sc{inset:0;box-shadow:0 0 1cqw #54402b25}
+.cv-keepsake .cv-pearl-panels{perspective:1200px;overflow:visible}
+.cv-keepsake .cv-pearl-panel{background-image:linear-gradient(105deg,#fffdf01b,transparent 45%,#27130630),url('/art/pearl-garden.webp');box-shadow:inset 0 .6cqw 1cqw #fff8e02a,0 .5cqw 2.5cqw #29180e57}
+.cv-keepsake--gilt .cv-pearl-panel{background-image:linear-gradient(105deg,#e9bb6417,transparent 45%,#0008),url('/art/gilded-night.webp');border-color:#a9874c;box-shadow:inset 0 .5cqw 1cqw #f0c97b24,0 .7cqw 3cqw #0009}
+.cv-keepsake--embossed .cv-pearl-panels{overflow:hidden}
+.cv-keepsake-sleeve{position:absolute;inset:-1cqw;background:#f4eadb url('/art/embossed-ivory.webp') center/100% 100% no-repeat;box-shadow:0 1.5cqw 5cqw #3d2a1e6b,0 .3cqw .7cqw #6c513d55;transform-origin:50% 5%}
+.cv-keepsake--embossed .cv-pearl-seal{background:radial-gradient(circle at 38% 28%,#fffdf6,#e5d1ae 54%,#b99a66 78%,#faf0d5);border-color:#9c7e59}
+.cv-keepsake--gilt .cv-pearl-seal{background:radial-gradient(circle at 37% 27%,#fff0c4,#caa15a 35%,#7d5928 74%,#dfbb70);border-color:#b89a5e;color:#2c1c0a;box-shadow:0 1.4cqw 4cqw #000b,inset 0 .5cqw 1cqw #fff4c48c}
+.cv-keepsake--gilt .cv-pearl-caption{color:#f4deb2;text-shadow:0 .2cqw .6cqw #000}
+.cv-keepsake--embossed .cv-pearl-caption{color:#5e4e3c}
+.cv-keepsake .cv-hit:focus-visible{outline:.8cqw solid var(--a);outline-offset:-2cqw}
+@media(prefers-reduced-motion:reduce){.cv-keepsake-card,.cv-keepsake .cv-pearl-panel,.cv-keepsake-sleeve,.cv-keepsake .cv-pearl-seal{transition:none!important}}

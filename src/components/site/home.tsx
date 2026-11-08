@@ -7,7 +7,7 @@ import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { DesignCard } from "@/components/gallery/design-card";
 import { sampleData, sampleEvents } from "@/components/gallery/samples";
-import { DESIGNS, specById } from "@/engine/registry";
+import { FEATURED_DESIGNS, specById } from "@/engine/registry";
 import { Nav } from "./nav";
 import { PriceTeaser, Faq, Closing, SiteFooter } from "./sections";
 import "./home.css";
@@ -83,7 +83,7 @@ function Collection() {
   return (
     <section id="designs" className="hm-sec">
       <div className="hm-head">
-        <h2>{DESIGNS.length} designs. Each one its own world.</h2>
+        <h2>{FEATURED_DESIGNS.length} crafted invitation worlds.</h2>
         <p>Not one template in different colours. Every design has its own composition, lettering, artwork and way of opening, and every one is a working invitation.</p>
       </div>
       <div className="hm-chips" aria-label="Browse by celebration">
@@ -91,7 +91,7 @@ function Collection() {
         <Link href="/designs" className="hm-chips-all">See all <ArrowRight size={14} /></Link>
       </div>
       <div className="hm-rail" tabIndex={0} aria-label="Designs">
-        {DESIGNS.map((d) => <div className="hm-rail-item" key={d.id}><DesignCard spec={d} /></div>)}
+        {FEATURED_DESIGNS.map((d) => <div className="hm-rail-item" key={d.id}><DesignCard spec={d} /></div>)}
       </div>
     </section>
   );

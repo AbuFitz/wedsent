@@ -68,10 +68,11 @@ export type DesignSpec = {
   site: { bg: string; ink: string };  // marketing-page tone for this design
 };
 
-export const DESIGN_IDS = ["atelier", "vellum", "nocturne", "postmark", "pearl", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
+export const DESIGN_IDS = ["pearl", "embossed", "gilt", "atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
 export type DesignId = (typeof DESIGN_IDS)[number];
 /** The original set remains renderable for existing invitations, but is not offered to new couples. */
-export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "atelier", "vellum", "nocturne", "postmark"];
+/** Old schemes remain readable for previously saved invitations, but the public gallery is rebuilt. */
+export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "embossed", "gilt"];
 
 const pal = (id: string, name: string, accent: string, rest: Partial<Palette> = {}): Palette => ({ id, name, accent, ...rest });
 
@@ -94,6 +95,28 @@ export const DESIGNS: DesignSpec[] = [
       pal("sage", "Sage pearl", "#778477", { bg: "#DCE0D7", soft: "#F5F1E8", fg: "#3D4C42", line: "#B59B6B" }),
       pal("champagne", "Champagne", "#987A53", { bg: "#E8E0D1", soft: "#FBF4E7", fg: "#514337", line: "#B69863" }),
       pal("lavender", "Lavender pearl", "#8B7A91", { bg: "#E5DFE8", soft: "#F8F1F1", fg: "#534655", line: "#B5A1B9" }),
+    ],
+  },
+  {
+    id: "embossed", name: "Sculpted Ivory", family: "Blind emboss", blurb: "A tactile cotton-paper invitation with ivory roses sculpted in relief and a softly raised foil impression.",
+    styles: ["Luxury", "Floral & Botanical", "Classic & Traditional"], colours: ["Neutral Tones", "Ivory & Gold"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Civil", "Church"],
+    opening: { kind: "lift", label: "Lift the sleeve", hint: "An ivory paper sleeve lifts away from the invitation" }, layout: "stationery", fonts: "classic", art: "none", intro: "families", sample: { names: "Amelia & Daniel", occasion: "Wedding" },
+    site: { bg: "#DCD2C2", ink: "#514532" }, palettes: [
+      pal("ivory", "Warm ivory", "#80613B", { bg: "#E4DCCF", soft: "#F3E8D6", fg: "#514334", line: "#C4AD86" }),
+      pal("rose", "Rose champagne", "#855E58", { bg: "#E6D8D1", soft: "#F7EAE2", fg: "#59483D", line: "#C9A693" }),
+      pal("sage", "Sage gold", "#59694D", { bg: "#DCE0D2", soft: "#F0EDDF", fg: "#465040", line: "#B8AE8D" }),
+      pal("stone", "Stone linen", "#655B50", { bg: "#DCDAD4", soft: "#F1EEE7", fg: "#46423C", line: "#BAB0A0" }),
+    ],
+  },
+  {
+    id: "gilt", name: "Gilded Night", family: "Hot foil", blurb: "Midnight velvet-black stock, dimensional antique-gold florals and a dramatic ceremonial reveal.",
+    styles: ["Luxury", "Art Deco", "Elegant & Formal"], colours: ["Metallic", "Black & White", "Jewel"], shape: "Portrait", cultures: ["Any wedding", "Walima", "Reception", "Evening"],
+    opening: { kind: "doors", label: "Open the invitation", hint: "Two gilded panels unfold in a quiet ceremony" }, layout: "stationery", fonts: "deco", art: "none", intro: "pleasure", sample: { names: "Nadia & Karim", occasion: "Walima" },
+    site: { bg: "#181512", ink: "#E6C889" }, palettes: [
+      pal("onyx", "Onyx foil", "#D4B66F", { bg: "#171410", soft: "#191512", fg: "#F2DEB1", line: "#AD8648" }),
+      pal("aubergine", "Aubergine foil", "#D8BC86", { bg: "#2D2028", soft: "#261B22", fg: "#F3E1C4", line: "#AF8D67" }),
+      pal("forest", "Forest foil", "#D8C28B", { bg: "#1A2722", soft: "#15221C", fg: "#F0E3C6", line: "#A99D6F" }),
+      pal("navy", "Navy foil", "#D7C799", { bg: "#19202C", soft: "#161B25", fg: "#E8E1CD", line: "#A9A080" }),
     ],
   },
   {
@@ -220,9 +243,9 @@ export const FEATURED_DESIGNS = DESIGNS.filter((d) => FEATURED_DESIGN_IDS.includ
 
 /** Filter facets for the gallery (mirrors how Evite groups designs: style, colour, shape, plus culture and opening). */
 export const FACETS = {
-  style: Array.from(new Set(DESIGNS.flatMap((d) => d.styles))).sort(),
-  colour: Array.from(new Set(DESIGNS.flatMap((d) => d.colours))).sort(),
-  shape: Array.from(new Set(DESIGNS.map((d) => d.shape))).sort(),
-  culture: Array.from(new Set(DESIGNS.flatMap((d) => d.cultures))).sort(),
-  opening: Array.from(new Set(DESIGNS.map((d) => d.opening.kind))).sort(),
+  style: Array.from(new Set(FEATURED_DESIGNS.flatMap((d) => d.styles))).sort(),
+  colour: Array.from(new Set(FEATURED_DESIGNS.flatMap((d) => d.colours))).sort(),
+  shape: Array.from(new Set(FEATURED_DESIGNS.map((d) => d.shape))).sort(),
+  culture: Array.from(new Set(FEATURED_DESIGNS.flatMap((d) => d.cultures))).sort(),
+  opening: Array.from(new Set(FEATURED_DESIGNS.map((d) => d.opening.kind))).sort(),
 };

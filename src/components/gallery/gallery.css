@@ -44,4 +44,14 @@
 .dc-dots button{width:22px;height:22px;border-radius:50%;border:0;box-shadow:0 0 0 1px rgba(0,0,0,.15) inset;transition:transform .2s}
 .dc-dots button:hover{transform:scale(1.15)}
 .dc-dots button[aria-pressed=true]{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--ink)}
+/* The gallery stages each design like a photographed paper suite, not a pair of app screenshots. */
+.dc-stage{border-radius:20px;background:radial-gradient(ellipse at 48% 20%,#ffffffa6,transparent 55%),linear-gradient(155deg,color-mix(in srgb,var(--stage) 87%,white),var(--stage));perspective:1100px}
+.dc-stage::after{content:"";position:absolute;left:7%;right:7%;bottom:9%;height:13%;border-radius:50%;background:#24190e35;filter:blur(22px);pointer-events:none}
+.dc-ph{aspect-ratio:2/3;width:46cqw;border-radius:.9cqw;box-shadow:0 5cqw 9cqw -2cqw #20140b63,0 0 0 .2cqw #ffffff90;transform-style:preserve-3d}
+.dc-ph--back{left:10cqw;top:11cqw;rotate:-9deg;transform:rotateY(-11deg)}
+.dc-ph--front{right:8cqw;top:18cqw;rotate:7deg;transform:rotateY(8deg)}
+.dc-stage:has(.dc-hit:hover) .dc-ph--back{transform:translate(-1.7cqw,-2cqw) rotateY(-4deg)}
+.dc-stage:has(.dc-hit:hover) .dc-ph--front{transform:translate(2cqw,-3cqw) rotateY(2deg)}
+.dc-open{z-index:4}
+@media(prefers-reduced-motion:reduce){.dc-stage,.dc-ph{transition:none!important}}
 @media(max-width:900px){.gl-body{grid-template-columns:minmax(0,1fr)}.gl-side{display:none}.gl-filter-btn{display:inline-flex}.gl-sort{margin-left:0}.gl-grid{grid-template-columns:minmax(0,1fr)}.gl{padding-top:96px}}

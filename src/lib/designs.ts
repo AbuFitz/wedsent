@@ -53,7 +53,7 @@ export const defaults: InviteData = {
   accent: "",
   address: "",
   photo: null,
-  design: "atelier",
+  design: "pearl",
   palette: "",
   type: "",
   intro: "",

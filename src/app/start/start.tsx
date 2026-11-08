@@ -9,7 +9,7 @@ import { Phone } from "@/components/phone";
 import { DesignCard } from "@/components/gallery/design-card";
 import { call } from "@/lib/api-client";
 import { defaults, loadDraft, saveDraft, PENDING_EVENTS_KEY, type InviteData, type InviteEvent } from "@/lib/designs";
-import { DESIGNS, FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
+import { DESIGNS, FEATURED_DESIGNS, FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
 import "./start.css";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
@@ -70,9 +70,9 @@ export function Start() {
   const choosePreset = (id: string) => { setPreset(id); setEvents([...(PRESETS.find((p) => p.id === id)?.events ?? [])]); patch({ occasion: OCC[id] ?? "Wedding" }); };
   const suggested = useMemo(() => {
     const tags = PRESETS.find((p) => p.id === preset)?.tags ?? [];
-    return new Set(DESIGNS.filter((x) => x.cultures.some((c) => tags.includes(c))).map((x) => x.id));
+    return new Set(FEATURED_DESIGNS.filter((x) => x.cultures.some((c) => tags.includes(c))).map((x) => x.id));
   }, [preset]);
-  const ordered = useMemo(() => [...DESIGNS].sort((a, b) => Number(suggested.has(b.id)) - Number(suggested.has(a.id))), [suggested]);
+  const ordered = useMemo(() => [...FEATURED_DESIGNS].sort((a, b) => Number(suggested.has(b.id)) - Number(suggested.has(a.id))), [suggested]);
 
   const finish = async () => {
     setBusy(true); setErr(null);

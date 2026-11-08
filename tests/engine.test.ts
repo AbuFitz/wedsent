@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { colord, extend } from "colord";
 import a11y from "colord/plugins/a11y";
 import { ASSETS } from "@/engine/assets";
-import { DESIGNS, DESIGN_IDS, FONT_PACKS, INTRO_PRESETS, FACETS, specById } from "@/engine/registry";
+import { DESIGNS, DESIGN_IDS, FEATURED_DESIGNS, FONT_PACKS, INTRO_PRESETS, FACETS, specById } from "@/engine/registry";
 import { ContentSchema } from "@/server/weddings";
 import { onColor, defaults } from "@/lib/designs";
 import { label } from "@/components/invitation/widgets";
@@ -71,7 +71,7 @@ describe("design engine registry", () => {
     expect(isMp3(Uint8Array.from([0xff, 0xfb, 0x90, 0x64]))).toBe(true);
     expect(isMp3(Uint8Array.from([0x52, 0x49, 0x46, 0x46]))).toBe(false);
   });
-  it("filter facets cover every design", () => {
-    for (const d of DESIGNS) { expect(FACETS.shape).toContain(d.shape); expect(FACETS.opening).toContain(d.opening.kind); }
+  it("filter facets cover the redesigned public collection", () => {
+    for (const d of FEATURED_DESIGNS) { expect(FACETS.shape).toContain(d.shape); expect(FACETS.opening).toContain(d.opening.kind); }
   });
 });
