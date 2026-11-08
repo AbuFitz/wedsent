@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import RegionsPlugin from "wavesurfer.js/dist/plugins/regions.esm.js";
 import { Pause, Play, RotateCcw } from "lucide-react";
+import { registerAudioPlayer } from "@/lib/audio-focus";
 
 type Props = {
   src: string;
@@ -36,6 +37,7 @@ export function SoundWaveform({ src, title, start, end, onTrim }: Props) {
       waveColor: "#cac9c6", progressColor: "#111111", cursorColor: "#111111",
       barWidth: 2, barGap: 2, barRadius: 2, plugins: [regions],
     });
+    const unregisterAudio = registerAudioPlayer(ws.getMediaElement());
     player.current = ws;
     ws.on("ready", (length) => {
       setDuration(length);
@@ -50,7 +52,7 @@ export function SoundWaveform({ src, title, start, end, onTrim }: Props) {
     ws.on("play", () => setPlaying(true));
     ws.on("pause", () => setPlaying(false));
     ws.on("error", () => setWaveError(true));
-    return () => { region.current = null; player.current = null; ws.destroy(); };
+    return () => { region.current = null; player.current = null; unregisterAudio(); ws.destroy(); };
     // A new track gets a new waveform; region changes are handled without reloading audio.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
