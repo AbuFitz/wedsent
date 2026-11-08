@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2 } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
@@ -13,6 +13,7 @@ import { useStudioDraft } from "@/lib/use-draft";
 import { readLocalMusic, saveLocalMusic } from "@/lib/local-music";
 import { recommendExperience, type Mood, type AudioPreference } from "@/lib/recommendations";
 import { CURATED_TRACKS } from "@/lib/music-library";
+import { makeFeedbackLink } from "@/lib/feedback-share";
 import "./studio.css";
 
 type Tab = "design" | "words" | "details" | "events" | "style";
@@ -38,6 +39,7 @@ export function Studio() {
   const [open, setOpen] = useState(false);
   const [sheet, setSheet] = useState(true);
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
+  const [shareStatus, setShareStatus] = useState("");
   const loadEvents = useCallback(async () => {
     if (!account) {
       try {
@@ -50,6 +52,13 @@ export function Studio() {
   }, [account]);
   useEffect(() => { loadEvents(); }, [loadEvents]);
   const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
+  const shareFeedback = async () => {
+    try {
+      const url = makeFeedbackLink(draft, events);
+      await navigator.clipboard.writeText(url);
+      setShareStatus(draft.photo ? "Link copied. Uploaded photos aren't included in feedback links yet." : "Feedback link copied. Send it to anyone!");
+    } catch { setShareStatus("Couldn’t copy the link. Try again in a secure browser."); }
+  };
 
   useEffect(() => {
     const d = params.get("design");
@@ -77,8 +86,10 @@ export function Studio() {
             ? <Link href="/dashboard" className="btn btn-dark st-guest"><span>Guests &amp; publish</span></Link>
             : null}
           <Link href="/invite" target="_blank" className="btn btn-light st-guest" aria-label="Open the guest invitation in a new tab"><span>View as guest</span> <ArrowUpRight size={16} /></Link>
+          <button type="button" className="btn btn-dark st-guest" onClick={() => void shareFeedback()} aria-label="Copy a shareable invitation link for feedback"><span>Share for feedback</span><Share2 size={16} /></button>
         </div>
       </header>
+      {shareStatus && <div className="st-share-toast" role="status">{shareStatus}</div>}
 
       <main className="st-canvas">
         <div className="st-phone" style={{ ["--bgtone" as string]: specById(draft.design).site.bg }}>
@@ -119,7 +130,7 @@ export function Studio() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Build mode: your invitation and events save on this device. Publishing and private guest links need an account later."}</p>
+        <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Build mode: your draft saves on this device. Share for feedback creates a working invitation preview link, not a published RSVP invitation."}</p>
       </aside>
     </div>
   );
@@ -433,12 +444,17 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           <button type="button" key={mood.id} className="st-chip" aria-pressed={musicMood === mood.id} onClick={() => setMusicMood(mood.id)}>{mood.label}</button>
         ))}
       </div>
+      <div className={`st-album-header st-album-header--${musicMood}`}>
+        <small>WEDSENT SOUND COLLECTION / {musicMood === "nasheed" ? "01" : musicMood === "instrumental" ? "02" : "03"}</small>
+        <strong>{musicMood === "nasheed" ? "Quiet devotion" : musicMood === "instrumental" ? "Ceremony & stillness" : "Voice & rhythm"}</strong>
+        <p>{musicMood === "nasheed" ? "Gentle vocal selections for a meaningful opening." : musicMood === "instrumental" ? "Considered piano and traditional ceremony pieces for the atmosphere you want." : "Duff-led options will appear here once the recordings are individually cleared."}</p>
+      </div>
       <div className="st-library" aria-label="Soundtrack library">
         {CURATED_TRACKS.filter((track) => track.category === musicMood).map((track) => (
           <div key={track.id} className="st-library-track">
             <div><strong>{track.title}</strong><small>{track.mood} · {track.artist}</small><small><a href={track.source} target="_blank" rel="noopener noreferrer">Source</a> · <a href={track.licenseUrl} target="_blank" rel="noopener noreferrer">{track.license}</a></small></div>
             <audio controls preload="none" src={track.src} aria-label={`Listen to ${track.title}`} />
-            <button type="button" className="st-chip" aria-pressed={draft.music?.src === track.src} onClick={() => patch({ music: { src: track.src, title: track.title } })}>{draft.music?.src === track.src ? "Selected" : "Use track"}</button>
+            <button type="button" className="st-chip" aria-pressed={draft.music?.src === track.src} onClick={() => patch({ music: { src: track.src, title: track.title, startAt: 0, endAt: 15 } })}>{draft.music?.src === track.src ? "Selected" : "Use 15s loop"}</button>
           </div>
         ))}
         {!CURATED_TRACKS.some((track) => track.category === musicMood) && <p className="st-help">No approved recordings in this category yet. You can upload a recording you have permission to use below; we won't fill this section with unrelated beats.</p>}

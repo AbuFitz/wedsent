@@ -10,7 +10,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "Wedsent — invitations people open",
+  title: "Wedsent | Invitations people open",
   description: "Design a wedding invitation that opens like a moment, not a PDF. Live phone preview, guest-ready details, RSVP flow in progress.",
 };
 export const viewport: Viewport = { themeColor: "#F4F4F2", width: "device-width", initialScale: 1 };

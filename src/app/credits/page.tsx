@@ -5,7 +5,7 @@ import { FONT_PACKS } from "@/engine/registry";
 import { Nav } from "@/components/site/nav";
 import "./credits.css";
 
-export const metadata: Metadata = { title: "Artwork credits — Wedsent", description: "Where Wedsent's artwork, fonts and icons come from, and their licences." };
+export const metadata: Metadata = { title: "Artwork credits | Wedsent", description: "Where Wedsent's artwork, fonts and icons come from, and their licences." };
 
 const OTHER = [
   ["Phosphor Icons", "MIT", "https://phosphoricons.com"],

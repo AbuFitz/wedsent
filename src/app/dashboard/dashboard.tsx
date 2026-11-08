@@ -84,7 +84,7 @@ function Overview({ w, events, hh, act, go }: { w: Wedding; events: Event[]; hh:
   const guests = hh.reduce((n, h) => n + h.guests.length, 0);
   const steps = [
     { done: !!w.content.names?.trim() && !!w.content.venue?.trim(), title: "Design your invitation", sub: "Pick a look, add names, date and venue.", action: <Link className="btn btn-light" href="/studio">Open Studio</Link> },
-    { done: events.length > 0, title: "Add your events", sub: "Nikah, ceremony, reception — whatever you’re hosting.", action: <button className="btn btn-light" onClick={() => go("Events")}>Add events</button> },
+    { done: events.length > 0, title: "Add your events", sub: "Nikah, ceremony, reception. Whatever you’re hosting.", action: <button className="btn btn-light" onClick={() => go("Events")}>Add events</button> },
     { done: guests > 0, title: "Add your guests", sub: `${guests} ${guests === 1 ? "person" : "people"} in ${hh.length} ${hh.length === 1 ? "household" : "households"}.`, action: <button className="btn btn-light" onClick={() => go("Guests")}>Add guests</button> },
     { done: !!live, title: "Publish and share", sub: live ? "Your invitation is live." : "Makes your invitation and every guest link work.", action: null },
   ];
@@ -214,7 +214,7 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
         <section className="db-card" aria-label="Import preview">
           <h2>Review import</h2>
           <p><strong>{imp.preview.rows.length}</strong> ready to add · <strong>{imp.preview.duplicates.length}</strong> look like duplicates (skipped) · <strong>{imp.preview.errors.length}</strong> need fixing</p>
-          {[...imp.preview.errors.map((e: any) => `Row ${e.line}: ${e.message}`), ...imp.preview.duplicates.map((d: any) => `Row ${d.line}: ${d.guest} — ${d.reason}`)].slice(0, 8).map((m) => <p className="db-muted" key={m}>{m}</p>)}
+          {[...imp.preview.errors.map((e: any) => `Row ${e.line}: ${e.message}`), ...imp.preview.duplicates.map((d: any) => `Row ${d.line}: ${d.guest}. ${d.reason}`)].slice(0, 8).map((m) => <p className="db-muted" key={m}>{m}</p>)}
           <p className="db-muted">Everyone imported is invited to: {events.filter((e) => sel.includes(e.id)).map((e) => e.title).join(", ") || "no events selected"}.</p>
           <div className="db-row">
             <button className="btn btn-dark" disabled={!imp.preview.rows.length || !sel.length} onClick={() => act(() => call("POST", "/api/wedding/import", { csv: imp.csv, eventIds: sel, confirm: true, skipErrors: true }), "Guests imported").then(() => setImp(null))}>Import {imp.preview.rows.length}</button>
@@ -244,7 +244,7 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
                   <span className="db-ev">{g.events.map((ev) => {
                     const t = events.find((x) => x.id === ev.eventId)?.title ?? "";
                     return (
-                      <label key={ev.eventId} className="db-status" data-s={ev.status ?? "none"} title={`Set reply for ${g.name} — ${t}`}>
+                      <label key={ev.eventId} className="db-status" data-s={ev.status ?? "none"} title={`Set reply for ${g.name}: ${t}`}>
                         <span>{t}</span>
                         <select value={ev.status ?? ""} aria-label={`${g.name}, ${t}`} onChange={(e) => e.target.value && act(() => call("POST", "/api/wedding/responses", { answers: [{ guestId: g.id, eventId: ev.eventId, status: e.target.value }] }), "Reply recorded")}>
                           <option value="" disabled>No reply</option><option value="attending">Attending</option><option value="declined">Declined</option>

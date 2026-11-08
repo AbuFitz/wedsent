@@ -30,6 +30,7 @@ export function GuestMusic({ choice }: { choice: MusicChoice | null }) {
   useEffect(() => {
     if (!src || !audio.current) return;
     const player = audio.current;
+    player.volume = 0;
     // Opening the cover is a guest gesture. Try to start then, but honour browser
     // autoplay policy: if blocked, leave the play control available and silent.
     if (choice?.startAt) player.currentTime = choice.startAt;
@@ -50,7 +51,13 @@ export function GuestMusic({ choice }: { choice: MusicChoice | null }) {
     <div className="in-music" aria-label="Invitation music">
       <audio ref={audio} src={src || undefined} loop preload="none" onTimeUpdate={() => {
         const player = audio.current;
-        if (player && choice.endAt !== undefined && player.currentTime >= choice.endAt) player.currentTime = choice.startAt ?? 0;
+        if (!player) return;
+        const beginning = choice.startAt ?? 0;
+        const ending = choice.endAt ?? player.duration;
+        const fadeIn = Math.min(1, Math.max(0, (player.currentTime - beginning) / 1.2));
+        const fadeOut = Number.isFinite(ending) ? Math.min(1, Math.max(0, (ending - player.currentTime) / 1.8)) : 1;
+        player.volume = Math.min(0.6, 0.6 * Math.min(fadeIn, fadeOut));
+        if (choice.endAt !== undefined && player.currentTime >= choice.endAt) { player.currentTime = beginning; player.volume = 0; }
       }} onEnded={() => setPlaying(false)} onError={() => { if (src) setError("Music could not be loaded"); }} />
       <button type="button" disabled={!src} onClick={toggle} aria-label={playing ? `Pause ${choice.title}` : `Play ${choice.title}`} aria-pressed={playing} title={error || choice.title}>
         {error ? <VolumeX size="1em" /> : playing ? <Pause size="1em" fill="currentColor" /> : <Play size="1em" fill="currentColor" />}

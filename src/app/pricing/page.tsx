@@ -7,7 +7,7 @@ import { Invitation } from "@/components/invitation/invitation";
 import { defaults } from "@/lib/designs";
 import "./pricing.css";
 
-export const metadata: Metadata = { title: "Pricing — Wedsent", description: "One price per wedding. Pay once, no subscription. Provisional price shown; checkout is not live yet." };
+export const metadata: Metadata = { title: "Pricing | Wedsent", description: "One price per wedding. Pay once, no subscription. Provisional price shown; checkout is not live yet." };
 
 const items: { text: string; ready: boolean }[] = [
   { text: "Your invitation, hosted at its own link", ready: true },
