@@ -11,6 +11,7 @@ import "./invitation.css";
 import "@/engine/engine.css";
 import { LiftCover, BloomCover, VeilCover } from "@/engine/covers";
 import { StationeryCard } from "@/engine/stationery";
+import { PhotoFill } from "@/engine/photo";
 import { fontPackById, paletteOf, specById, type DesignSpec, type Palette } from "@/engine/registry";
 
 export type InvitationProps = {
@@ -117,6 +118,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
         {spec.layout === "stationery" ? (
           <motion.div {...reveal(0)}>
             <StationeryCard data={data} spec={spec} palette={palette} greeting={greeting} event={evs?.[0]} />
+            {data.photo && !["gallery", "arch"].includes(spec.id) && <div className="in-photo" style={{ marginTop: "5cqw" }}><PhotoFill photo={data.photo} /></div>}
             {data.message.trim() && <p className="in-message in-note">{data.message}</p>}
           </motion.div>
         ) : (<>
@@ -146,9 +148,10 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
               {ev.startsOn && <p className="in-sub">{p.weekday}{t && ` at ${t}`}</p>}
               {i === 0 && left !== null && left >= 0 && <p className="in-count">{left > 1 ? `${left} days to go` : left === 1 ? "Tomorrow" : "Today"}</p>}
               {(ev.venue || ev.city) && <p className="in-venue">{ev.venue || ev.city}</p>}
-              {ev.venue && ev.city && <p className="in-sub">{ev.city}</p>}
+              {(ev.address || (ev.venue && ev.city)) && <p className="in-sub in-addr">{[ev.address, ev.city].filter(Boolean).join(", ")}</p>}
               <div className="in-links">
-                {(ev.venue || ev.city) && <a className="in-link" href={eventMapsUrl(ev)} target="_blank" rel="noreferrer"><MapPin size="1em" /> Open in Maps</a>}
+                {(ev.venue || ev.city) && <a className="in-link" href={eventMapsUrl(ev)} target="_blank" rel="noreferrer"><MapPin size="1em" /> Google Maps</a>}
+                {(ev.venue || ev.city) && <a className="in-link" href={appleMapsUrl(ev)} target="_blank" rel="noreferrer">Apple Maps</a>}
                 {ev.startsOn && <button type="button" className="in-cal" onClick={() => downloadEvent(ev)}><CalendarPlus size="1.1em" /> Add to calendar</button>}
               </div>
             </motion.section>
@@ -167,7 +170,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
         <motion.section className="in-card in-where" {...reveal(3)}>
           <h3 className="in-label">Where</h3>
           <p className="in-venue">{data.venue || "Venue to be confirmed"}</p>
-          {data.city && <p className="in-sub">{data.city}</p>}
+          {(data.address || data.city) && <p className="in-sub">{[data.address, data.city].filter(Boolean).join(", ")}</p>}
           {(data.venue || data.city) && (
             <a className="in-link" href={mapsUrl(data)} target="_blank" rel="noreferrer">
               <MapPin size="1em" /> Open in Maps

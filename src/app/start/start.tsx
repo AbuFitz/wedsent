@@ -8,7 +8,8 @@ import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { DesignCard } from "@/components/gallery/design-card";
 import { call } from "@/lib/api-client";
-import { defaults, loadDraft, saveDraft, PENDING_EVENTS_KEY, type InviteData, type InviteEvent } from "@/lib/designs";
+import { defaults, loadDraft, saveDraft, type InviteData, type InviteEvent } from "@/lib/designs";
+import { newLocalEvent, writeLocalEvents } from "@/lib/local-events";
 import { DESIGNS, FONT_PACKS, INTRO_PRESETS, paletteOf, specById, type DesignId } from "@/engine/registry";
 import "./start.css";
 
@@ -81,16 +82,18 @@ export function Start() {
     let user: unknown = null;
     try { user = (await call("GET", "/api/me")).user; } catch { /* backend not connected */ }
     const titles = events.filter((e) => e.trim());
+    const when = undecided ? null : d.date || null;
     if (!user) {
-      try { localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(titles.map((title) => ({ title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city })))); } catch {}
-      router.push("/signin?next=/studio");
+      // No sign-in wall: keep building. Everything is saved on this device until the couple chooses to create an account.
+      writeLocalEvents(titles.map((title) => newLocalEvent({ title, starts_on: when, starts_at_local: null, venue: d.venue, address: d.address, city: d.city, visibility: "invited" })));
+      router.push("/studio");
       return;
     }
     try {
       const w = await call("GET", "/api/wedding");
       await call("PUT", "/api/wedding", { content, rev: w.rev });
       const existing = (await call("GET", "/api/wedding/events")).events;
-      if (!existing.length) for (const title of titles) await call("POST", "/api/wedding/events", { title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city, visibility: "invited" });
+      if (!existing.length) for (const title of titles) await call("POST", "/api/wedding/events", { title, startsOn: when, venue: d.venue, address: d.address, city: d.city, visibility: "invited" });
       router.push("/studio");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Couldn’t save. Try again.");
@@ -183,6 +186,7 @@ export function Start() {
         <h1>Where, and a few words.</h1>
         <p className="s8-sub">All optional. You can fill these in later in the Studio.</p>
         <label className="s8-f"><span>Venue</span><input value={d.venue} maxLength={80} onChange={(e) => patch({ venue: e.target.value })} placeholder="The Glasshouse" /></label>
+        <label className="s8-f"><span>Street address</span><input value={d.address} maxLength={160} onChange={(e) => patch({ address: e.target.value })} placeholder="1 High Street, N1 1AA" autoComplete="off" /></label>
         <label className="s8-f"><span>City</span><input value={d.city} maxLength={80} onChange={(e) => patch({ city: e.target.value })} placeholder="London" /></label>
         <label className="s8-f"><span>A message for your guests</span><textarea rows={3} value={d.message} maxLength={300} onChange={(e) => patch({ message: e.target.value })} placeholder="We would be honoured to celebrate with you." /></label>
       </>
@@ -198,8 +202,8 @@ export function Start() {
           <li><span>Design</span>{spec.name} · {paletteOf(spec, d.palette).name}</li>
         </ul>
         {err && <p className="s8-err" role="alert">{err}</p>}
-        <button className="btn btn-dark s8-save" onClick={finish} disabled={busy}>{busy ? "Saving…" : "Save and continue"} <ArrowRight size={18} /></button>
-        <p className="s8-fine">You’ll create a free account so your invitation is saved. Nothing is sent to guests until you publish.</p>
+        <button className="btn btn-dark s8-save" onClick={finish} disabled={busy}>{busy ? "Opening…" : "Open in Studio"} <ArrowRight size={18} /></button>
+        <p className="s8-fine">No account needed to keep designing. It’s saved on this device; create a free account when you want to add guests and publish.</p>
       </>
     ),
   };

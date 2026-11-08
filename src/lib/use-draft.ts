@@ -28,7 +28,8 @@ export function useDraft() {
 }
 
 import { call, ApiError } from "./api-client";
-import { DRAFT_KEY, PENDING_EVENTS_KEY } from "./designs";
+import { DRAFT_KEY } from "./designs";
+import { clearLocalEvents, readLocalEvents, writeLocalEvents } from "./local-events";
 
 export type StudioSave = "loading" | "saving" | "saved" | "failed" | "conflict" | "offline";
 
@@ -52,19 +53,28 @@ export function useStudioDraft() {
         try {
           const w = await call("GET", "/api/wedding");
           rev.current = w.rev;
-          // Events chosen during onboarding while signed out are created now, once. The key is consumed first
-          // so a double-run (React dev strict mode, two tabs) cannot create them twice.
-          const raw = localStorage.getItem(PENDING_EVENTS_KEY);
-          if (raw) {
-            localStorage.removeItem(PENDING_EVENTS_KEY);
+          // Events built while signed out are created now, once. The key is consumed first so a double-run cannot duplicate them.
+          const pending = readLocalEvents();
+          if (pending.length) {
+            clearLocalEvents();
             try {
-              const pending = JSON.parse(raw) as { title: string; startsOn: string | null; venue?: string; city?: string }[];
               const existing = (await call("GET", "/api/wedding/events")).events;
-              if (!existing.length) for (const e of pending) await call("POST", "/api/wedding/events", { title: e.title, startsOn: e.startsOn, venue: e.venue ?? "", city: e.city ?? "", visibility: "invited" });
-            } catch { localStorage.setItem(PENDING_EVENTS_KEY, raw); }
+              if (!existing.length) for (const e of pending) await call("POST", "/api/wedding/events", { title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, address: e.address, city: e.city, visibility: e.visibility });
+            } catch { writeLocalEvents(pending); }
           }
           const hasLocal = !!localStorage.getItem(DRAFT_KEY);
-          if (w.rev === 1 && hasLocal) { setDraft(loadDraft()); dirty.current = true; }
+          if (w.rev === 1 && hasLocal) {
+            const local = loadDraft();
+            if (local.photo?.src.startsWith("data:")) {
+              try {
+                const blob = await (await fetch(local.photo.src)).blob();
+                const r = await fetch("/api/media", { method: "POST", body: blob, headers: { "content-type": blob.type }, credentials: "same-origin" });
+                const j = await r.json();
+                local.photo = r.ok ? { ...local.photo, src: j.src } : null;
+              } catch { local.photo = null; }
+            }
+            setDraft(local); dirty.current = true;
+          }
           else setDraft({ ...defaults, ...w.content });
           setAccount(user);
         } catch { setDraft(loadDraft()); }
@@ -90,6 +100,16 @@ export function useStudioDraft() {
     }, 600);
     return () => clearTimeout(t);
   }, [draft, ready, account]);
+
+  // Never lose the last keystrokes: flush the local draft when the tab hides or the Studio unmounts (client navigation).
+  const latest = useRef(draft); latest.current = draft;
+  useEffect(() => {
+    if (!ready || account) return;
+    const flush = () => { saveDraft(latest.current); };
+    const vis = () => { if (document.visibilityState === "hidden") flush(); };
+    window.addEventListener("pagehide", flush); document.addEventListener("visibilitychange", vis);
+    return () => { window.removeEventListener("pagehide", flush); document.removeEventListener("visibilitychange", vis); flush(); };
+  }, [ready, account]);
 
   const patch = useCallback((p: Partial<InviteData>) => { dirty.current = true; setDraft((d) => ({ ...d, ...p })); }, []);
   return { draft, patch, state, ready, account, reload: () => location.reload() };

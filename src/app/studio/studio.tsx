@@ -3,20 +3,22 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Image as ImageIcon, Upload, MapPin } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designs, daysUntil, onColor, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
 import { FONT_PACKS, INTRO_PRESETS, paletteOf, specById } from "@/engine/registry";
 import { call, ApiError } from "@/lib/api-client";
+import { newLocalEvent, readLocalEvents, writeLocalEvents, type RawEvent } from "@/lib/local-events";
+import { storePhoto } from "@/lib/photo-upload";
 import { useStudioDraft } from "@/lib/use-draft";
 import "./studio.css";
 
-type Tab = "design" | "words" | "details" | "events" | "style";
-type RawEvent = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
+type Tab = "design" | "words" | "photo" | "details" | "events" | "style";
 const tabs: { id: Tab; label: string; icon: typeof Palette }[] = [
   { id: "design", label: "Design", icon: Sparkles },
   { id: "words", label: "Words", icon: Type },
+  { id: "photo", label: "Photo", icon: ImageIcon },
   { id: "details", label: "Details", icon: CalendarDays },
   { id: "events", label: "Events", icon: CalendarRange },
   { id: "style", label: "Style", icon: Palette },
@@ -36,11 +38,11 @@ export function Studio() {
   const [sheet, setSheet] = useState(true);
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
   const loadEvents = useCallback(async () => {
-    if (!account) return;
+    if (!account) { setRawEvents(readLocalEvents()); return; }
     try { setRawEvents((await call("GET", "/api/wedding/events")).events); } catch { /* keep what we have */ }
   }, [account]);
-  useEffect(() => { loadEvents(); }, [loadEvents]);
-  const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
+  useEffect(() => { if (ready) loadEvents(); }, [loadEvents, ready]);
+  const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, address: e.address, city: e.city }));
 
   useEffect(() => {
     const d = params.get("design");
@@ -51,6 +53,7 @@ export function Studio() {
     setTab(t);
     setSheet(true);
     if (t === "details" || t === "events") setOpen(true);
+    if (t === "photo") setOpen(false);
     if (t === "design" || t === "style") setOpen(false);
   };
 
@@ -99,6 +102,7 @@ export function Studio() {
               {tab === "design" && <DesignTab draft={draft} patch={patch} />}
               {tab === "words" && <WordsTab draft={draft} patch={patch} />}
               {tab === "details" && <DetailsTab draft={draft} patch={patch} />}
+              {tab === "photo" && <PhotoTab draft={draft} patch={patch} signedIn={!!account} />}
               {tab === "events" && <EventsTab account={!!account} events={rawEvents} reload={loadEvents} />}
               {tab === "style" && <StyleTab draft={draft} patch={patch} />}
             </motion.div>
@@ -197,6 +201,10 @@ function DetailsTab({ draft, patch }: TabProps) {
         <input value={draft.venue} maxLength={80} onChange={(e) => patch({ venue: e.target.value })} placeholder="The Glasshouse" />
       </label>
       <label className="st-field">
+        <span>Street address <i>optional</i></span>
+        <input value={draft.address} maxLength={160} onChange={(e) => patch({ address: e.target.value })} placeholder="1 High Street, N1 1AA" autoComplete="off" />
+      </label>
+      <label className="st-field">
         <span>City</span>
         <input value={draft.city} maxLength={80} onChange={(e) => patch({ city: e.target.value })} placeholder="London" />
         <small>Guests get an “Open in Maps” link built from venue and city.</small>
@@ -262,23 +270,22 @@ function StyleTab({ draft, patch }: TabProps) {
   );
 }
 
-const blank = { title: "", startsOn: "", startsAt: "", venue: "", city: "", visibility: "invited" as "invited" | "everyone" };
+const blank = { title: "", startsOn: "", startsAt: "", venue: "", address: "", city: "", visibility: "invited" as "invited" | "everyone" };
 function EventsTab({ account, events, reload }: { account: boolean; events: RawEvent[]; reload: () => Promise<void> }) {
   const [f, setF] = useState(blank);
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  if (!account)
-    return (
-      <div className="st-stack">
-        <h2 className="st-h">Events</h2>
-        <p className="st-help st-help--flat">Add the Nikah, ceremony, reception or any other celebration, and each guest sees only the ones they’re invited to. Events are saved to your account, so sign in first. Until then your invitation shows the single date and venue from Details.</p>
-        <Link href="/signin?next=/studio" className="btn btn-dark">Sign in to add events</Link>
-      </div>
-    );
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr(null);
     const body = { ...f, startsOn: f.startsOn || null, startsAt: f.startsAt || null };
+    if (!account) {
+      const raw = { title: f.title.trim(), starts_on: body.startsOn, starts_at_local: body.startsAt, venue: f.venue, address: f.address, city: f.city, visibility: f.visibility };
+      const list = readLocalEvents();
+      writeLocalEvents(editing ? list.map((x) => (x.id === editing ? { ...x, ...raw } : x)) : [...list, newLocalEvent(raw)]);
+      setF(blank); setEditing(null); await reload(); setBusy(false);
+      return;
+    }
     try {
       if (editing) await call("PUT", `/api/wedding/events/${editing}`, body); else await call("POST", "/api/wedding/events", body);
       setF(blank); setEditing(null); await reload();
@@ -286,7 +293,8 @@ function EventsTab({ account, events, reload }: { account: boolean; events: RawE
     setBusy(false);
   };
   const del = async (id: string, title: string) => {
-    if (!confirm(`Delete “${title}”? Replies to it will be removed.`)) return;
+    if (!confirm(`Delete “${title}”?${account ? " Replies to it will be removed." : ""}`)) return;
+    if (!account) { writeLocalEvents(readLocalEvents().filter((x) => x.id !== id)); if (editing === id) { setEditing(null); setF(blank); } await reload(); return; }
     try { await call("DELETE", `/api/wedding/events/${id}`); if (editing === id) { setEditing(null); setF(blank); } await reload(); } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t delete."); }
   };
   return (
@@ -297,7 +305,7 @@ function EventsTab({ account, events, reload }: { account: boolean; events: RawE
         {events.map((e) => (
           <li key={e.id} data-editing={editing === e.id}>
             <div><strong>{e.title}</strong><span>{[e.starts_on, e.starts_at_local, e.venue].filter(Boolean).join(" · ") || "No details yet"}</span></div>
-            <button type="button" className="st-ico" aria-label={`Edit ${e.title}`} onClick={() => { setEditing(e.id); setF({ title: e.title, startsOn: e.starts_on ?? "", startsAt: e.starts_at_local ?? "", venue: e.venue, city: e.city, visibility: e.visibility }); }}><Pencil size={15} /></button>
+            <button type="button" className="st-ico" aria-label={`Edit ${e.title}`} onClick={() => { setEditing(e.id); setF({ title: e.title, startsOn: e.starts_on ?? "", startsAt: e.starts_at_local ?? "", venue: e.venue, address: e.address ?? "", city: e.city, visibility: e.visibility }); }}><Pencil size={15} /></button>
             <button type="button" className="st-ico" aria-label={`Delete ${e.title}`} onClick={() => del(e.id, e.title)}><Trash2 size={15} /></button>
           </li>
         ))}
@@ -310,6 +318,7 @@ function EventsTab({ account, events, reload }: { account: boolean; events: RawE
           <label className="st-field"><span>Time</span><input type="time" value={f.startsAt} onChange={(e) => setF({ ...f, startsAt: e.target.value })} /></label>
         </div>
         <label className="st-field"><span>Venue</span><input maxLength={80} value={f.venue} onChange={(e) => setF({ ...f, venue: e.target.value })} /></label>
+        <label className="st-field"><span>Street address</span><input maxLength={160} value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} placeholder="1 High Street, N1 1AA" autoComplete="off" /></label>
         <label className="st-field"><span>City</span><input maxLength={80} value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} /></label>
         <label className="st-field"><span>Who can see it?</span>
           <select value={f.visibility} onChange={(e) => setF({ ...f, visibility: e.target.value as "invited" | "everyone" })}>
@@ -320,8 +329,60 @@ function EventsTab({ account, events, reload }: { account: boolean; events: RawE
           <button className="btn btn-dark" disabled={busy || !f.title.trim()}>{editing ? "Save event" : <><Plus size={16} /> Add event</>}</button>
           {editing && <button type="button" className="btn btn-light" onClick={() => { setEditing(null); setF(blank); }}>Cancel</button>}
         </div>
-        <p className="st-help st-help--flat">Choose who’s invited to each event in <Link href="/dashboard" className="st-inl">Guests</Link>.</p>
+        <p className="st-help st-help--flat">{account ? <>Choose who’s invited to each event in <Link href="/dashboard" className="st-inl">Guests</Link>.</> : "Saved on this device. They move to your account when you create one."}</p>
       </form>
+    </div>
+  );
+}
+
+function PhotoTab({ draft, patch, signedIn }: TabProps & { signedIn: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [drag, setDrag] = useState(false);
+  const photo = draft.photo;
+  const take = async (f: File | undefined) => {
+    if (!f) return;
+    setBusy(true); setErr(null);
+    try { patch({ photo: await storePhoto(f, signedIn) }); } catch (e) { setErr(e instanceof Error ? e.message : "Couldn’t add that photo."); }
+    setBusy(false);
+  };
+  const focus = (e: React.MouseEvent<HTMLDivElement> | React.PointerEvent<HTMLDivElement>) => {
+    if (!photo) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    patch({ photo: { ...photo, fx: Math.round(((e.clientX - r.left) / r.width) * 100), fy: Math.round(((e.clientY - r.top) / r.height) * 100) } });
+  };
+  const nudge = (dx: number, dy: number) => photo && patch({ photo: { ...photo, fx: Math.max(0, Math.min(100, photo.fx + dx)), fy: Math.max(0, Math.min(100, photo.fy + dy)) } });
+  return (
+    <div className="st-stack">
+      <h2 className="st-h">Your photograph</h2>
+      <p className="st-help">Shown full-bleed on Gallery, inside the window on Arch, and at the top of your invitation on every design.</p>
+      {!photo ? (
+        <label className="st-drop" data-drag={drag} onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={(e) => { e.preventDefault(); setDrag(false); take(e.dataTransfer.files?.[0]); }}>
+          <Upload size={22} />
+          <strong>{busy ? "Adding…" : "Add a photo"}</strong>
+          <span>Drop one here, or choose from your device. JPEG, PNG or WebP.</span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { take(e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+      ) : (
+        <>
+          <div className="st-focus" role="group" aria-label="Choose the focal point">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo.src} alt="Your photograph" draggable={false} />
+            <div className="st-focus-hit" onPointerDown={focus} onPointerMove={(e) => e.buttons === 1 && focus(e)} />
+            <i className="st-dot" style={{ left: `${photo.fx}%`, top: `${photo.fy}%` }} />
+          </div>
+          <p className="st-help st-help--flat">Tap the part of the photo that matters most. It stays in frame when the picture is cropped.</p>
+          <div className="st-nudge" role="group" aria-label="Fine-tune focal point">
+            <button type="button" onClick={() => nudge(0, -6)} aria-label="Move focus up">↑</button><button type="button" onClick={() => nudge(-6, 0)} aria-label="Move focus left">←</button><button type="button" onClick={() => nudge(6, 0)} aria-label="Move focus right">→</button><button type="button" onClick={() => nudge(0, 6)} aria-label="Move focus down">↓</button>
+          </div>
+          <div className="st-btns">
+            <label className="btn btn-light">Replace<input type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { take(e.target.files?.[0]); e.target.value = ""; }} /></label>
+            <button type="button" className="btn btn-light" onClick={() => patch({ photo: null })}>Remove</button>
+          </div>
+        </>
+      )}
+      {err && <small className="st-err" role="alert">{err}</small>}
+      {!signedIn && <p className="st-help st-help--flat">Photos stay on this device until you create an account.</p>}
     </div>
   );
 }

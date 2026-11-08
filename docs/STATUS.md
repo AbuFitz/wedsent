@@ -3,11 +3,17 @@
 Source of truth for what is real. States: **Verified** = covered by an automated test or a browser run this session. **Partial** = built, with named gaps. **UI only** = looks real, is not. **Planned**. **Blocked** = needs something outside the code.
 Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs` (16 browser checks, cold server), screenshots reviewed at 390 and 1440 widths.
 
+## Latest (2026-11-08, round 5)
+- Original three designs and all object-metaphor openings removed. Six designs, three quiet openings (lift, bloom, veil).
+- Customisation: photograph with focal point, street address, 11 lettering pairings, opening lines, palettes, per-event address.
+- No sign-in wall: onboarding opens the Studio; events and photo live on the device and move to the account at sign-up (e2e verified).
+- Site rebuilt: single hero, real configurator, restrained type. Needs a real-device check and a licensed photography decision.
+
 ## Invitation (the creative product)
 | Capability | State | Notes |
 | --- | --- | --- |
 | Design engine: spec registry, palettes, font pairings, intro lines, shared by server and client | Verified | `docs/DESIGN_ENGINE.md`. Registry integrity, contrast (WCAG AA) and artwork licences are tested. |
-| Seven designs, each with its own opening (seal envelope, doors, lattice, curtains, shutter, hold) | Partial | Four new designs use real public-domain artwork and read as stationery. Vermilion, Monolith and Nocturne are type-led and need the same art pass. |
+| Six designs with three quiet openings (lift, bloom, veil) | Partial | See `docs/DESIGN_ENGINE.md`. Photo-led designs need real photography to shine; none is bundled. |
 | Real artwork pipeline (public-domain / CC0 plates, provenance, `/credits`) | Verified | Pale flowers and low-resolution scans are known limits. |
 | Guest sees their own events as cards, greeted by household, Maps and per-event calendar file | Verified | |
 | Per-design lettering, colour palette, optional opening line (Arabic, Hindi, custom) | Verified | Font pairing applies to the four stationery designs only. |

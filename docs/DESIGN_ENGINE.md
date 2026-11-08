@@ -15,17 +15,25 @@ The invitation is the creative product. The engine turns **content** (names, eve
 - Stationery card: `src/engine/stationery.tsx` + `src/engine/engine.css`. Real artwork cutouts and tinted ornament masks, paper grain, gold foil gradients, per-design composition.
 - Multi-event: the guest sees one card per event they are invited to, plus Maps and a per-event calendar file.
 
-## Designs (7)
-| Design | Family | Opening | Art |
-| --- | --- | --- | --- |
-| Botanica | Botanical | Wax-seal envelope | Redouté roses, peonies, olive |
-| Foil Arch | Contemporary romantic | Arched doors | Foil arch, peony |
-| Zellige | Heritage | Lattice iris | Owen Jones Moresque ornament in gold |
-| Marigold | Celebration | Curtains | Marigold plates, toran scallops, medallion |
-| Vermilion | Stationery | Envelope | Type-led |
-| Monolith | Bold typographic | Shutter | Type-led |
-| Nocturne | Cinematic | Press and hold | Type-led |
-Not every design is finished art direction; Vermilion, Monolith and Nocturne predate the engine's artwork.
+## Designs (6) and openings (3)
+Openings are deliberately quiet; object metaphors (envelopes, doors, curtains, seals) were removed as cartoonish.
+| Opening | Behaviour |
+| --- | --- |
+| lift | The cover is a sheet: drag/swipe up, tap or press Enter |
+| bloom | The invitation opens outward from where you touch (keyboard: from centre) |
+| veil | The cover softly clears (fade, scale, blur) |
+| Design | Family | Opening | Photo | Art |
+| --- | --- | --- | --- | --- |
+| Gallery | Editorial | lift | full-bleed cover | none (type over photograph) |
+| Linen | Minimal | veil | inside, optional | none (hairline frame) |
+| Botanica | Botanical | veil | inside, optional | Redouté / peony / olive plates |
+| Arch | Contemporary romantic | bloom | in the arch window | plates when no photo |
+| Zellige | Heritage | lift | inside, optional | Owen Jones ornament masks in gold |
+| Marigold | Celebration | bloom | inside, optional | marigold plates, toran edge |
+No photography is bundled: licensed wedding photography could not be sourced legitimately here (Unsplash blocks automated access and was not circumvented; the museum APIs returned little usable). Photo designs show a tonal fallback until the couple uploads their own. Provide or license photography for marketing use.
+
+## Customisation (what a couple can change)
+Design, colour palette (plus custom accent), lettering (11 font pairings incl. scripts), opening line (presets in Arabic, Hindi, Jewish, East Asian, or custom text), names, occasion, message, date and time, venue, street address, city (Google and Apple Maps links), dress code, reply-by date, a cover photograph with focal point, and any number of events with their own address. Photo: resized in the browser (EXIF-aware, ≤1600px JPEG), stored as `/media/:id` for accounts (Postgres bytea, magic-byte checked, 2.5 MB and 40-photo limits) or as a data URL in the local draft when signed out; the local photo is uploaded when the account is created. The server rejects `data:` and third-party photo URLs.
 
 ## Artwork provenance (the rule: only public-domain or CC0, each file verifiable)
 Source: Wikimedia Commons scans of public-domain plates (Cleveland Museum of Art CC0 Redouté, Edwin Step, Owen Jones and others). `scripts/art/search.py` finds candidates and checks the licence field; `scripts/art/build-assets.py` cuts plants out of the paper (flood-fill matte so pale petals survive), turns black-on-paper ornament into tintable alpha masks, optimises to WebP, and writes `public/art/provenance.json`. `src/engine/assets.ts` mirrors it; `tests/engine.test.ts` fails if any bundled asset is not PD/CC0 or lacks a source page. `/credits` lists every file.

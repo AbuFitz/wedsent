@@ -11,7 +11,7 @@ export function PriceTeaser() {
   return (
     <section className="pt-teaser">
       <motion.div {...rise}>
-        <h2><span>£39</span> once, for the whole wedding.</h2>
+        <h2>One price for the whole wedding. Provisionally £39.</h2>
         <p>No subscription and no per-guest charges. This is the provisional price: checkout isn’t switched on yet, so nothing is charged while you try it.</p>
         <Link href="/pricing" className="btn btn-dark">See what’s included <ArrowRight size={18} /></Link>
       </motion.div>
@@ -37,7 +37,7 @@ export function Faq() {
 export function Closing() {
   return (
     <section className="cl">
-      <motion.h2 {...rise}>Make one they’ll<br />want to open.</motion.h2>
+      <motion.h2 {...rise}>Make one they’ll keep.</motion.h2>
       <Link href="/start" className="btn cl-btn">Start your invitation <ArrowRight size={18} /></Link>
     </section>
   );

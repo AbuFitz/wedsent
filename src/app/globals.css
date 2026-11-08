@@ -1,10 +1,10 @@
 :root{
-  --bg:#F5F2EB;--surface:#FFFFFF;--ink:#0E0E10;--muted:#5C5E66;--line:#E2E2DE;--signal:#5B3DF5;
+  --bg:#FAF8F4;--surface:#FFFFFF;--ink:#171410;--muted:#6B655B;--line:#E7E2D8;--signal:#5B3DF5;
   --display:"Geist Variable",system-ui,sans-serif;
-  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --serif:"Newsreader Variable","Iowan Old Style",Georgia,serif;
   --body:"Geist Variable",system-ui,sans-serif;
   --ease:cubic-bezier(.2,.8,.2,1);
-  --r-s:10px;--r-m:16px;--r-l:28px;
+  --r-s:6px;--r-m:10px;--r-l:14px;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -17,7 +17,7 @@ h1,h2,h3,p{margin:0}
 img,svg{max-width:100%}
 :focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:6px}
 ::selection{background:var(--signal);color:#fff}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px;border-radius:99px;border:1px solid transparent;font-weight:600;font-size:15px;transition:transform .25s var(--ease),background .2s,box-shadow .2s;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px;border-radius:10px;border:1px solid transparent;font-weight:500;font-size:15px;letter-spacing:.005em;transition:transform .25s var(--ease),background .2s,border-color .2s;white-space:nowrap}
 .btn:active{transform:scale(.97)}
 .btn-dark{background:var(--ink);color:#fff}
 .btn-dark:hover{background:#26262c}
