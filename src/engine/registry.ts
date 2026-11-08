@@ -3,7 +3,7 @@
  * palettes + type pairing. Content (names, events...) is separate and survives switching designs.
  * Pure TypeScript, safe to import on the server (validation) and the client (rendering).
  */
-export type OpeningKind = "lift" | "bloom" | "veil" | "focus";
+export type OpeningKind = "lift" | "bloom" | "veil" | "focus" | "doors" | "curtain";
 export type ArtKind = "none" | "plates" | "photo" | "ornament";
 export type Shape = "Portrait" | "Arch" | "Frame" | "Full bleed" | "Minimal";
 
@@ -78,6 +78,8 @@ export const OPENINGS: Record<OpeningKind, { label: string; hint: string }> = {
   bloom: { label: "Tap to open", hint: "The invitation opens outward from where you touch" },
   veil: { label: "Tap to open", hint: "The cover softly clears to reveal the invitation" },
   focus: { label: "Reveal the moment", hint: "Typography moves into focus as the invitation is revealed" },
+  doors: { label: "Open the doors", hint: "A pair of hinged panels opens to reveal the occasion" },
+  curtain: { label: "Draw the curtain", hint: "Soft fabric folds pull away from the invitation" },
 };
 
 export const DESIGNS: DesignSpec[] = [

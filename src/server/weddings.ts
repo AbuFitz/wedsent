@@ -26,7 +26,7 @@ export const ContentSchema = z.object({
   palette: z.string().max(30).default(""),
   type: z.string().max(30).default(""),
   intro: z.string().max(120).default(""),
-  opening: z.enum(["", "lift", "bloom", "veil", "focus"]).default(""),
+  opening: z.enum(["", "lift", "bloom", "veil", "focus", "doors", "curtain"]).default(""),
 });
 export type Content = z.infer<typeof ContentSchema>;
 

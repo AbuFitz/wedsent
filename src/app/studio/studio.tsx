@@ -106,7 +106,7 @@ export function Studio() {
               {tab === "words" && <WordsTab draft={draft} patch={patch} />}
               {tab === "details" && <DetailsTab draft={draft} patch={patch} />}
               {tab === "events" && <EventsTab account={!!account} events={rawEvents} reload={loadEvents} />}
-              {tab === "style" && <StyleTab draft={draft} patch={patch} />}
+              {tab === "style" && <StyleTab draft={draft} patch={patch} account={!!account} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -219,13 +219,65 @@ function DetailsTab({ draft, patch }: TabProps) {
   );
 }
 
-function StyleTab({ draft, patch }: TabProps) {
+function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const upload = async (file?: File) => {
+    if (!file) return;
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 15_000_000) {
+      setPhotoError("Choose a JPEG, PNG or WebP photo smaller than 15 MB."); return;
+    }
+    setPhotoBusy(true); setPhotoError(null);
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1800 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("This browser cannot process the photograph.");
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((b) => b ? resolve(b) : reject(new Error("Couldn’t process this image.")), "image/jpeg", 0.8));
+      if (blob.size > 2_500_000) throw new Error("Please choose a smaller photograph.");
+      let src: string;
+      if (account) {
+        const res = await fetch("/api/media", { method: "POST", body: blob, credentials: "same-origin" });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result?.error?.message || "Couldn’t upload your photograph.");
+        src = result.src;
+      } else {
+        src = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Couldn’t read this photograph.")); reader.readAsDataURL(blob);
+        });
+      }
+      patch({ photo: { src, fx: 50, fy: 50 } });
+    } catch (e) { setPhotoError(e instanceof Error ? e.message : "Couldn’t add that image."); }
+    finally { setPhotoBusy(false); }
+  };
   const spec = specById(draft.design);
   const pal = paletteOf(spec, draft.palette);
   const stationery = spec.layout === "stationery";
   const custom = draft.accent || pal.accent;
   return (
     <div className="st-stack">
+      <h2 className="st-h">Your photograph</h2>
+      <p className="st-help">Choose a sharp portrait or landscape photo. We optimise it for the invitation and let you position the focal point. Gallery and Arch use photos most prominently.</p>
+      <label className="st-field">
+        <span>{photoBusy ? "Processing photograph…" : draft.photo ? "Replace photograph" : "Upload photograph"}</span>
+        <input type="file" accept="image/jpeg,image/png,image/webp" disabled={photoBusy} onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }} />
+      </label>
+      {draft.photo && <>
+        <div className="st-photo-crop">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={draft.photo.src} alt="Your uploaded photograph, showing the current crop" style={{ objectPosition: `${draft.photo.fx}% ${draft.photo.fy}%` }} />
+        </div>
+        <label className="st-field"><span>Move photo left or right</span><input type="range" min="0" max="100" value={draft.photo.fx} onChange={(e) => patch({ photo: { ...draft.photo!, fx: Number(e.target.value) } })} /></label>
+        <label className="st-field"><span>Move photo up or down</span><input type="range" min="0" max="100" value={draft.photo.fy} onChange={(e) => patch({ photo: { ...draft.photo!, fy: Number(e.target.value) } })} /></label>
+        <button type="button" className="st-chip" onClick={() => patch({ photo: null })}>Remove photograph</button>
+      </>}
+      {photoError && <small className="st-err" role="alert">{photoError}</small>}
+      {!account && <p className="st-help">Build mode: the photo stays in this browser. Signed-in uploads use private owner-scoped storage.</p>}
       <h2 className="st-h">Colours</h2>
       <p className="st-help">Each design has its own palettes. Text colour adjusts so it stays readable.</p>
       <div className="st-pals">
@@ -244,7 +296,7 @@ function StyleTab({ draft, patch }: TabProps) {
         <button type="button" className="st-chip" aria-pressed={!draft.opening} onClick={() => patch({ opening: "" })}>Designer’s choice</button>
         {(Object.keys(OPENINGS) as OpeningKind[]).map((kind) => (
           <button key={kind} type="button" className="st-chip" aria-pressed={draft.opening === kind} title={OPENINGS[kind].hint} onClick={() => patch({ opening: kind })}>
-            {{ lift: "Lift", bloom: "Bloom", veil: "Veil", focus: "Focus" }[kind]}
+            {{ lift: "Lift", bloom: "Bloom", veil: "Veil", focus: "Focus", doors: "Doors", curtain: "Curtain" }[kind]}
           </button>
         ))}
       </div>

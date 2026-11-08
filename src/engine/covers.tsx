@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "motion/react";
 import type { InviteData } from "@/lib/designs";
 import { paletteOf, type DesignSpec } from "./registry";
@@ -42,6 +42,50 @@ export function FocusCover({ data, spec, onOpen, still }: P) {
     >
       <Face data={data} spec={spec} hint={spec.opening.label} />
       <button type="button" className="cv-hit" onClick={onOpen} disabled={still} aria-label="Open invitation" />
+    </motion.section>
+  );
+}
+
+/** Hinged architectural panels with a single perspective vanishing plane. */
+export function DoorsCover({ data, spec, onOpen, still }: P) {
+  const reduced = useReducedMotion();
+  const [opening, setOpening] = useState(false);
+  useEffect(() => {
+    if (!opening) return;
+    const timer = window.setTimeout(onOpen, 1050);
+    return () => window.clearTimeout(timer);
+  }, [opening, onOpen]);
+  return (
+    <motion.section className="cover cv cv-doors" aria-label="Invitation cover" exit={{ opacity: 0, transition: { duration: 0.1 } }}>
+      <Face data={data} spec={spec} hint="" />
+      <div className="cv-pair" aria-hidden="true">
+        <motion.div className="cv-door cv-door--left" animate={opening ? { rotateY: -112 } : { rotateY: 0 }} transition={{ duration: 0.95, ease: [0.23, 0.65, 0.2, 1] }} />
+        <motion.div className="cv-door cv-door--right" animate={opening ? { rotateY: 112 } : { rotateY: 0 }} transition={{ duration: 0.95, ease: [0.23, 0.65, 0.2, 1] }} />
+      </div>
+      {!opening && <span className="cv-invite-action" aria-hidden="true">Tap to enter</span>}
+      <button type="button" className="cv-hit" onClick={() => reduced ? onOpen() : setOpening(true)} disabled={still || opening} aria-label="Open the invitation doors" />
+    </motion.section>
+  );
+}
+
+/** Fabric-like surface with directional light on each fold; no WebGL required. */
+export function CurtainCover({ data, spec, onOpen, still }: P) {
+  const reduced = useReducedMotion();
+  const [opening, setOpening] = useState(false);
+  useEffect(() => {
+    if (!opening) return;
+    const timer = window.setTimeout(onOpen, 1150);
+    return () => window.clearTimeout(timer);
+  }, [opening, onOpen]);
+  return (
+    <motion.section className="cover cv cv-curtain" aria-label="Invitation cover" exit={{ opacity: 0, transition: { duration: 0.1 } }}>
+      <Face data={data} spec={spec} hint="" />
+      <div className="cv-pair" aria-hidden="true">
+        <motion.div className="cv-drape cv-drape--left" animate={opening ? { x: "-104%", scaleX: 0.8 } : { x: 0, scaleX: 1 }} transition={{ duration: 1.05, ease: [0.3, 0, 0.16, 1] }} />
+        <motion.div className="cv-drape cv-drape--right" animate={opening ? { x: "104%", scaleX: 0.8 } : { x: 0, scaleX: 1 }} transition={{ duration: 1.05, ease: [0.3, 0, 0.16, 1] }} />
+      </div>
+      {!opening && <span className="cv-invite-action" aria-hidden="true">Reveal the invitation</span>}
+      <button type="button" className="cv-hit" onClick={() => reduced ? onOpen() : setOpening(true)} disabled={still || opening} aria-label="Draw the invitation curtains" />
     </motion.section>
   );
 }

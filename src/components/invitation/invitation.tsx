@@ -9,7 +9,7 @@ import {
 } from "@/lib/designs";
 import "./invitation.css";
 import "@/engine/engine.css";
-import { LiftCover, BloomCover, VeilCover, FocusCover } from "@/engine/covers";
+import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover } from "@/engine/covers";
 import { StationeryCard } from "@/engine/stationery";
 import { fontPackById, paletteOf, specById, OPENINGS, type DesignSpec, type Palette } from "@/engine/registry";
 
@@ -66,6 +66,8 @@ function Cover({ spec, ...p }: CoverProps & { spec: DesignSpec }) {
     case "lift": return <LiftCover spec={spec} {...p} />;
     case "bloom": return <BloomCover spec={spec} {...p} />;
     case "focus": return <FocusCover spec={spec} {...p} />;
+    case "doors": return <DoorsCover spec={spec} {...p} />;
+    case "curtain": return <CurtainCover spec={spec} {...p} />;
     default: return <VeilCover spec={spec} {...p} />;
   }
 }
