@@ -1,32 +1,30 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
-import {
-  AnimatePresence, motion, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform,
-} from "motion/react";
-import { ArrowRight, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll, useSpring, useTransform } from "motion/react";
+import { ArrowRight, CalendarPlus, Lock, Printer, Translate, UsersThree, PencilSimpleLine, MapPin } from "@phosphor-icons/react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
+import { DesignCard } from "@/components/gallery/design-card";
+import { sampleData, sampleEvents } from "@/components/gallery/samples";
+import { DESIGNS, specById } from "@/engine/registry";
 import { Nav } from "./nav";
-import { ProductTour } from "./showcase";
-import { Features, PriceTeaser, Faq, Closing, SiteFooter, Trust } from "./sections";
-import { designs, saveDraft, type DesignId, type InviteData } from "@/lib/designs";
-import { useDraft } from "@/lib/use-draft";
+import { PriceTeaser, Faq, Closing, SiteFooter } from "./sections";
 import "./home.css";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
+const spec = (id: string) => specById(id);
 
 export function Home() {
-  const { draft, patch } = useDraft();
   return (
     <>
       <Nav />
-      <main>
-        <Hero draft={draft} patch={patch} />
-        <Trust />
-        <ProductTour data={draft} />
-        <Designs draft={draft} />
-        <Features />
+      <main className="hm">
+        <Hero />
+        <Collection />
+        <EveryWedding />
+        <GuestTour />
+        <Everything />
         <PriceTeaser />
         <Faq />
         <Closing />
@@ -36,132 +34,164 @@ export function Home() {
   );
 }
 
-/* ----------------------------- Hero ----------------------------- */
-
-function Hero({ draft, patch }: { draft: InviteData; patch: (p: Partial<InviteData>) => void }) {
-  const [replay, setReplay] = useState(0);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const rx = useSpring(useTransform(my, [-1, 1], [7, -7]), { stiffness: 140, damping: 18 });
-  const ry = useSpring(useTransform(mx, [-1, 1], [-9, 9]), { stiffness: 140, damping: 18 });
-
-  const words = ["The", "invitation", "they’ll", "actually", "open."];
+/* ------------------------------ Hero ------------------------------ */
+function Hero() {
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const lift = useSpring(useTransform(scrollYProgress, [0, 1], [0, -70]), { stiffness: 80, damping: 20 });
+  const sink = useSpring(useTransform(scrollYProgress, [0, 1], [0, 40]), { stiffness: 80, damping: 20 });
+  const words = ["Invitations", "that", "open", "like", "a", "moment."];
+  const z = spec("zellige"), b = spec("botanica"), m = spec("marigold");
   return (
-    <section
-      className="hero"
-      onPointerMove={(e) => {
-        if (e.pointerType !== "mouse") return;
-        const r = e.currentTarget.getBoundingClientRect();
-        mx.set(((e.clientX - r.left) / r.width) * 2 - 1);
-        my.set(((e.clientY - r.top) / r.height) * 2 - 1);
-      }}
-      onPointerLeave={() => { mx.set(0); my.set(0); }}
-    >
-      <div className="hero-copy">
-        <h1 className="hero-title" aria-label={words.join(" ")}>
+    <section ref={ref} className="hm-hero">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <motion.img src="/art/rose-sprig.webp" alt="" aria-hidden="true" className="hm-leaf hm-leaf--a" style={{ y: sink }} width={688} height={900} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <motion.img src="/art/peony-paxton.webp" alt="" aria-hidden="true" className="hm-leaf hm-leaf--b" style={{ y: lift }} width={790} height={900} />
+      <div className="hm-hero-copy">
+        <h1 aria-label={words.join(" ")}>
           {words.map((w, i) => (
             <span className="mask" key={i} aria-hidden="true">
-              <motion.span
-                initial={{ y: "108%" }} animate={{ y: 0 }}
-                transition={{ delay: 0.1 + i * 0.07, duration: 0.9, ease }}
-              >{w}&nbsp;</motion.span>
+              <motion.span initial={{ y: "108%" }} animate={{ y: 0 }} transition={{ delay: 0.1 + i * 0.07, duration: 0.9, ease }}>{w}&nbsp;</motion.span>
             </span>
           ))}
         </h1>
-        <motion.p className="hero-sub" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65, duration: 0.8, ease }}>
-          Type your names and the phone beside you rewrites itself. Pick a design, open it like a guest would, then carry on in the Studio.
+        <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.8, ease }}>
+          Choose a design made like real stationery, add your events, and send each family their own private link. Replies come back counted, per person and per event.
         </motion.p>
-        <motion.div className="hero-form" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.8, ease }}>
-          <label className="field">
-            <span>Names</span>
-            <input value={draft.names} maxLength={60} onChange={(e) => patch({ names: e.target.value })} placeholder="Amina & Yusuf" autoComplete="off" />
-          </label>
-          <label className="field field-date">
-            <span>Date</span>
-            <input type="date" value={draft.date} onChange={(e) => patch({ date: e.target.value })} />
-          </label>
-          <Link href="/studio" className="btn btn-dark hero-go">Continue in Studio <ArrowRight size={18} /></Link>
+        <motion.div className="hm-cta" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.8, ease }}>
+          <Link href="/start" className="btn btn-dark">Start your invitation <ArrowRight size={18} /></Link>
+          <Link href="/designs" className="btn btn-light">Browse designs</Link>
         </motion.div>
-        <motion.div className="hero-picks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 0.8 }}>
-          {designs.map((d) => (
-            <div key={d.id} className="pick" data-on={draft.design === d.id}>
-              <span className="pick-thumb">
-                <Invitation data={{ ...draft, design: d.id, accent: "" }} still />
-              </span>
-              <span className="pick-name">{d.name}</span>
-              <button
-                type="button" className="pick-hit" aria-pressed={draft.design === d.id} aria-label={`Preview ${d.name}`}
-                onClick={() => { patch({ design: d.id, accent: "" }); setReplay((n) => n + 1); }}
-              />
-            </div>
-          ))}
-        </motion.div>
+        <p className="hm-note">Free to try. No app or account needed for guests.</p>
       </div>
-
-      <motion.div className="hero-stage" initial={{ opacity: 0, y: 60, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.25, duration: 1.1, ease }}>
-        <div className="hero-glow" aria-hidden="true" style={{ background: designs.find((d) => d.id === draft.design)?.bg }} />
-        <motion.div style={{ rotateX: rx, rotateY: ry, transformPerspective: 1100 }} className="hero-tilt">
-          <Phone label="Live invitation preview">
-            <Invitation key={`${draft.design}-${replay}`} data={draft} rsvpHref="/invite/rsvp" />
-          </Phone>
-        </motion.div>
-        <button type="button" className="replay" onClick={() => setReplay((n) => n + 1)}>
-          <RotateCcw size={15} /> Close it again
-        </button>
+      <motion.div className="hm-fan" initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 1.1, ease }}>
+        <div className="hm-ph hm-ph--l"><Phone label="Zellige invitation"><Invitation data={sampleData(z)} still /></Phone></div>
+        <div className="hm-ph hm-ph--r"><Phone label="Marigold invitation"><Invitation data={sampleData(m)} still /></Phone></div>
+        <div className="hm-ph hm-ph--c"><Phone label="Botanica invitation, try opening it"><Invitation data={sampleData(b)} events={sampleEvents(b)} /></Phone></div>
+        <span className="hm-try">Try the middle one</span>
       </motion.div>
     </section>
   );
 }
 
-/* ------------------- Scroll-pinned design tour ------------------- */
-
-const stage: Partial<Record<DesignId, { bg: string; fg: string }>> = {
-  zest: { bg: "#17120D", fg: "#FFF3E6" },
-  mono: { bg: "#2437F2", fg: "#FFFFFF" },
-  nocturne: { bg: "#E9E5DD", fg: "#0E0E10" },
-};
-
-function Designs({ draft }: { draft: InviteData }) {
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const [i, setI] = useState(0);
-  useMotionValueEvent(scrollYProgress, "change", (v) => setI(Math.max(0, Math.min(designs.length - 1, Math.floor(v * designs.length * 0.999)))));
-  const d = designs[i];
-  const s = stage[d.id] ?? { bg: d.bg, fg: d.ink };
-
+/* ---------------------------- Collection ---------------------------- */
+const CELEBRATIONS = [
+  ["Nikah & Walima", "Nikah"], ["Mehndi & Sangeet", "Mehndi"], ["Church & garden", "Church"], ["Civil", "Civil"], ["Any wedding", "Any wedding"],
+] as const;
+function Collection() {
   return (
-    <section id="designs" ref={ref} className="tour" style={{ height: `${designs.length * 100 + 40}svh` }}>
-      <motion.div className="tour-stick" animate={{ backgroundColor: s.bg, color: s.fg }} transition={{ duration: 0.7, ease: "easeInOut" }}>
-        <div className="tour-text">
-          <p className="tour-count" aria-hidden="true">
-            {designs.map((x, n) => <span key={x.id} className={n === i ? "on" : ""} />)}
-          </p>
-          <AnimatePresence mode="wait">
-            <motion.div key={d.id} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.45, ease }}>
-              <h2 className="tour-title">{d.name}</h2>
-              <p className="tour-mood">{d.mood}.</p>
-              <p className="tour-open"><strong>{d.opening}.</strong> {d.openingHint}.</p>
-              <div className="tour-actions">
-                <Link
-                  href="/studio" className="btn tour-btn"
-                  onClick={() => saveDraft({ ...draft, design: d.id, accent: "" })}
-                >Use {d.name} <ArrowRight size={18} /></Link>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <div className="tour-phone">
-          <AnimatePresence mode="wait">
-            <motion.div key={d.id} initial={{ opacity: 0, y: 40, rotate: 3 }} animate={{ opacity: 1, y: 0, rotate: 0 }} exit={{ opacity: 0, y: -30, rotate: -3 }} transition={{ duration: 0.5, ease }}>
-              <Phone label={`${d.name} invitation`}>
-                <Invitation data={{ ...draft, design: d.id, accent: "" }} rsvpHref="/invite/rsvp" />
-              </Phone>
-            </motion.div>
-          </AnimatePresence>
-          <p className="tour-try">Try it. This is the real invitation.</p>
-        </div>
-      </motion.div>
+    <section id="designs" className="hm-sec">
+      <div className="hm-head">
+        <h2>{DESIGNS.length} designs. Each one its own world.</h2>
+        <p>Not one template in different colours. Every design has its own composition, lettering, artwork and way of opening, and every one is a working invitation.</p>
+      </div>
+      <div className="hm-chips" aria-label="Browse by celebration">
+        {CELEBRATIONS.map(([label, v]) => <Link key={v} href={`/designs?culture=${encodeURIComponent(v)}`}>{label}</Link>)}
+        <Link href="/designs" className="hm-chips-all">See all <ArrowRight size={14} /></Link>
+      </div>
+      <div className="hm-rail" tabIndex={0} aria-label="Designs">
+        {DESIGNS.map((d) => <div className="hm-rail-item" key={d.id}><DesignCard spec={d} /></div>)}
+      </div>
     </section>
   );
 }
 
+/* --------------------------- Every wedding --------------------------- */
+const EVENTS = ["Nikah", "Walima", "Mehndi", "Sangeet", "Haldi", "Ceremony", "Reception", "Civil ceremony", "Rehearsal dinner", "Brunch"];
+function EveryWedding() {
+  return (
+    <section className="hm-sec hm-every">
+      <div className="hm-head">
+        <h2>Made for the way you actually celebrate.</h2>
+        <p>Weddings are rarely one event. Wedsent starts from yours, in your words, and never assumes a tradition.</p>
+      </div>
+      <motion.ul className="hm-events" aria-label="Examples of events you can add" initial="h" whileInView="v" viewport={{ once: true, margin: "-60px" }} transition={{ staggerChildren: 0.05 }}>
+        {EVENTS.map((e) => <motion.li key={e} variants={{ h: { opacity: 0, y: 10 }, v: { opacity: 1, y: 0 } }}>{e}</motion.li>)}
+      </motion.ul>
+      <div className="hm-cols">
+        <article>
+          <UsersThree size={30} weight="duotone" />
+          <h3>Guests invited to different things</h3>
+          <p>Invite the whole family to the Walima and only close family to the Nikah. Each household opens a page showing just their own events.</p>
+        </article>
+        <article>
+          <Translate size={30} weight="duotone" />
+          <h3>Your language, your script</h3>
+          <p>Add an opening line in Arabic or Hindi, or write your own. Right-to-left text and Devanagari set properly, with real calligraphic fonts.</p>
+          <div className="hm-scripts"><span lang="ar" dir="rtl">بسم الله الرحمن الرحيم</span><span lang="hi">शुभ विवाह</span><span lang="en">Together with their families</span></div>
+        </article>
+        <article>
+          <PencilSimpleLine size={30} weight="duotone" />
+          <h3>Simple to make, real to send</h3>
+          <p>Pick a design, type your names, add your events. You can change the colours, lettering and wording any time without losing a word.</p>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------- Guest tour ---------------------------- */
+const TOUR = [
+  { t: "It arrives with a gesture", d: "A wax seal to break, doors to part, curtains to draw. Guests open it with their thumb, and it plays once." },
+  { t: "It shows them their day", d: "A card first, in your lettering. Then only the events this family is invited to, with directions and a calendar file for each." },
+  { t: "They reply in a minute", d: "One page for the household: yes or no for each person and each event. No app, no account, and they can change their answer later." },
+];
+function GuestTour() {
+  const ref = useRef<HTMLElement>(null);
+  const [i, setI] = useState(0);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  useMotionValueEvent(scrollYProgress, "change", (v) => setI(Math.max(0, Math.min(2, Math.floor(v * 3 * 0.999)))));
+  const s = spec("botanica");
+  useEffect(() => {
+    const el = ref.current?.querySelector(".inside-scroll");
+    if (el) (el as HTMLElement).scrollTo({ top: i === 2 ? 520 : 0, behavior: "smooth" });
+  }, [i]);
+  return (
+    <section ref={ref} className="hm-tour" style={{ height: "330svh" }}>
+      <div className="hm-tour-stick">
+        <div className="hm-tour-text">
+          <h2>What your guests see</h2>
+          <ol>
+            {TOUR.map((x, n) => (
+              <li key={x.t} data-on={n === i}>
+                <h3>{x.t}</h3>
+                <motion.p initial={false} animate={{ height: n === i ? "auto" : 0, opacity: n === i ? 1 : 0 }} transition={{ duration: 0.4, ease }}>{x.d}</motion.p>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="hm-tour-phone">
+          <Phone label="Live invitation">
+            <Invitation key={i === 0 ? "closed" : "open"} data={sampleData(s)} events={sampleEvents(s)} greeting="Sara & family" open={i > 0 ? true : undefined} rsvpHref="/designs/botanica" />
+          </Phone>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ----------------------- Everything behind it ----------------------- */
+const LIST = [
+  { Icon: Lock, t: "A private link per household", d: "Reset one link and only that family’s old link stops working." },
+  { Icon: UsersThree, t: "Replies per person, per event", d: "A link is never a headcount. Plus-ones are named guests." },
+  { Icon: CalendarPlus, t: "Calendar and directions", d: "A calendar file and a maps link on every event." },
+  { Icon: PencilSimpleLine, t: "Change it after you send it", d: "Edits stay a draft until you publish. Your link never changes." },
+  { Icon: Printer, t: "Print the same design", d: "An A5 layout today. Print-shop files are next." },
+  { Icon: MapPin, t: "Private by default", d: "Link previews show no names or dates, and pages are not searchable." },
+];
+function Everything() {
+  return (
+    <section className="hm-sec">
+      <div className="hm-head"><h2>The unglamorous parts, done properly.</h2><p>Families, events, replies and changes of plan, handled without turning your wedding into a spreadsheet.</p></div>
+      <ul className="hm-list">
+        {LIST.map(({ Icon, t, d }) => (
+          <motion.li key={t} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.6, ease }}>
+            <Icon size={26} weight="duotone" /><div><h3>{t}</h3><p>{d}</p></div>
+          </motion.li>
+        ))}
+      </ul>
+      <p className="hm-later">Still to come: reminders, music, photos, and a Photo Hall for after the day.</p>
+    </section>
+  );
+}

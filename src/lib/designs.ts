@@ -126,16 +126,16 @@ export function saveDraft(d: InviteData) {
   }
 }
 
-/** Readable text colour on a given background. */
+/** Readable text colour on a given background: whichever of dark/light has the higher WCAG contrast. */
 export function onColor(hex: string, dark = "#17120D", light = "#FFFFFF") {
-  const h = hex.replace("#", "");
-  if (h.length !== 6) return dark;
-  const [r, g, b] = [0, 2, 4].map((i) => {
-    const c = parseInt(h.slice(i, i + 2), 16) / 255;
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  });
-  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return L > 0.3 ? dark : light;
+  const lum = (h: string) => {
+    const x = h.replace("#", "");
+    if (x.length !== 6) return 0;
+    const [r, g, b] = [0, 2, 4].map((i) => { const c = parseInt(x.slice(i, i + 2), 16) / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a: string, b: string) => { const [l1, l2] = [lum(a), lum(b)].sort((x, y) => y - x); return (l1 + 0.05) / (l2 + 0.05); };
+  return ratio(hex, dark) >= ratio(hex, light) ? dark : light;
 }
 
 /** Font size (in cqw) so `text` fits one line in `width` cqw. */
@@ -198,3 +198,5 @@ export function buildEventIcs(e: InviteEvent, couple: string) {
     "END:VEVENT", "END:VCALENDAR",
   ].filter(Boolean).join("\r\n");
 }
+
+export const PENDING_EVENTS_KEY = "wedsent-pending-events-v1";

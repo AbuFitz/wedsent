@@ -83,7 +83,7 @@ const pub = await gp.goto(url); ok(pub.status() === 200, "public link resolves")
 await gp.goto(link); await gp.waitForTimeout(1500);
 await gp.screenshot({ path: `${out}/guest-cover.png` });
 const inside = await gp.locator(".inside").first().innerText();
-ok(/For The Khans/.test(inside) && /Nikah/.test(inside) && /Walima/.test(inside) && /Central Mosque/.test(inside), "personal invitation shows the household greeting and both of their events");
+ok(/for the khans/i.test(inside) && /Nikah/.test(inside) && /Walima/.test(inside) && /Central Mosque/.test(inside), "personal invitation shows the household greeting and both of their events");
 const pubGp = await g.newPage(); await pubGp.goto(url); await pubGp.waitForTimeout(1500);
 const pubInside = await pubGp.locator(".inside").first().innerText();
 ok(/Walima/.test(pubInside) && !/Nikah/.test(pubInside) && !/Khan/.test(pubInside), "public invitation shows only the public event and no guest data");

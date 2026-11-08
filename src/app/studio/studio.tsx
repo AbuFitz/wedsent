@@ -6,7 +6,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
-import { designById, designs, daysUntil, onColor, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
+import { designs, daysUntil, onColor, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
+import { FONT_PACKS, INTRO_PRESETS, paletteOf, specById } from "@/engine/registry";
 import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
 import "./studio.css";
@@ -71,7 +72,7 @@ export function Studio() {
       </header>
 
       <main className="st-canvas">
-        <div className="st-phone" style={{ ["--bgtone" as string]: designById(draft.design).bg }}>
+        <div className="st-phone" style={{ ["--bgtone" as string]: specById(draft.design).site.bg }}>
           <Phone label="Live invitation preview">
             <Invitation data={draft} open={open} onOpenChange={setOpen} events={events} />
           </Phone>
@@ -213,22 +214,48 @@ function DetailsTab({ draft, patch }: TabProps) {
 }
 
 function StyleTab({ draft, patch }: TabProps) {
-  const d = designById(draft.design);
-  const current = draft.accent || d.accents[0];
+  const spec = specById(draft.design);
+  const pal = paletteOf(spec, draft.palette);
+  const stationery = spec.layout === "stationery";
+  const custom = draft.accent || pal.accent;
   return (
     <div className="st-stack">
-      <h2 className="st-h">Accent colour</h2>
-      <p className="st-help">Text colour adjusts itself so it stays readable.</p>
-      <div className="st-swatches">
-        {d.accents.map((c, i) => (
-          <button key={c} type="button" className="st-swatch" style={{ background: c, color: onColor(c) }} aria-pressed={current.toLowerCase() === c.toLowerCase()} aria-label={i === 0 ? `Default ${c}` : c} onClick={() => patch({ accent: i === 0 ? "" : c })}>
-            {current.toLowerCase() === c.toLowerCase() && <Check size={18} strokeWidth={3} />}
+      <h2 className="st-h">Colours</h2>
+      <p className="st-help">Each design has its own palettes. Text colour adjusts so it stays readable.</p>
+      <div className="st-pals">
+        {spec.palettes.map((p) => (
+          <button key={p.id} type="button" aria-pressed={pal.id === p.id && !draft.accent} onClick={() => patch({ palette: p.id, accent: "" })}>
+            <i style={{ background: p.accent, boxShadow: p.bg ? `inset 0 0 0 6px ${p.bg}` : undefined }} />{p.name}
           </button>
         ))}
-        <label className="st-swatch st-swatch--custom" aria-label="Custom colour">
-          <input type="color" value={current} onChange={(e) => patch({ accent: e.target.value })} />
+        <label className="st-swatch st-swatch--custom" aria-label="Custom accent colour" title="Custom accent colour">
+          <input type="color" value={custom} onChange={(e) => patch({ accent: e.target.value })} />
         </label>
       </div>
+      {stationery && (
+        <>
+          <h2 className="st-h">Lettering</h2>
+          <div className="st-types">
+            <button type="button" aria-pressed={draft.type === ""} onClick={() => patch({ type: "" })}><span>Designer’s choice</span></button>
+            {FONT_PACKS.filter((f) => f.script || ["classic", "didone", "deco", "italiana", "garamond"].includes(f.id)).map((f) => (
+              <button key={f.id} type="button" aria-pressed={draft.type === f.id} onClick={() => patch({ type: f.id })} title={f.note}>
+                <span style={{ fontFamily: f.script ?? f.head, fontSize: f.script ? 24 : 18 }}>{(draft.names || "Amina").split(/[ &]/)[0]}</span><small>{f.name}</small>
+              </button>
+            ))}
+          </div>
+          <h2 className="st-h">Opening line <i className="st-opt">optional</i></h2>
+          <select className="st-select" value={INTRO_PRESETS.some((i) => i.text === draft.intro) || draft.intro === "" || draft.intro === "none" ? draft.intro : "__custom"} onChange={(e) => patch({ intro: e.target.value === "__custom" ? "" : e.target.value })} aria-label="Opening line">
+            <option value="">Designer’s choice</option>
+            {Array.from(new Set(INTRO_PRESETS.map((i) => i.group))).map((g) => (
+              <optgroup key={g} label={g}>{INTRO_PRESETS.filter((i) => i.group === g).map((i) => <option key={i.id} value={i.id === "none" ? "none" : i.text}>{i.label}</option>)}</optgroup>
+            ))}
+            <option value="__custom">Write my own…</option>
+          </select>
+          {!INTRO_PRESETS.some((i) => i.text === draft.intro) && draft.intro !== "" && draft.intro !== "none" && (
+            <input className="st-select" value={draft.intro} maxLength={120} onChange={(e) => patch({ intro: e.target.value })} placeholder="Your own opening line" aria-label="Custom opening line" />
+          )}
+        </>
+      )}
       <div className="st-soon" aria-disabled="true"><strong>Music</strong><span>Not built yet</span></div>
       <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
     </div>

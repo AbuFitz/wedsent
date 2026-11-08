@@ -8,6 +8,7 @@ One current source of truth per topic. If two documents disagree, the one listed
 | **Owner's intended product, journeys, phases** | [CURRENT_PRODUCT_PLAN.md](CURRENT_PRODUCT_PLAN.md) | Written by the owner 7 Nov 2026. Phases A–E there are the roadmap. |
 | Product vision, positioning, IA | [PRODUCT.md](PRODUCT.md) | Background. |
 | Target architecture and invariants | [ARCHITECTURE.md](ARCHITECTURE.md) | Target design. |
+| **Design engine (as built)** | [DESIGN_ENGINE.md](DESIGN_ENGINE.md) | Specs, palettes, fonts, artwork provenance, how to add a design. |
 | **As-built backend** (schema, API, auth, tests) | [BACKEND_V1.md](BACKEND_V1.md) | What is actually implemented, and why. |
 | User journeys and state machines | [FLOWS.md](FLOWS.md) | |
 | Screen contracts and scenario matrix | [UX_SCREEN_CONTRACTS.md](UX_SCREEN_CONTRACTS.md) | |

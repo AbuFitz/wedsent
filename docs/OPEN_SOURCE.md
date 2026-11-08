@@ -58,3 +58,15 @@ For each specific dependency or copied module:
 - Internal owner and version-update policy
 
 No source from the projects above has been incorporated into Wedsent as of this document.
+
+
+## Adopted for the design engine (2026-11-08)
+| Item | Licence | Decision | Use |
+| --- | --- | --- | --- |
+| Fontsource packages (Cormorant, Playfair, Bodoni Moda, Cinzel, Jost, EB Garamond, Noto Naskh Arabic, Great Vibes, Pinyon Script, Allura, Parisienne, DM Serif Display, Italiana, Marcellus, Tenor Sans, Amiri, Tiro Devanagari Hindi) | OFL-1.1 | ADOPT | Self-hosted lettering and scripts |
+| Phosphor Icons | MIT | ADOPT | Multi-weight icons (duotone, bold) |
+| colord | MIT | ADOPT | Contrast checks in tests |
+| qrcode | MIT | ADOPT (not yet wired) | Share QR |
+| Wikimedia Commons public-domain/CC0 plates (Redouté via Cleveland Museum of Art, Edwin Step, Owen Jones and others) | PD / CC0 | ADOPT with provenance | All botanical and ornament artwork; see `/credits` |
+| Framer marketplace templates/components | Framer licence, in-Framer use | RESEARCH ONLY | Structure and ideas, nothing copied |
+| Procedural SVG botanicals (own code) | n/a | REJECTED | Quality not acceptable; `src/engine/art.tsx` is only used by `/dev/art` |

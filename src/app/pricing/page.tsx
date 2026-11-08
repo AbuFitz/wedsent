@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Pricing — Wedsent", description: "
 
 const items: { text: string; ready: boolean }[] = [
   { text: "Your invitation, hosted at its own link", ready: true },
-  { text: "Three designs, each with its own way of opening", ready: true },
+  { text: "Seven designs, each with its own way of opening", ready: true },
   { text: "A private link for every household", ready: true },
   { text: "Replies per person, per event, with plus-ones as named guests", ready: true },
   { text: "Calendar file and directions on every invitation", ready: true },
@@ -30,8 +30,8 @@ const faqs = [
 ];
 
 export default function Pricing() {
-  const phone = (design: "zest" | "mono" | "nocturne", names: string) => (
-    <Phone label={`${design} invitation`}><Invitation data={{ ...defaults, design, names, accent: "" }} still /></Phone>
+  const phone = (design: "botanica" | "zellige" | "marigold", names: string) => (
+    <Phone label={`${design} invitation`}><Invitation data={{ ...defaults, design, names, accent: "", palette: "" }} still /></Phone>
   );
   return (
     <>
@@ -47,9 +47,9 @@ export default function Pricing() {
             </div>
           </div>
           <div className="pp-fan" aria-hidden="true">
-            <div className="pp-ph pp-ph--l">{phone("nocturne", "Layla & Omar")}</div>
-            <div className="pp-ph pp-ph--r">{phone("mono", "Hannah & James")}</div>
-            <div className="pp-ph pp-ph--c">{phone("zest", "Amina & Yusuf")}</div>
+            <div className="pp-ph pp-ph--l">{phone("zellige", "Aisha & Yusuf")}</div>
+            <div className="pp-ph pp-ph--r">{phone("marigold", "Priya & Arjun")}</div>
+            <div className="pp-ph pp-ph--c">{phone("botanica", "Eleanor & James")}</div>
           </div>
         </section>
 

@@ -28,7 +28,7 @@ export function useDraft() {
 }
 
 import { call, ApiError } from "./api-client";
-import { DRAFT_KEY } from "./designs";
+import { DRAFT_KEY, PENDING_EVENTS_KEY } from "./designs";
 
 export type StudioSave = "loading" | "saving" | "saved" | "failed" | "conflict" | "offline";
 
@@ -52,6 +52,17 @@ export function useStudioDraft() {
         try {
           const w = await call("GET", "/api/wedding");
           rev.current = w.rev;
+          // Events chosen during onboarding while signed out are created now, once. The key is consumed first
+          // so a double-run (React dev strict mode, two tabs) cannot create them twice.
+          const raw = localStorage.getItem(PENDING_EVENTS_KEY);
+          if (raw) {
+            localStorage.removeItem(PENDING_EVENTS_KEY);
+            try {
+              const pending = JSON.parse(raw) as { title: string; startsOn: string | null; venue?: string; city?: string }[];
+              const existing = (await call("GET", "/api/wedding/events")).events;
+              if (!existing.length) for (const e of pending) await call("POST", "/api/wedding/events", { title: e.title, startsOn: e.startsOn, venue: e.venue ?? "", city: e.city ?? "", visibility: "invited" });
+            } catch { localStorage.setItem(PENDING_EVENTS_KEY, raw); }
+          }
           const hasLocal = !!localStorage.getItem(DRAFT_KEY);
           if (w.rev === 1 && hasLocal) { setDraft(loadDraft()); dirty.current = true; }
           else setDraft({ ...defaults, ...w.content });

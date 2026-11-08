@@ -93,8 +93,8 @@ export const DESIGNS: DesignSpec[] = [
     layout: "stationery", fonts: "classic", art: "arch", intro: "none", sample: { names: "Amara & Daniel", occasion: "Wedding" },
     site: { bg: "#EBD9CC", ink: "#3B2218" },
     palettes: [
-      pal("terracotta", "Terracotta", "#B5654A", { bg: "#EBD3C5", fg: "#4A271B", soft: "#FAF1EA", line: "#C9A24B", art: ["peony-pink", "rose-sprig"] }),
-      pal("sage", "Sage", "#5F7E67", { bg: "#D9E3D3", fg: "#26382B", soft: "#F6F8F1", line: "#C9A24B", art: ["peony-paxton", "olive-b"] }),
+      pal("terracotta", "Terracotta", "#A85A40", { bg: "#EBD3C5", fg: "#4A271B", soft: "#FAF1EA", line: "#C9A24B", art: ["peony-pink", "rose-sprig"] }),
+      pal("sage", "Sage", "#577660", { bg: "#D9E3D3", fg: "#26382B", soft: "#F6F8F1", line: "#C9A24B", art: ["peony-paxton", "olive-b"] }),
       pal("midnight", "Midnight", "#243B5E", { bg: "#D3DAE8", fg: "#16243C", soft: "#F5F7FB", line: "#C9A24B", art: ["peony-crimson", "rose-sprig"] }),
       pal("plum", "Plum", "#6D3D57", { bg: "#E8D6DF", fg: "#3A1E2D", soft: "#FBF4F7", line: "#C9A24B", art: ["peony-pink", "rose-red"] }),
     ],

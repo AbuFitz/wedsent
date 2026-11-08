@@ -6,13 +6,14 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 ## Invitation (the creative product)
 | Capability | State | Notes |
 | --- | --- | --- |
-| Renderer driven by structured data, content separate from design | Verified | `src/components/invitation/`, `InviteData` + events. Switching design keeps content. |
-| Three designs, each with its own cover, opening gesture and inside layout (Vermilion, Monolith, Nocturne) | Partial | All open and render multi-event invitations in a browser. Monolith and Nocturne need a more mature art-direction pass; a fourth family is not started. |
-| Guest sees **their own events** as cards (date, time, venue, Maps, per-event calendar file), greeted by household | Verified | New this round. Public page shows only public events. |
-| Opening: reduced motion, keyboard path, once-per-session replay skip | Partial | Implemented; no screen-reader or low-end-device test yet. |
-| Live preview in Studio (cover and inside) | Verified | Uses real events when signed in. |
-| Music, photos/crop, story/FAQ sections, RTL/Arabic, per-design RSVP styling inside the card | Planned | |
-| Print: A5 browser-print layout | Partial | No bleed/crop/CMYK. |
+| Design engine: spec registry, palettes, font pairings, intro lines, shared by server and client | Verified | `docs/DESIGN_ENGINE.md`. Registry integrity, contrast (WCAG AA) and artwork licences are tested. |
+| Seven designs, each with its own opening (seal envelope, doors, lattice, curtains, shutter, hold) | Partial | Four new designs use real public-domain artwork and read as stationery. Vermilion, Monolith and Nocturne are type-led and need the same art pass. |
+| Real artwork pipeline (public-domain / CC0 plates, provenance, `/credits`) | Verified | Pale flowers and low-resolution scans are known limits. |
+| Guest sees their own events as cards, greeted by household, Maps and per-event calendar file | Verified | |
+| Per-design lettering, colour palette, optional opening line (Arabic, Hindi, custom) | Verified | Font pairing applies to the four stationery designs only. |
+| Live preview in Studio, onboarding, gallery and detail pages | Verified | Same renderer everywhere. |
+| Music, photo upload/crop, RTL layout beyond the opening line, story/FAQ sections | Planned | |
+| Print: A5 browser-print layout | Partial | No bleed/crop/CMYK; not yet using the new artwork. |
 
 ## Creation and Studio
 | Capability | State | Notes |
@@ -20,7 +21,7 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 | Accounts (password), sessions, rate limits | Verified | No email verification or reset (needs email). |
 | Autosave to account, conflict detection, signed-out local draft claimed on sign-up | Verified | |
 | Four tabs plus **Events** (add/edit/delete, who can see it) | Verified | Event reorder, descriptions, schedule items: planned. |
-| Guided onboarding journey (names/date → design → live personalise → events → preview → guests → publish) | Partial | Today the home hero captures names/date and the Studio is the editor. No stepwise guided flow yet. **Next.** |
+| Guided onboarding at `/start` (names → date → celebration preset → design → style → details → preview → account) | Verified | Events chosen while signed out are created once after sign-up. Guests and publishing still happen in the Studio/dashboard, not in this flow. |
 | Undo/restore, version history UI, collaborators | Planned | Versions exist in the database. |
 
 ## Guests and replies
@@ -38,9 +39,10 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 ## Public site
 | Capability | State | Notes |
 | --- | --- | --- |
-| Home: hero with live phone, plain-facts strip, scroll-pinned how-it-works, design tour, feature index, price teaser, FAQ | Partial | "How it works" scenes are **UI only** illustrations of real screens, labelled as examples. |
-| Pricing page (provisional £39, ready/coming list) | UI only | No checkout. |
-| Design gallery page, design detail pages, live full-screen preview route | Planned | **Next after onboarding.** Today designs are shown on the home page only. |
+| Home: art-led hero with live phones, design rail with celebration shortcuts, "every wedding" section, scroll-pinned live guest tour, feature list, price teaser, FAQ | Partial | No illustrations of screens remain; everything shown is the real renderer. Needs a real-device and low-end check. |
+| Pricing page (provisional £39, ready/coming list) | UI only | No checkout. Its three "how it works" demo cards are still illustrations and should be replaced. |
+| Design gallery (`/designs`) with Evite-style filters (celebration, style, colour, shape, opening), design detail pages with live preview, palette, lettering and opening-line controls, full-screen preview | Verified | Browser-tested. |
+| Credits page for artwork, fonts and software | Verified | |
 | Legal, privacy, terms, help/FAQ pages, sign-in polish | Planned | |
 
 ## Platform
@@ -59,9 +61,8 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 4. **Data model names.** The directive lists HouseholdMember, EventInvitation, InvitationToken. Implemented equivalents: `guests`, `event_invitees`, `invitations` (token digest). No rename planned.
 
 ## Build order from here (dependency order, one journey at a time)
-1. Guided creation journey (O01): names/date → design → live personalise → events → preview → account → publish.
-2. Gallery, design detail pages and full-screen live preview (public, no real data).
-3. Design maturity: Monolith and Nocturne art direction, then a fourth family; reply inside the invitation card.
+1. Design maturity: art pass for Vermilion, Monolith, Nocturne; higher-resolution re-cuts of the hero plates; paper/marble photo textures; a Chinese/East Asian and a Jewish design family; reply inside the invitation card.
+2. Onboarding to publish: guests and sharing inside the guided flow; QR and share sheet.
 4. Sharing: QR, native share sheet, share card.
 5. Deploy with a database; then payments; then email and reminders.
 6. Music, photos/crop, then Photo Hall and print as separate cost-checked slices.
