@@ -46,16 +46,19 @@ export function RosewoodCover({ data, spec, onOpen, still }: P) {
 export function VelvetStageCover({ data, spec, onOpen, still }: P) {
   const reduced = useReducedMotion();
   const [opening, setOpening] = useState(false);
-  useEffect(() => { if (!opening) return; const t = window.setTimeout(onOpen, 1500); return () => window.clearTimeout(t); }, [opening, onOpen]);
+  useEffect(() => { if (!opening) return; const t = window.setTimeout(onOpen, 1800); return () => window.clearTimeout(t); }, [opening, onOpen]);
   const start = () => { if (opening || still) return; if (reduced) onOpen(); else setOpening(true); };
   return <motion.section className="cover cv cv-velvet" aria-label="Velvet curtain invitation" exit={{ opacity: 0, transition: { duration: .16 } }}>
-    <motion.div className="cv-velvet-card" aria-hidden="true" animate={{ scale: opening ? 1.025 : .93, filter: opening ? "brightness(1)" : "brightness(.64)" }} transition={{ duration: 1.22, ease }}><StationeryCard data={data} spec={spec} palette={paletteOf(spec, data.palette)} fill /></motion.div>
+    <motion.div className="cv-velvet-card" aria-hidden="true" animate={{ scale: opening ? 1.035 : .91, filter: opening ? "brightness(1)" : "brightness(.52)" }} transition={{ duration: 1.62, ease }}><StationeryCard data={data} spec={spec} palette={paletteOf(spec, data.palette)} fill /></motion.div>
+    <motion.div className="cv-velvet-spotlight" aria-hidden="true" animate={{ opacity: opening ? 1 : .2, scale: opening ? 1 : .88 }} transition={{ duration: 1.45, ease }} />
     <div className="cv-velvet-top" aria-hidden="true" />
     <div className="cv-velvet-pair" aria-hidden="true">
-      <motion.div className="cv-velvet-drape cv-velvet-left" animate={opening ? { x: "-103%", scaleX: .66, skewY: -1.8, rotateY: -8 } : { x: 0, scaleX: 1, skewY: 0, rotateY: 0 }} transition={{ duration: 1.36, delay: .1, ease: [.56,.08,.16,1] }} />
-      <motion.div className="cv-velvet-drape cv-velvet-right" animate={opening ? { x: "103%", scaleX: .66, skewY: 1.8, rotateY: 8 } : { x: 0, scaleX: 1, skewY: 0, rotateY: 0 }} transition={{ duration: 1.4, delay: .15, ease: [.56,.08,.16,1] }} />
+      <motion.div className="cv-velvet-drape cv-velvet-left" animate={opening ? { x: "-79%", scaleX: .44, skewY: -2.2, rotateY: -12 } : { x: 0, scaleX: 1, skewY: 0, rotateY: 0 }} transition={{ duration: 1.58, delay: .08, ease: [.46,.04,.13,1] }}><span className="cv-velvet-pleats" /></motion.div>
+      <motion.div className="cv-velvet-drape cv-velvet-right" animate={opening ? { x: "79%", scaleX: .44, skewY: 2.2, rotateY: 12 } : { x: 0, scaleX: 1, skewY: 0, rotateY: 0 }} transition={{ duration: 1.67, delay: .14, ease: [.46,.04,.13,1] }}><span className="cv-velvet-pleats" /></motion.div>
     </div>
-    <motion.div className="cv-velvet-cord" aria-hidden="true" animate={opening ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }} transition={{ duration: .25 }}><span /></motion.div>
+    <motion.div className="cv-velvet-cord" aria-hidden="true" animate={opening ? { opacity: 0, scale: .86, y: 14 } : { opacity: 1, scale: 1, y: 0 }} transition={{ duration: .34 }}><span /></motion.div>
+    <motion.div className="cv-velvet-tieback cv-velvet-tieback--left" aria-hidden="true" animate={opening ? { x: "-12%", opacity: 1 } : { x: "-45%", opacity: 0 }} transition={{ duration: .8, delay: .36 }} />
+    <motion.div className="cv-velvet-tieback cv-velvet-tieback--right" aria-hidden="true" animate={opening ? { x: "12%", opacity: 1 } : { x: "45%", opacity: 0 }} transition={{ duration: .8, delay: .42 }} />
     <motion.span className="cv-velvet-instruction" animate={{ opacity: opening ? 0 : 1 }}>PULL BACK THE CURTAIN</motion.span>
     <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Draw the curtains and reveal the invitation" />
   </motion.section>;
