@@ -38,6 +38,7 @@ export const ContentSchema = z.object({
     countdown: z.enum(["en", "fr", "ar", "so"]),
     reply: z.enum(["en", "fr", "ar", "so"]),
   }).default({ details: "en", countdown: "en", reply: "en" }),
+  music: z.object({ src: z.string().regex(/^\/music\/[0-9a-f-]{36}$/), title: z.string().trim().min(1).max(80) }).nullable().default(null),
 });
 export type Content = z.infer<typeof ContentSchema>;
 

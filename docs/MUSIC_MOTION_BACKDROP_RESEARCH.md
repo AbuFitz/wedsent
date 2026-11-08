@@ -4,7 +4,7 @@ Updated 8 November 2026. **Research and design direction, not a catalogue of cle
 
 ## Audio: distinguish the player from the recording
 
-`howler.js` (https://github.com/goldfire/howler.js) is MIT-licensed and suitable for a later shared audio controller. It grants no rights to music. We can also use the HTML audio element initially for a single looping track, with explicit guest-initiated playback and persistent mute control. There must never be surprise autoplay.
+`howler.js` (https://github.com/goldfire/howler.js) is MIT-licensed and suitable for a later shared audio controller. It grants no rights to music. The current build uses an HTML audio element for one guest-controlled looping MP3, with no autoplay. The user can play or pause; a volume slider and persistent cross-device mute setting are still future work.
 
 Source candidates:
 
@@ -16,7 +16,7 @@ Source candidates:
 | [Pixabay Music](https://pixabay.com/music/) | Alternative instrumental discovery | Platform-specific Pixabay content licence, restrictions and redistribution rules: review before embedding in a SaaS catalogue |
 | [OpenGameArt](https://opengameart.org/) | Ambient loops and short transition sounds | Check the individual asset licence and musical fit; game-style sound does not automatically suit weddings |
 
-Important: **a public-domain composition does not prove its modern recording is free to redistribute.** Avoid chart songs and tracks labelled merely “royalty-free” without inspecting the actual licence. Do not scrape and mirror third-party catalogues.
+Important: **a public-domain composition does not prove its modern recording is free to redistribute.** Avoid chart songs and tracks labelled merely “royalty-free” without inspecting the actual licence. Do not scrape and mirror third-party catalogues. An explicit user-upload rights checkbox is not a substitute for contractual terms or enforcement policy.
 
 ### Proposed curated sound families
 
@@ -28,7 +28,7 @@ Important: **a public-domain composition does not prove its modern recording is 
 - Cultural sound worlds: optional and carefully researched; do not associate a music tradition automatically with a guest's identity or ceremony label.
 - Silence: first-class default, not an error state.
 
-Curate 2–4 genuinely beautiful, rights-verified tracks per sound family. Record title, artist/performer, original source, licence version, asset URL, hash, duration, loudness, and attribution text. Select at most one track per invitation. Compress to mobile-friendly formats, normalise levels, loop cleanly, expose volume/mute, and pause on page hide. Guests explicitly opt in to playback; use the native platform media controls where possible. An owner-uploaded audio file needs separate usage-rights acknowledgement and a real audio storage pipeline before activation.
+Curate 2–4 genuinely beautiful, rights-verified tracks per sound family. Record title, artist/performer, original source, licence version, asset URL, hash, duration, loudness, and attribution text. Select at most one track per invitation. Compress to mobile-friendly formats, normalise levels, loop cleanly, expose volume/mute, and pause on page hide. Guests explicitly opt in to playback; use the native platform media controls where possible. An owner-uploaded MP3 pipeline now exists as a build slice, with owner permission checks and an 8 MB limit. It needs lifecycle controls and policy review before broad production use.
 
 ## Openings: physicality before spectacle
 

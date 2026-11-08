@@ -13,6 +13,7 @@ import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover 
 import { StationeryCard } from "@/engine/stationery";
 import { fontPackById, paletteOf, specById, OPENINGS, type DesignSpec, type Palette } from "@/engine/registry";
 import { CountdownWidget, label } from "./widgets";
+import { GuestMusic } from "./music-control";
 
 export type InvitationProps = {
   data: InviteData;
@@ -51,6 +52,7 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
   return (
     <div className={`inv inv--${design}`} style={style} data-open={open} data-layout={spec.layout} {...(still ? { inert: true } : {})}>
       <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} events={events} greeting={greeting} spec={spec} palette={palette} />
+      {open && <GuestMusic choice={data.music ?? null} />}
       <AnimatePresence>
         {!open && (
           <Cover key={design} spec={spec} data={data} onOpen={() => setOpen(true)} still={!!still} />

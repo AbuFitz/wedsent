@@ -6,6 +6,7 @@ import { DESIGNS, DESIGN_IDS, FONT_PACKS, INTRO_PRESETS, FACETS, specById } from
 import { ContentSchema } from "@/server/weddings";
 import { onColor, defaults } from "@/lib/designs";
 import { label } from "@/components/invitation/widgets";
+import { isMp3, MAX_MUSIC_BYTES } from "@/server/music";
 extend([a11y]);
 
 describe("design engine registry", () => {
@@ -58,6 +59,15 @@ describe("design engine registry", () => {
     expect(label("fr", "reply")).toBe("Répondre");
     expect(label("ar", "where")).toBe("المكان");
     expect(label("so", "days")).toBe("Maalmood");
+  });
+  it("accepts only expected music references in server wedding content", () => {
+    expect(ContentSchema.safeParse({ ...defaults, music: { src: "/music/12345678-1234-1234-1234-123456789abc", title: "Our instrumental" } }).success).toBe(true);
+    expect(ContentSchema.safeParse({ ...defaults, music: { src: "data:audio/mpeg;base64,AAA", title: "Injected audio" } }).success).toBe(false);
+    expect(ContentSchema.safeParse({ ...defaults, music: { src: "https://elsewhere.invalid/song.mp3", title: "External" } }).success).toBe(false);
+    expect(MAX_MUSIC_BYTES).toBe(8_000_000);
+    expect(isMp3(Uint8Array.from([0x49, 0x44, 0x33, 0x03]))).toBe(true);
+    expect(isMp3(Uint8Array.from([0xff, 0xfb, 0x90, 0x64]))).toBe(true);
+    expect(isMp3(Uint8Array.from([0x52, 0x49, 0x46, 0x46]))).toBe(false);
   });
   it("filter facets cover every design", () => {
     for (const d of DESIGNS) { expect(FACETS.shape).toContain(d.shape); expect(FACETS.opening).toContain(d.opening.kind); }

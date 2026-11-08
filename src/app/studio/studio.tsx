@@ -10,6 +10,7 @@ import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type In
 import { FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type OpeningKind } from "@/engine/registry";
 import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
+import { saveLocalMusic } from "@/lib/local-music";
 import "./studio.css";
 
 type Tab = "design" | "words" | "details" | "events" | "style";
@@ -222,6 +223,27 @@ function DetailsTab({ draft, patch }: TabProps) {
 function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [musicBusy, setMusicBusy] = useState(false);
+  const [musicError, setMusicError] = useState<string | null>(null);
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
+  const uploadMusic = async (file?: File) => {
+    if (!file) return;
+    if (file.size > 8_000_000 || !/\.mp3$/i.test(file.name) || !rightsConfirmed) {
+      setMusicError("Choose an MP3 below 8 MB and confirm your permission to use the recording."); return;
+    }
+    setMusicBusy(true); setMusicError(null);
+    try {
+      let src = "local-music";
+      if (account) {
+        const res = await fetch("/api/music", { method: "POST", body: file, credentials: "same-origin", headers: { "x-music-rights": "confirmed" } });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result?.error?.message || "Couldn’t upload this MP3.");
+        src = result.src;
+      } else await saveLocalMusic(file);
+      patch({ music: { src, title: file.name.replace(/\.mp3$/i, "").slice(0, 80) } });
+    } catch (e) { setMusicError(e instanceof Error ? e.message : "Couldn’t add music."); }
+    finally { setMusicBusy(false); }
+  };
   const upload = async (file?: File) => {
     if (!file) return;
     if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 15_000_000) {
@@ -345,7 +367,13 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           )}
         </>
       )}
-      <div className="st-soon" aria-disabled="true"><strong>Music</strong><span>Not built yet</span></div>
+      <h2 className="st-h">Music</h2>
+      <p className="st-help">Add your own permitted MP3. Guests can tap the small control to start or pause music. It never plays automatically.</p>
+      <label className="st-widget-toggle"><span><strong>I have permission to use this recording</strong><small>Only upload music you own or have rights to share with guests.</small></span><input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} /></label>
+      <label className="st-field"><span>{musicBusy ? "Uploading music…" : "Choose MP3 (up to 8 MB)"}</span><input type="file" accept="audio/mpeg,.mp3" disabled={!rightsConfirmed || musicBusy} onChange={(e) => { void uploadMusic(e.target.files?.[0]); e.target.value = ""; }} /></label>
+      {draft.music && <div className="st-music-selected"><span>Selected: {draft.music.title}</span><button type="button" className="st-chip" onClick={() => patch({ music: null })}>Remove music</button></div>}
+      {!account && <p className="st-help">Build mode music stays in this browser only. Re-upload once account publishing is enabled.</p>}
+      {musicError && <small className="st-err" role="alert">{musicError}</small>}
       <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
     </div>
   );

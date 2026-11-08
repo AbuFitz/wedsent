@@ -64,7 +64,12 @@ export function useStudioDraft() {
             } catch { localStorage.setItem(PENDING_EVENTS_KEY, raw); }
           }
           const hasLocal = !!localStorage.getItem(DRAFT_KEY);
-          if (w.rev === 1 && hasLocal) { setDraft(loadDraft()); dirty.current = true; }
+          if (w.rev === 1 && hasLocal) {
+            const local = loadDraft();
+            // IndexedDB demo audio cannot be published or persisted to the owner's server record.
+            if (local.music?.src === "local-music") local.music = null;
+            setDraft(local); dirty.current = true;
+          }
           else setDraft({ ...defaults, ...w.content });
           setAccount(user);
         } catch { setDraft(loadDraft()); }
