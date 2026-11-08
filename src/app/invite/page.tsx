@@ -29,14 +29,14 @@ export default function InvitePage() {
     <main className="guest" style={{ ["--g-bg" as string]: "#101014" }}>
       <div className="guest-wrap">
         <Phone label="Invitation">
-          <Invitation key={round} data={draft} open={open} onOpenChange={onOpen} rsvpHref="/invite/rsvp" />
+          <Invitation key={round} data={draft} syncChrome open={open} onOpenChange={onOpen} rsvpHref="/invite/rsvp" />
           {open && (
             <button className="guest-replay" onClick={() => { sessionStorage.removeItem(SEEN); setOpen(false); setRound((n) => n + 1); }} aria-label="Replay opening">
               <RotateCcw size={17} />
             </button>
           )}
         </Phone>
-        <p className="guest-note">Preview of your draft. It isn’t a shareable link yet.</p>
+        <p className="guest-note">Draft preview. Published invitations use personal, shareable guest links.</p>
       </div>
     </main>
   );

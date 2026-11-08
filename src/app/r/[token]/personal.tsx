@@ -27,7 +27,7 @@ export function PersonalInvite({ token }: { token: string }) {
     <main className="guest" style={{ ["--g-bg" as string]: "#101014" }}>
       <div className="guest-wrap">
         <Phone label="Invitation">
-          <Invitation data={view.content} open={open} onOpenChange={(v) => { setOpen(v); if (v) sessionStorage.setItem(`opened:${token.slice(0, 10)}`, "1"); }} rsvpHref={`/r/${token}/reply`} events={view.events} greeting={view.household.name} />
+          <Invitation data={view.content} syncChrome open={open} onOpenChange={(v) => { setOpen(v); if (v) sessionStorage.setItem(`opened:${token.slice(0, 10)}`, "1"); }} rsvpHref={`/r/${token}/reply`} events={view.events} greeting={view.household.name} />
         </Phone>
         <p className="guest-note">Invitation for {view.household.name}</p>
       </div>

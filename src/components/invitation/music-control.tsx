@@ -27,6 +27,14 @@ export function GuestMusic({ choice }: { choice: MusicChoice | null }) {
     document.addEventListener("visibilitychange", hidden);
     return () => document.removeEventListener("visibilitychange", hidden);
   }, []);
+  useEffect(() => {
+    if (!src || !audio.current) return;
+    const player = audio.current;
+    // Opening the cover is a guest gesture. Try to start then, but honour browser
+    // autoplay policy: if blocked, leave the play control available and silent.
+    player.play().then(() => { setPlaying(true); setError(""); }).catch(() => setPlaying(false));
+    return () => { player.pause(); };
+  }, [src]);
   if (!choice) return null;
   const toggle = async () => {
     if (!audio.current) return;

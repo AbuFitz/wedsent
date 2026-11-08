@@ -1,5 +1,5 @@
 "use client";
-import { useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { CalendarPlus, MapPin } from "lucide-react";
@@ -28,9 +28,11 @@ export type InvitationProps = {
   events?: InviteEvent[];
   /** Who the invitation is for (household name). Shown instead of the occasion label. */
   greeting?: string;
+  /** Only true on an actual guest-facing page, not a phone mockup in the editor. */
+  syncChrome?: boolean;
 };
 
-export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still, events, greeting }: InvitationProps) {
+export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still, events, greeting, syncChrome = false }: InvitationProps) {
   const [inner, setInner] = useState(false);
   const open = openProp ?? inner;
   const setOpen = (v: boolean) => {
@@ -41,6 +43,19 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
   const original = specById(data.design);
   const spec = data.opening && OPENINGS[data.opening] ? { ...original, opening: { kind: data.opening, ...OPENINGS[data.opening] } } : original;
   const palette = paletteOf(spec, data.palette);
+  useEffect(() => {
+    if (!syncChrome) return;
+    const color = palette.bg || "#F4F4F2";
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const previous = meta?.content;
+    if (meta) meta.content = color;
+    const oldBackground = document.documentElement.style.backgroundColor;
+    document.documentElement.style.backgroundColor = color;
+    return () => {
+      if (meta && previous !== undefined) meta.content = previous;
+      document.documentElement.style.backgroundColor = oldBackground;
+    };
+  }, [syncChrome, palette.bg]);
   const pack = fontPackById(data.type) ?? fontPackById(spec.fonts);
   const style = {
     "--a": accent, "--on-a": onColor(accent),
