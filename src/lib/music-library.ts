@@ -14,6 +14,22 @@ export const DEMO_TRACK_LICENCE = "https://github.com/farmmer938-lgtm/aeris-cc0-
 /** Source-attributed recordings selected for review. Only explicitly approved records are exposed in Studio. */
 export const CURATED_TRACKS = [
   {
+    id: "owner-paradise-humming", title: "Paradise Humming", artist: "Nasheed Harmony", mood: "Gentle humming · serene", category: "nasheed" as const,
+    src: "/audio/paradise-humming.mp3", source: "", license: "Owner-authorised recording", licenseUrl: "", note: "Owner confirmed permission on 8 November 2026.",
+  },
+  {
+    id: "owner-rawaa", title: "Rawaa’", artist: "Raid al-Qahtani", mood: "Warm nasheed · expressive", category: "nasheed" as const,
+    src: "/audio/rawaa.mp3", source: "", license: "Owner-authorised recording", licenseUrl: "", note: "Owner confirmed permission on 8 November 2026.",
+  },
+  {
+    id: "owner-wedding-nasheed", title: "Wedding Nasheed (Muffled)", artist: "Maruf Mohammad Jisan", mood: "Soft, subdued nasheed", category: "nasheed" as const,
+    src: "/audio/wedding-nasheed-muffled.mp3", source: "", license: "Owner-authorised recording", licenseUrl: "", note: "Source audio is intentionally muffled; check its quality before sharing.",
+  },
+  {
+    id: "owner-min-awel-dekika", title: "Min Awel Dekika", artist: "Elissa", mood: "Arabic wedding song · lyrical", category: "songs" as const,
+    src: "/audio/min-awel-dekika.mp3", source: "", license: "Owner-authorised recording", licenseUrl: "", note: "Commercial song supplied by the owner; permission scope should be documented.",
+  },
+  {
     id: "nasheed-alhamdulillah",
     title: "Alhamdulillah (Vocals Only)",
     artist: "Jawad Syed / SyedsLife",
