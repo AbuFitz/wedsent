@@ -18,11 +18,11 @@ import "./studio.css";
 type Tab = "design" | "words" | "details" | "events" | "style";
 type RawEvent = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
 const tabs: { id: Tab; label: string; icon: typeof Palette }[] = [
-  { id: "design", label: "Design", icon: Sparkles },
+  { id: "design", label: "Looks", icon: Sparkles },
   { id: "words", label: "Words", icon: Type },
-  { id: "details", label: "Details", icon: CalendarDays },
   { id: "events", label: "Events", icon: CalendarRange },
-  { id: "style", label: "Style", icon: Palette },
+  { id: "details", label: "Details", icon: CalendarDays },
+  { id: "style", label: "Finishing", icon: Palette },
 ];
 const occasions = ["Wedding", "Nikah", "Walima", "Mehndi", "Reception", "Civil ceremony"];
 const tones = [
@@ -73,10 +73,10 @@ export function Studio() {
         </div>
         <div className="st-right">
           <SaveBadge state={state} account={!!account} reload={reload} />
-          <Link href="/invite" target="_blank" className="btn btn-light st-guest"><span>Guest preview</span> <ArrowUpRight size={16} /></Link>
           {account
             ? <Link href="/dashboard" className="btn btn-dark st-guest"><span>Guests &amp; publish</span></Link>
-            : <Link href="/invite" className="btn btn-dark st-guest"><span>View invitation</span> <ArrowUpRight size={16} /></Link>}
+            : null}
+          <Link href="/invite" target="_blank" className="btn btn-light st-guest" aria-label="Open the guest invitation in a new tab"><span>View as guest</span> <ArrowUpRight size={16} /></Link>
         </div>
       </header>
 
@@ -97,12 +97,18 @@ export function Studio() {
         </button>
         <div className="st-tabs" role="tablist">
           {tabs.map((t) => (
-            <button key={t.id} role="tab" aria-selected={tab === t.id} className="st-tab" onClick={() => go(t.id)}>
+            <button key={t.id} type="button" role="tab" id={`studio-tab-${t.id}`} aria-controls="studio-editor-content" aria-selected={tab === t.id} tabIndex={tab === t.id ? 0 : -1} className="st-tab" onClick={() => go(t.id)} onKeyDown={(event) => {
+              const at = tabs.findIndex((item) => item.id === t.id);
+              const next = event.key === "ArrowRight" ? (at + 1) % tabs.length : event.key === "ArrowLeft" ? (at + tabs.length - 1) % tabs.length : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : -1;
+              if (next === -1) return;
+              event.preventDefault(); go(tabs[next].id);
+              document.getElementById(`studio-tab-${tabs[next].id}`)?.focus();
+            }}>
               <t.icon size={17} /> <span>{t.label}</span>
             </button>
           ))}
         </div>
-        <div className="st-body">
+        <div className="st-body" id="studio-editor-content" role="tabpanel" aria-labelledby={`studio-tab-${tab}`}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
               {tab === "design" && <DesignTab draft={draft} patch={patch} />}
@@ -136,6 +142,7 @@ function DesignTab({ draft, patch }: TabProps) {
   const suggestion = recommendExperience(draft.occasion, mood, audio);
   return (
     <div className="st-stack">
+      <div className="st-panel-intro"><span>01 / LOOKS</span><p>Pick a visual world. Your names, events and answers stay exactly as they are.</p></div>
       <section className="st-recommend" aria-label="Personalised starting point">
         <div className="st-recommend-head"><Sparkles size={17} /><strong>Find your starting point</strong></div>
         <p className="st-help st-help--flat">Tell us the feeling you want. Suggestions never lock your choices or change anything until you apply them.</p>
@@ -172,6 +179,7 @@ function WordsTab({ draft, patch }: TabProps) {
   const custom = !occasions.includes(draft.occasion);
   return (
     <div className="st-stack">
+      <div className="st-panel-intro"><span>02 / WORDS</span><p>Make the invitation sound like you. All copy updates live.</p></div>
       <label className="st-field">
         <span>Names</span>
         <input value={draft.names} maxLength={60} onChange={(e) => patch({ names: e.target.value })} placeholder="Amina & Yusuf" autoComplete="off" aria-invalid={!draft.names.trim()} />
@@ -203,6 +211,7 @@ function DetailsTab({ draft, patch }: TabProps) {
   const left = daysUntil(draft.date);
   return (
     <div className="st-stack">
+      <div className="st-panel-intro"><span>04 / DETAILS</span><p>The practical things guests need to know, kept clear and easy to find.</p></div>
       <p className="st-help st-help--flat">This is the headline date and venue. Use the Events tab for each ceremony or celebration; guests see the events they’re invited to.</p>
       <div className="st-row">
         <label className="st-field">
@@ -319,7 +328,13 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
   const custom = draft.accent || pal.accent;
   return (
     <div className="st-stack">
-      <h2 className="st-h">Your photograph</h2>
+      <div className="st-panel-intro"><span>05 / FINISHING</span><p>Fine-tune the look, motion, soundtrack and little details of your invitation.</p></div>
+      <nav className="st-section-nav" aria-label="Finishing options">
+        {([{ id: "media", title: "Photo" }, { id: "colours", title: "Colour" }, { id: "motion", title: "Opening" }, { id: "extras", title: "Widgets" }, { id: "language", title: "Language" }, { id: "lettering", title: "Type" }, { id: "music", title: "Audio" }] as const).map((s) => (
+          <button key={s.id} type="button" onClick={() => document.getElementById(`studio-${s.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}>{s.title}</button>
+        ))}
+      </nav>
+      <h2 className="st-h st-section-anchor" id="studio-media">Your photograph</h2>
       <p className="st-help">Choose a sharp portrait or landscape photo. We optimise it for the invitation and let you position the focal point. Gallery and Arch use photos most prominently.</p>
       <label className="st-field">
         <span>{photoBusy ? "Processing photograph…" : draft.photo ? "Replace photograph" : "Upload photograph"}</span>
@@ -336,7 +351,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
       </>}
       {photoError && <small className="st-err" role="alert">{photoError}</small>}
       {!account && <p className="st-help">Build mode: the photo stays in this browser. Signed-in uploads use private owner-scoped storage.</p>}
-      <h2 className="st-h">Colours</h2>
+      <h2 className="st-h st-section-anchor" id="studio-colours">Colours</h2>
       <p className="st-help">Each design has its own palettes. Text colour adjusts so it stays readable.</p>
       <div className="st-pals">
         {spec.palettes.map((p) => (
@@ -348,7 +363,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           <input type="color" value={custom} onChange={(e) => patch({ accent: e.target.value })} />
         </label>
       </div>
-      <h2 className="st-h">Opening motion</h2>
+      <h2 className="st-h st-section-anchor" id="studio-motion">Opening motion</h2>
       <p className="st-help">Choose how your invitation opens. Replay it on the phone to feel the difference.</p>
       <div className="st-chips" role="group" aria-label="Opening animation">
         <button type="button" className="st-chip" aria-pressed={!draft.opening} onClick={() => patch({ opening: "" })}>Designer’s choice</button>
@@ -358,7 +373,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           </button>
         ))}
       </div>
-      <h2 className="st-h">Little extras</h2>
+      <h2 className="st-h st-section-anchor" id="studio-extras">Little extras</h2>
       <label className="st-widget-toggle">
         <span><strong>Wedding countdown</strong><small>A sweet live countdown on the invitation</small></span>
         <input type="checkbox" checked={draft.countdown?.enabled ?? false} onChange={(e) => patch({ countdown: { ...(draft.countdown ?? { style: "type", accent: "", label: "" }), enabled: e.target.checked } })} />
@@ -372,7 +387,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
         <label className="st-field"><span>Countdown heading <i>optional</i></span><input maxLength={48} value={draft.countdown.label} placeholder="Until our day" onChange={(e) => patch({ countdown: { ...draft.countdown, label: e.target.value } })} /></label>
         <label className="st-widget-colour"><span>Countdown colour</span><input type="color" aria-label="Countdown accent colour" value={draft.countdown.accent || pal.accent} onChange={(e) => patch({ countdown: { ...draft.countdown, accent: e.target.value } })} /><button type="button" onClick={() => patch({ countdown: { ...draft.countdown, accent: "" } })}>Use theme colour</button></label>
       </>}
-      <h2 className="st-h">Languages by section</h2>
+      <h2 className="st-h st-section-anchor" id="studio-language">Languages by section</h2>
       <p className="st-help">Choose the language for labels in each section. Your own names, messages and event descriptions stay exactly as you wrote them.</p>
       {([{ id: "details", label: "Details and directions" }, { id: "countdown", label: "Countdown" }, { id: "reply", label: "Reply button" }] as const).map((section) => (
         <label className="st-field" key={section.id}><span>{section.label}</span><select value={draft.languages?.[section.id] ?? "en"} onChange={(e) => patch({ languages: { ...(draft.languages ?? { details: "en", countdown: "en", reply: "en" }), [section.id]: e.target.value as "en" | "fr" | "ar" | "so" } })}>
@@ -381,7 +396,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
       ))}
       {stationery && (
         <>
-          <h2 className="st-h">Lettering</h2>
+          <h2 className="st-h st-section-anchor" id="studio-lettering">Lettering</h2>
           <div className="st-types">
             <button type="button" aria-pressed={draft.type === ""} onClick={() => patch({ type: "" })}><span>Designer’s choice</span></button>
             {FONT_PACKS.filter((f) => f.script || ["classic", "didone", "deco", "italiana", "garamond"].includes(f.id)).map((f) => (
@@ -403,7 +418,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           )}
         </>
       )}
-      <h2 className="st-h">Music</h2>
+      <h2 className="st-h st-section-anchor" id="studio-music">Music</h2>
       <p className="st-help st-help--flat">Playable demo collection: three original instrumental tracks released as CC0 by their creator. Listen, then add one to your invitation. No account needed.</p>
       <div className="st-library" aria-label="Demo soundtrack library">
         {DEMO_TRACKS.map((track) => (

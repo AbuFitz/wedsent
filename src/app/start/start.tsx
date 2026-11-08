@@ -9,7 +9,7 @@ import { Phone } from "@/components/phone";
 import { DesignCard } from "@/components/gallery/design-card";
 import { call } from "@/lib/api-client";
 import { defaults, loadDraft, saveDraft, PENDING_EVENTS_KEY, type InviteData, type InviteEvent } from "@/lib/designs";
-import { DESIGNS, FONT_PACKS, INTRO_PRESETS, paletteOf, specById, type DesignId } from "@/engine/registry";
+import { DESIGNS, FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
 import "./start.css";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
@@ -155,11 +155,23 @@ export function Start() {
     style: (
       <>
         <h1>Make it yours.</h1>
-        <p className="s8-sub">Colours, lettering and an optional opening line. The invitation changes as you choose.</p>
+        <p className="s8-sub">Choose the colour, opening gesture and lettering. Each choice updates your invitation.</p>
         <h2 className="s8-h2">Colours</h2>
         <div className="s8-pals">{spec.palettes.map((p) => (
           <button key={p.id} type="button" aria-pressed={paletteOf(spec, d.palette).id === p.id} onClick={() => patch({ palette: p.id, accent: "" })}><i style={{ background: p.accent, boxShadow: p.bg ? `inset 0 0 0 6px ${p.bg}` : undefined }} />{p.name}</button>
         ))}</div>
+        <h2 className="s8-h2">How it opens</h2>
+        <p className="s8-help">Guests tap or swipe to reveal your invitation. You can change this again in Studio.</p>
+        <div className="s8-openings" role="group" aria-label="Invitation opening">
+          <button type="button" aria-pressed={!d.opening} onClick={() => { patch({ opening: "" }); setOpen(false); }}><strong>Designer’s choice</strong><span>{OPENINGS[spec.opening.kind].hint}</span></button>
+          {(["lift", "bloom", "veil", "focus", "doors", "curtain"] as OpeningKind[]).map((kind) => (
+            <button key={kind} type="button" aria-pressed={d.opening === kind} onClick={() => { patch({ opening: kind }); setOpen(false); }}>
+              <strong>{kind === "lift" ? "Paper lift" : kind === "bloom" ? "Touch reveal" : kind === "veil" ? "Soft veil" : kind === "focus" ? "Focus reveal" : kind === "doors" ? "Opening doors" : "Drawing curtains"}</strong>
+              <span>{OPENINGS[kind].hint}</span>
+            </button>
+          ))}
+        </div>
+        <button type="button" className="s8-replay" onClick={() => setOpen(false)}>Replay opening in the phone</button>
         {spec.layout === "stationery" && (
           <>
             <h2 className="s8-h2">Lettering</h2>
@@ -232,7 +244,7 @@ export function Start() {
         <aside className="s8-stage" aria-label="Live preview">
           <div className="s8-phone">
             <Phone label="Your invitation">
-              <Invitation key={`${spec.id}-${d.palette}-${d.type}-${step === "design" ? "c" : "i"}`} data={shown} events={evs} open={inside ? true : open} onOpenChange={setOpen} />
+              <Invitation key={`${spec.id}-${d.palette}-${d.type}-${d.opening}-${step === "design" ? "c" : "i"}`} data={shown} events={evs} open={inside && step !== "style" ? true : open} onOpenChange={setOpen} />
             </Phone>
           </div>
         </aside>

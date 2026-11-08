@@ -14,6 +14,14 @@
 .st-panel{grid-area:panel;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
 .st-grab{display:none}
 .st-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:12px 12px 0;border-bottom:1px solid var(--line)}
+.st-panel-intro{display:flex;flex-direction:column;gap:7px;padding:0 0 16px;border-bottom:1px solid var(--line)}
+.st-panel-intro span{font-size:11px;letter-spacing:.1em;font-weight:700;color:var(--muted)}
+.st-panel-intro p{font-size:14px;line-height:1.5;color:var(--ink)}
+.st-section-nav{position:sticky;top:-22px;z-index:3;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -22px;padding:12px 22px;background:var(--surface);border-bottom:1px solid var(--line)}
+.st-section-nav::-webkit-scrollbar{display:none}
+.st-section-nav button{flex-shrink:0;padding:8px 12px;border:1px solid var(--line);border-radius:99px;background:#fff;font-size:12px;font-weight:600}
+.st-section-nav button:hover,.st-section-nav button:focus-visible{border-color:var(--ink)}
+.st-section-anchor{scroll-margin-top:100px}
 .st-tab{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px 11px;border:0;background:none;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s}
 .st-tab:hover{color:var(--ink)}
 .st-tab[aria-selected=true]{color:var(--ink);border-color:var(--ink)}
@@ -73,19 +81,19 @@
 .st-link{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;text-decoration:underline;text-underline-offset:4px}
 
 .st-canvas{grid-area:canvas;display:grid;place-items:center;position:relative;overflow:hidden;background:
-  radial-gradient(circle at 1px 1px,rgba(14,14,16,.13) 1px,transparent 0) 0 0/22px 22px,var(--bg)}
+  radial-gradient(ellipse at 50% 36%,rgba(255,255,255,.82),transparent 68%),linear-gradient(145deg,#eeede9,var(--bg) 62%,#e9e7e2)}
 .st-phone{--phone-w:min(360px,calc((100svh - 60px - 120px)/2.15));display:flex;flex-direction:column;align-items:center;gap:18px;position:relative}
 .st-replay{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:99px;min-height:38px;padding:0 16px;font-size:13.5px;font-weight:600}
 .st-replay:hover:not(:disabled){border-color:#bdbdb7}
 
 @media(max-width:860px){
-  .st{grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,1fr) auto;grid-template-areas:"top" "canvas" "panel";--sheet:min(52svh,470px)}
+  .st{height:100dvh;grid-template-columns:minmax(0,1fr);grid-template-rows:56px minmax(0,1fr) auto;grid-template-areas:"top" "canvas" "panel";--sheet:min(52dvh,470px)}
   .st[data-sheet=false]{--sheet:104px}
   .st-top{padding:0 12px 0 16px}
   .st-guest span,.st-save b{display:none}
   .st-guest{padding:0 14px}
   .st-seg button{padding:7px 14px}
-  .st-phone{--phone-w:min(290px,calc((100svh - 56px - var(--sheet) - 60px)/2.15));gap:10px}
+  .st-phone{--phone-w:min(290px,calc((100dvh - 56px - var(--sheet) - 60px)/2.15));gap:10px}
   .st-canvas{align-items:start;padding-top:14px}
   .st-panel{height:var(--sheet);border-right:0;border-top:1px solid var(--line);border-radius:22px 22px 0 0;box-shadow:0 -14px 40px -20px rgba(0,0,0,.35);transition:height .4s var(--ease);z-index:6}
   .st-grab{display:grid;place-items:center;height:22px;border:0;background:none;color:var(--muted)}
@@ -95,7 +103,13 @@
   .st-tab{flex-direction:row;justify-content:center;gap:6px;padding:8px 2px 10px}
   .st-note{display:none}
   .st-body{padding:18px 16px 30px}
+  .st-section-nav{top:-18px;margin:0 -16px;padding:10px 16px}
+  .st-tabs{gap:0;padding:4px 6px 0}
+  .st-tab{font-size:11.5px;gap:3px;min-width:0;flex-direction:column;min-height:58px}
+  .st-tab svg{width:17px;height:17px}
+  .st-tab span{white-space:nowrap}
 }
+@media(max-width:370px){.st-top{gap:5px}.st-save{font-size:11px}.st-seg button{padding:7px 9px;font-size:12px}.st-tab{font-size:10.5px}}
 .st-design-hit{position:absolute;inset:0;border:0;background:none;border-radius:18px}
 .st-reload{background:none;border:0;padding:0;font-weight:700;text-decoration:underline;color:inherit}
 .st-help--flat{margin-top:0}
