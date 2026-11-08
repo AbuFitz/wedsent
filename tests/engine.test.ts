@@ -62,6 +62,8 @@ describe("design engine registry", () => {
   });
   it("accepts only expected music references in server wedding content", () => {
     expect(ContentSchema.safeParse({ ...defaults, music: { src: "/music/12345678-1234-1234-1234-123456789abc", title: "Our instrumental" } }).success).toBe(true);
+    expect(ContentSchema.safeParse({ ...defaults, music: { src: "/library/quiet-room", title: "Quiet Room" } }).success).toBe(true);
+    expect(ContentSchema.safeParse({ ...defaults, music: { src: "/library/suspicious-track", title: "Unknown" } }).success).toBe(false);
     expect(ContentSchema.safeParse({ ...defaults, music: { src: "data:audio/mpeg;base64,AAA", title: "Injected audio" } }).success).toBe(false);
     expect(ContentSchema.safeParse({ ...defaults, music: { src: "https://elsewhere.invalid/song.mp3", title: "External" } }).success).toBe(false);
     expect(MAX_MUSIC_BYTES).toBe(8_000_000);

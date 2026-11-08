@@ -12,6 +12,7 @@ import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
 import { readLocalMusic, saveLocalMusic } from "@/lib/local-music";
 import { recommendExperience, type Mood, type AudioPreference } from "@/lib/recommendations";
+import { DEMO_TRACKS, DEMO_TRACK_LICENCE, demoTrackSrc } from "@/lib/music-library";
 import "./studio.css";
 
 type Tab = "design" | "words" | "details" | "events" | "style";
@@ -403,13 +404,25 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
         </>
       )}
       <h2 className="st-h">Music</h2>
+      <p className="st-help st-help--flat">Playable demo collection: three original instrumental tracks released as CC0 by their creator. Listen, then add one to your invitation. No account needed.</p>
+      <div className="st-library" aria-label="Demo soundtrack library">
+        {DEMO_TRACKS.map((track) => (
+          <div key={track.id} className="st-library-track">
+            <div><strong>{track.title}</strong><small>{track.mood} · {track.creator}</small></div>
+            <audio controls preload="none" src={demoTrackSrc(track.id)} aria-label={`Preview ${track.title}`} />
+            <button type="button" className="st-chip" aria-pressed={draft.music?.src === demoTrackSrc(track.id)} onClick={() => patch({ music: { src: demoTrackSrc(track.id), title: track.title } })}>{draft.music?.src === demoTrackSrc(track.id) ? "Selected" : "Use track"}</button>
+          </div>
+        ))}
+      </div>
+      <p className="st-help st-help--flat">Demo audio is streamed from the creator’s public repository, so playback depends on that host. <a href={DEMO_TRACK_LICENCE} target="_blank" rel="noopener noreferrer" className="st-link">Read CC0 licence ↗</a></p>
+      <p className="st-help st-help--flat">Nasheed recordings are not bundled yet: sources identified so far require individual rights checks. You can select vocals-only or duff in Design recommendations, then upload a recording you have permission to use below.</p>
       <p className="st-help">Add your own permitted MP3. Guests can tap the small control to start or pause music. It never plays automatically.</p>
       <label className="st-widget-toggle"><span><strong>I have permission to use this recording</strong><small>Only upload music you own or have rights to share with guests.</small></span><input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} /></label>
       <label className="st-field"><span>{musicBusy ? "Uploading music…" : "Choose MP3 (up to 8 MB)"}</span><input type="file" accept="audio/mpeg,.mp3" disabled={!rightsConfirmed || musicBusy} onChange={(e) => { void uploadMusic(e.target.files?.[0]); e.target.value = ""; }} /></label>
       {draft.music && <div className="st-music-selected"><span>Selected: {draft.music.title}</span><button type="button" className="st-chip" onClick={() => patch({ music: null })}>Remove music</button></div>}
       {draft.music && audioPreview && <div className="st-audio-preview"><label htmlFor="studio-track-player">Listen to your selected track</label><audio id="studio-track-player" key={audioPreview} controls preload="metadata" src={audioPreview} onError={() => setAudioPreviewError("The selected MP3 could not play. Try another file or re-upload it.")} /></div>}
       {draft.music && audioPreviewError && <small className="st-err" role="alert">{audioPreviewError}</small>}
-      <p className="st-help st-help--flat">Vocals-only nasheeds, duff, instrumental and ambient are recommendation preferences, not playable songs yet. The curated library needs rights clearance. Uploaded MP3s can be played here and by guests after opening the invitation.</p>
+      <p className="st-help st-help--flat">Vocals-only nasheed and duff recommendations are not playable tracks yet. The three instrumentals above are real demo recordings; uploaded MP3s play here and on the guest invitation after opening.</p>
       {!account && <p className="st-help">Build mode music stays in this browser only. Re-upload once account publishing is enabled.</p>}
       {musicError && <small className="st-err" role="alert">{musicError}</small>}
       <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
