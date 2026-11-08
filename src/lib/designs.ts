@@ -1,4 +1,4 @@
-import { DESIGNS, DESIGN_IDS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
+import { FEATURED_DESIGNS, DESIGN_IDS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
 export type { DesignId };
 
 /** A cover photograph. `src` is /media/<id> (uploaded), /art/<file> (library artwork) or a data: URL (signed-out local draft). fx/fy are the focal point, 0-100. */
@@ -53,7 +53,7 @@ export const defaults: InviteData = {
   accent: "",
   address: "",
   photo: null,
-  design: "botanica",
+  design: "atelier",
   palette: "",
   type: "",
   intro: "",
@@ -77,7 +77,7 @@ export type DesignMeta = {
   accents: string[]; // first is the default
 };
 
-export const designs: DesignMeta[] = DESIGNS.map((d) => ({
+export const designs: DesignMeta[] = FEATURED_DESIGNS.map((d) => ({
   id: d.id, name: d.name, mood: d.blurb, opening: d.opening.label, openingHint: d.opening.hint,
   bg: d.site.bg, ink: d.site.ink, accents: d.palettes.map((p) => p.accent),
 }));

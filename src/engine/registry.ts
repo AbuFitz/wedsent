@@ -68,8 +68,10 @@ export type DesignSpec = {
   site: { bg: string; ink: string };  // marketing-page tone for this design
 };
 
-export const DESIGN_IDS = ["botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
+export const DESIGN_IDS = ["atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
 export type DesignId = (typeof DESIGN_IDS)[number];
+/** The original set remains renderable for existing invitations, but is not offered to new couples. */
+export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["atelier", "vellum", "nocturne", "postmark"];
 
 const pal = (id: string, name: string, accent: string, rest: Partial<Palette> = {}): Palette => ({ id, name, accent, ...rest });
 
@@ -83,6 +85,50 @@ export const OPENINGS: Record<OpeningKind, { label: string; hint: string }> = {
 };
 
 export const DESIGNS: DesignSpec[] = [
+  {
+    id: "atelier", name: "Atelier Press", family: "Letterpress", blurb: "A warm cotton-paper keepsake with blind-pressed borders, restrained ink and sculpted lettering.",
+    styles: ["Letterpress", "Classic & Traditional", "Simple & Minimalist"], colours: ["Neutral Tones", "Earthy"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Civil", "Church"],
+    opening: { kind: "lift", ...OPENINGS.lift }, layout: "stationery", fonts: "editorial2", art: "none", intro: "families", sample: { names: "Mariam & Adam", occasion: "Wedding" },
+    site: { bg: "#E8E1D5", ink: "#312B26" }, palettes: [
+      pal("ivory", "Cotton ivory", "#6B6052", { bg: "#E9E2D5", soft: "#FAF7EE", fg: "#302D29", line: "#CEC4B5" }),
+      pal("sage", "Olive ink", "#51624A", { bg: "#DDE1D6", soft: "#F3F2E8", fg: "#344035", line: "#BBC7B4" }),
+      pal("rose", "Dusty rose", "#945B61", { bg: "#EBDCDC", soft: "#FBF4EF", fg: "#593A3B", line: "#D5BDBB" }),
+      pal("slate", "Slate impression", "#525C65", { bg: "#DBE0E2", soft: "#F4F5F2", fg: "#303941", line: "#BFC6C8" }),
+    ],
+  },
+  {
+    id: "vellum", name: "Vellum Study", family: "Layered paper", blurb: "A translucent invitation sleeve reveals a portrait beneath, as though unwrapping fine stationery.",
+    styles: ["Modern", "Photography", "Romantic"], colours: ["Pastel", "Neutral Tones"], shape: "Arch", cultures: ["Any wedding", "Civil", "Garden"],
+    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "italiana", art: "photo", intro: "none", sample: { names: "Sofia & Elias", occasion: "Wedding" },
+    site: { bg: "#E9DDD8", ink: "#4D3735" }, palettes: [
+      pal("blush", "Rose vellum", "#95686C", { bg: "#E9DDD8", soft: "#F7F0EB", fg: "#4D3735", line: "#CEB3AF" }),
+      pal("stone", "Stone vellum", "#776B5D", { bg: "#DCD9D2", soft: "#F1EEE7", fg: "#443F3A", line: "#C7BDB2" }),
+      pal("mist", "Blue mist", "#567585", { bg: "#DCE5E6", soft: "#F3F6F3", fg: "#30454B", line: "#B5CFD1" }),
+      pal("olive", "Soft olive", "#566C55", { bg: "#DCE3D8", soft: "#F3F5EB", fg: "#354536", line: "#BBC9B7" }),
+    ],
+  },
+  {
+    id: "nocturne", name: "Nocturne", family: "Evening foil", blurb: "Inky stock, a reflective metallic monogram and disciplined black-tie typography.",
+    styles: ["Elegant & Formal", "Art Deco", "Bold & Typographic"], colours: ["Black & White", "Metallic", "Jewel"], shape: "Frame", cultures: ["Any wedding", "Reception", "Walima", "Evening"],
+    opening: { kind: "doors", ...OPENINGS.doors }, layout: "stationery", fonts: "deco", art: "none", intro: "none", sample: { names: "Nadia & Karim", occasion: "Walima" },
+    site: { bg: "#1B2423", ink: "#D4C19A" }, palettes: [
+      pal("onyx", "Onyx & champagne", "#D6BD83", { bg: "#131B19", soft: "#18211E", fg: "#F4E9D4", line: "#9F8C65" }),
+      pal("plum", "Midnight plum", "#D5B3B9", { bg: "#2A1F2A", soft: "#322632", fg: "#F8E8E9", line: "#B792A3" }),
+      pal("navy", "Navy & platinum", "#C4CDD3", { bg: "#121F2C", soft: "#172637", fg: "#F0F3F4", line: "#8FA2AD" }),
+      pal("forest", "Forest & brass", "#C5AF79", { bg: "#112A24", soft: "#17342C", fg: "#F4ECDC", line: "#8F845F" }),
+    ],
+  },
+  {
+    id: "postmark", name: "Postmark", family: "Destination", blurb: "A nostalgic destination-wedding postcard with a landscape window, serif address and a stamped date.",
+    styles: ["Editorial", "Photography", "Destination"], colours: ["Earthy", "Neutral Tones", "Bright"], shape: "Full bleed", cultures: ["Any wedding", "Destination", "Civil"],
+    opening: { kind: "focus", ...OPENINGS.focus }, layout: "stationery", fonts: "garamond", art: "photo", intro: "none", sample: { names: "Leila & Luca", occasion: "Wedding" },
+    site: { bg: "#DAD2BE", ink: "#383B32" }, palettes: [
+      pal("sand", "Sun-faded sand", "#8F6C4C", { bg: "#DDD3BD", soft: "#F7F0DE", fg: "#3D3A31", line: "#C6B89B" }),
+      pal("sea", "Sea glass", "#3E7777", { bg: "#D9E5DD", soft: "#F5F2E6", fg: "#2B4D4C", line: "#A7C4BE" }),
+      pal("terracotta", "Terracotta", "#A85E46", { bg: "#E9D8C8", soft: "#FBF2E7", fg: "#5C4037", line: "#D6B7A2" }),
+      pal("cobalt", "Faded cobalt", "#355F85", { bg: "#D7DFE4", soft: "#F5F4E9", fg: "#2C4557", line: "#B5C8D4" }),
+    ],
+  },
   {
     id: "gallery", name: "Gallery", family: "Editorial", blurb: "Your photograph, full bleed, with your names set large like a magazine cover.",
     styles: ["Full Bleed Photo", "Modern", "Elegant & Formal"], colours: ["Neutral Tones", "Black & White", "Earthy"], shape: "Full bleed", cultures: ["Any wedding", "Civil", "Evening", "Nikah"],
@@ -159,6 +205,7 @@ export const DESIGNS: DesignSpec[] = [
 
 export const specById = (id: string): DesignSpec => DESIGNS.find((d) => d.id === id) ?? DESIGNS[0];
 export const paletteOf = (spec: DesignSpec, id?: string) => spec.palettes.find((p) => p.id === id) ?? spec.palettes[0];
+export const FEATURED_DESIGNS = DESIGNS.filter((d) => FEATURED_DESIGN_IDS.includes(d.id));
 
 /** Filter facets for the gallery (mirrors how Evite groups designs: style, colour, shape, plus culture and opening). */
 export const FACETS = {

@@ -21,3 +21,17 @@
 .pr-note{text-align:center;font-size:13px;color:#5c5e66;margin-top:20px}
 @page{size:A5;margin:0}
 @media print{.pr{background:#fff;padding:0}.pr-bar,.pr-note{display:none}.pr-card{width:148mm;height:210mm;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+/* Print-suite 2: one visual language from digital front to physical detail insert. */
+.pr{background:#e5e4dd;color:#252720}.pr-stage{display:flex;align-items:flex-start;justify-content:center;gap:26px;flex-wrap:wrap;padding:14px 0 24px}
+.pr-sheet{width:min(148mm,100%);height:210mm;flex:0 0 auto;position:relative;overflow:hidden;box-shadow:0 22px 55px #302a1d35;background:var(--soft);container-type:inline-size;container-name:print-sheet}
+.pr-sheet--front{display:flex;align-items:center;justify-content:center;padding:0}.pr-sheet--front>.sc{width:100%;height:100%;aspect-ratio:auto!important;border-radius:0;box-shadow:none}
+.pr-sheet--insert{display:flex;align-items:center;justify-content:center;background:var(--soft);color:var(--fg);padding:14mm;box-shadow:0 22px 55px #302a1d35,inset 0 0 0 2mm var(--bg)}
+.pr-insert-inner{width:100%;height:100%;display:flex;align-items:center;flex-direction:column;justify-content:center;text-align:center;gap:8mm;border:.25mm solid var(--line);padding:10mm 7mm}
+.pr-insert-kicker{font:700 2.5mm var(--f-caps),serif;letter-spacing:.25em;color:var(--a)}.pr-insert-inner h2{font:400 12mm/1.08 var(--f-head),Georgia,serif;letter-spacing:-.05em;margin:0;overflow-wrap:anywhere}.pr-insert-note{font:italic 4mm/1.45 var(--f-head),serif;max-width:95mm;margin:0}.pr-insert-rule{width:25mm;border-top:.25mm solid var(--line)}
+.pr-insert-inner>p:not(.pr-insert-note){display:flex;flex-direction:column;align-items:center;gap:2mm;margin:0;font:4mm/1.4 var(--f-body),sans-serif}.pr-insert-inner small{font-size:2.5mm;letter-spacing:.22em;color:var(--a);font-weight:700}.pr-insert-inner strong{font:500 5.3mm var(--f-head),serif}.pr-insert-inner span{font-size:3.5mm}
+.pr-sheet--nocturne .pr-insert-inner{border-color:var(--line)}.pr-sheet--nocturne .pr-insert-inner h2{font-family:var(--f-head);text-transform:uppercase;letter-spacing:.09em}
+.pr-sheet--postmark .pr-insert-inner{border-style:dashed}.pr-sheet--atelier .pr-insert-inner{box-shadow:inset 0 0 0 1mm #a89b8018}
+.pr-note{max-width:640px;margin:0 auto 25px;line-height:1.5}
+@media(max-width:660px){.pr{padding:10px}.pr-stage{gap:14px}.pr-sheet{width:min(148mm,calc(100vw - 20px));height:auto;aspect-ratio:148/210;flex-basis:auto}.pr-bar{gap:8px;font-size:12px}.pr-bar button{padding:0 12px}}
+@page{size:A5;margin:0}
+@media print{.pr{padding:0!important;min-height:0;background:white}.pr-stage{display:block;padding:0;gap:0}.pr-sheet{width:148mm!important;height:210mm!important;margin:0!important;box-shadow:none!important;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pr-sheet:last-child{break-after:auto;page-break-after:auto}.pr-bar,.pr-note{display:none!important}}

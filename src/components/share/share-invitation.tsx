@@ -13,12 +13,13 @@ export function ShareInvitation({ url, title, privateLink = false, label = "Shar
   const [svg, setSvg] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [qrStyle, setQrStyle] = useState<"ink" | "olive" | "plum">("ink");
 
   useEffect(() => {
     if (!open) return;
     let alive = true;
     setBusy(true); setNotice("");
-    const options = { errorCorrectionLevel: "H" as const, margin: 3, color: { dark: "#191D19", light: "#FFFFFFFF" } };
+    const options = { errorCorrectionLevel: "H" as const, margin: 4, color: { dark: qrStyle === "olive" ? "#244A3E" : qrStyle === "plum" ? "#543247" : "#191D19", light: "#FFFFFFFF" } };
     Promise.all([
       QRCode.toDataURL(url, { ...options, width: 720 }),
       QRCode.toString(url, { ...options, type: "svg" as const, width: 720 }),
@@ -26,7 +27,7 @@ export function ShareInvitation({ url, title, privateLink = false, label = "Shar
       .catch(() => { if (alive) setNotice("Couldn't generate the QR code. The link is still available below."); })
       .finally(() => { if (alive) setBusy(false); });
     return () => { alive = false; };
-  }, [url, open]);
+  }, [url, open, qrStyle]);
 
   useEffect(() => {
     if (!open) return;
@@ -59,10 +60,11 @@ export function ShareInvitation({ url, title, privateLink = false, label = "Shar
       <section className="share-dialog" role="dialog" aria-modal="true" aria-label="Share invitation">
         <header><div><span>WEDSENT / SHARING</span><h2>{privateLink ? "A personal invitation" : "Share your celebration"}</h2></div><button type="button" aria-label="Close sharing" onClick={() => setOpen(false)}><X size={19}/></button></header>
         <p className="share-intro">{privateLink ? "This link is for one household. Anyone who receives it may be able to view and reply for that household." : "This public link shows the general invitation. It does not grant access to private guest details."}</p>
-        <div className="share-card">
+        <div className={`share-card share-card--${qrStyle}`}>
           <div className="share-qr">{png ? <img src={png} alt="QR code linking to this invitation" width="224" height="224"/> : <span>{busy ? "Creating QR code…" : "QR preview unavailable"}</span>}</div>
           <div className="share-card-caption"><strong>{title}</strong><small>Scan to open the invitation</small></div>
         </div>
+        <div className="share-qr-styles" role="group" aria-label="QR colour"><span>QR ink</span>{([{value:"ink",label:"Ink"},{value:"olive",label:"Olive"},{value:"plum",label:"Plum"}] as const).map((item) => <button type="button" key={item.value} aria-pressed={qrStyle===item.value} onClick={() => setQrStyle(item.value)}>{item.label}</button>)}</div>
         <label className="share-link"><span>Invitation link</span><input value={url} readOnly onFocus={(e) => e.target.select()} aria-label="Invitation link"/><button type="button" aria-label="Copy invitation link" onClick={() => void copy()}><Copy size={17}/></button></label>
         <div className="share-actions">
           <button type="button" onClick={() => void nativeShare()}><Share2 size={16}/> Share with phone</button>

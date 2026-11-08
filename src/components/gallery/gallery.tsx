@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { FunnelSimple, X } from "@phosphor-icons/react";
 import { Nav } from "@/components/site/nav";
-import { DESIGNS, FACETS } from "@/engine/registry";
+import { FEATURED_DESIGNS, FACETS } from "@/engine/registry";
 import { DesignCard, OPENING_NAME } from "./design-card";
 import "./gallery.css";
 
@@ -18,7 +18,7 @@ export function Gallery({ initial }: { initial?: Partial<Record<Facet, string>> 
   const active = ORDER.flatMap((f) => sel[f].map((v) => ({ f, v })));
 
   const list = useMemo(() => {
-    const l = DESIGNS.filter((d) => {
+    const l = FEATURED_DESIGNS.filter((d) => {
       const has: Record<Facet, string[]> = { culture: d.cultures, style: d.styles, colour: d.colours, shape: [d.shape], opening: [d.opening.kind] };
       return ORDER.every((f) => !sel[f].length || sel[f].some((v) => has[f].includes(v)));
     });

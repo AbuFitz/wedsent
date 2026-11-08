@@ -134,3 +134,36 @@
 @media (prefers-reduced-motion:reduce){.cv-hint i{animation:none}}
 .sc--fill.sc--gallery .sc-text{padding-bottom:26cqw}
 .sc--fill.sc--linen .sc-text{padding-bottom:12cqw}
+
+/* The new stationery collection: four separate print-world compositions. */
+.sc--atelier{background:var(--soft);aspect-ratio:5/7.5;box-shadow:0 .7cqw 2cqw #2d241926,0 0 0 .18cqw #d3c8b6,inset 0 0 4cqw #ad9a7c15}
+.sc--atelier::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#7d6e5510 0 1px,transparent 1px 3px);opacity:.25}
+.sc--atelier .sc-impression{position:absolute;inset:5cqw;border:.36cqw solid #a89b804b;box-shadow:inset .18cqw .18cqw .45cqw #695a4938,.18cqw .18cqw .2cqw #fff9ef;outline:.17cqw solid #c8baa36b;outline-offset:1.8cqw}
+.sc--atelier .sc-impression-crest{position:absolute;left:50%;top:14cqw;translate:-50% 0;font:13cqw Georgia,serif;color:var(--a);text-shadow:0 .2cqw .3cqw #fff8ee,-.13cqw -.13cqw .2cqw #69574660}
+.sc--atelier .sc-text{padding:23cqw 13cqw 5cqw;gap:2.6cqw}.sc--atelier .sc-intro{letter-spacing:.18em}.sc--atelier .sc-names{font-family:var(--f-head);font-weight:350;letter-spacing:-.065em;line-height:.97;color:var(--fg)}.sc--atelier .sc-and{font-weight:300;font-size:.33em;margin:.3em 0}.sc--atelier .sc-line{font-size:3.4cqw;font-style:normal;letter-spacing:.03em}.sc--atelier .sc-date{border-top:.18cqw solid var(--line);padding-top:3cqw;margin-top:4cqw}.sc--atelier .sc-venue{font-style:normal;font-size:3.5cqw}
+.sc--fill.sc--atelier .sc-impression-crest{top:23cqw}.sc--fill.sc--atelier .sc-text{padding-top:43cqw}
+
+.sc--vellum{background:var(--bg);aspect-ratio:5/8.2;isolation:isolate}
+.sc-vellum-photo{position:absolute;inset:6cqw 6cqw 22cqw;overflow:hidden;border-radius:45cqw 45cqw 1cqw 1cqw;background:#bfaea7;box-shadow:0 2cqw 7cqw #3b25212c}.sc-vellum-photo img{height:100%;width:100%;object-fit:cover}
+.sc-vellum-placeholder{position:absolute;inset:0;background:radial-gradient(ellipse at 70% 22%,#fff9ec9c,transparent 50%),linear-gradient(145deg,#a58d83,#d4b9ae 35%,#87766b 75%,#d9c7bd)}
+.sc-vellum-layer{position:absolute;inset:37cqw 3cqw 4cqw;background:linear-gradient(120deg,#fffef7ce,#fffaf0b4 35%,#fffbf6e6 70%);border:1px solid #fffdf4a6;box-shadow:0 -1cqw 3cqw #3b2a221a,0 2cqw 6cqw #57453924;backdrop-filter:blur(1.4cqw);transform:rotate(-1.4deg);z-index:1}
+.sc-vellum-clip{position:absolute;top:34cqw;left:50%;translate:-50% 0;width:15cqw;height:4cqw;border-radius:10cqw;background:linear-gradient(#b39780,#eedac1 42%,#a48a76);box-shadow:0 .4cqw 1.5cqw #352b2652;z-index:2}
+.sc--vellum .sc-text{justify-content:flex-end;padding:0 9cqw 13cqw;gap:1.7cqw}.sc--vellum .sc-intro{font-size:2.8cqw}.sc--vellum .sc-line{font-style:normal;font-size:3.1cqw;letter-spacing:.03em}.sc--vellum .sc-names{font-family:var(--f-head);letter-spacing:-.05em;line-height:.92}.sc--vellum .sc-and{font-size:.38em}.sc--vellum .sc-date{font-size:2.8cqw}.sc--vellum .sc-venue{font-size:3.2cqw;font-style:normal}
+.sc--fill.sc--vellum .sc-vellum-photo{inset:4cqw 5cqw 35cqw}.sc--fill.sc--vellum .sc-vellum-layer{top:48cqw}.sc--fill.sc--vellum .sc-vellum-clip{top:45cqw}.sc--fill.sc--vellum .sc-text{padding-bottom:30cqw}
+
+.sc--nocturne{background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--soft) 80%,#4b4a3c),var(--bg) 70%);aspect-ratio:5/7.5;color:var(--fg)}
+.sc--nocturne::before{content:"";position:absolute;inset:4cqw;border:.2cqw solid color-mix(in srgb,var(--line) 60%,transparent);box-shadow:inset 0 0 0 .9cqw var(--bg),inset 0 0 0 1.05cqw color-mix(in srgb,var(--line) 38%,transparent)}
+.sc-nocturne-rule{position:absolute;left:50%;top:20cqw;translate:-50% 0;width:1px;height:17cqw;background:linear-gradient(transparent,var(--line),transparent)}
+.sc-nocturne-monogram{position:absolute;top:44cqw;left:50%;translate:-50% 0;white-space:nowrap;font:400 27cqw "Cinzel Variable",Georgia,serif;line-height:1;color:var(--a);background:linear-gradient(125deg,#786546,var(--a) 30%,#fff4cb 53%,var(--a) 75%,#6c5940);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:.85;filter:drop-shadow(0 .25cqw .3cqw #0b0907a6)}
+.sc-nocturne-monogram i{font-size:.35em;margin:0 -.1em;font-style:normal}
+.sc--nocturne .sc-text{justify-content:flex-end;padding:0 10cqw 17cqw;gap:2.3cqw}.sc--nocturne .sc-names{font-family:var(--f-head);font-size:8cqw!important;line-height:1.1;letter-spacing:.12em;text-transform:uppercase}.sc--nocturne .sc-and{font-size:.5em;letter-spacing:0}.sc--nocturne .sc-line{font-style:normal;text-transform:uppercase;letter-spacing:.24em;font:2.6cqw var(--f-body)}.sc--nocturne .sc-date{color:var(--a)}.sc--nocturne .sc-venue{font-style:normal;font-size:3.2cqw}
+.sc--fill.sc--nocturne .sc-nocturne-monogram{top:57cqw}.sc--fill.sc--nocturne .sc-text{padding-bottom:28cqw}
+
+.sc--postmark{background:var(--soft);aspect-ratio:5/7.4;border-radius:.6cqw;box-shadow:0 .5cqw 2cqw #2c2b2540,0 0 0 .3cqw #dfd4bd}
+.sc--postmark::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,#514b3f0b 0 .1cqw,transparent .1cqw 1.2cqw);opacity:.5}
+.sc-postmark-photo{position:absolute;inset:4.7cqw 4.7cqw 40cqw;background:#b0b5a4;overflow:hidden;filter:sepia(.12) contrast(.93)}.sc-postmark-photo img{height:100%;width:100%;object-fit:cover}.sc-postmark-placeholder{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 120%,#384a46 0 30%,transparent 32%),linear-gradient(170deg,#adc0bd 0,#d7d9c8 60%,#9ea28b)}
+.sc-postmark-stamp{position:absolute;right:10cqw;top:54cqw;display:grid;place-items:center;width:20cqw;height:20cqw;border:.6cqw double var(--a);border-radius:50%;font:700 2.7cqw var(--f-caps);text-align:center;letter-spacing:.12em;line-height:1.5;rotate:12deg;opacity:.75}
+.sc-postmark-rule{position:absolute;left:9cqw;right:9cqw;bottom:16cqw;border-top:.2cqw solid var(--line)}
+.sc--postmark .sc-text{align-items:flex-start;text-align:left;justify-content:flex-end;padding:0 9cqw 20cqw;gap:1.7cqw}.sc--postmark .sc-intro{font-size:2.5cqw}.sc--postmark .sc-names{font-family:var(--f-head);align-items:flex-start;font-style:italic;font-weight:500;letter-spacing:-.05em;line-height:.85;max-width:60cqw}.sc--postmark .sc-and{font-size:.5em;align-self:flex-start}.sc--postmark .sc-line{font-style:normal;text-transform:uppercase;letter-spacing:.2em;font-size:2.5cqw}.sc--postmark .sc-date{margin-top:2cqw;font-size:2.8cqw}.sc--postmark .sc-venue{font-style:normal;font-size:3.1cqw}
+.sc--fill.sc--postmark .sc-postmark-photo{bottom:70cqw}.sc--fill.sc--postmark .sc-stamp{top:80cqw}.sc--fill.sc--postmark .sc-text{padding-bottom:36cqw}
+@media(prefers-reduced-motion:reduce){.sc-vellum-layer{transform:none}}

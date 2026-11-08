@@ -49,6 +49,10 @@ export function StationeryCard({ data, spec, palette, greeting, event, fill }: {
 
   return (
     <section className={`sc sc--${spec.id}${fill ? " sc--fill" : ""}`} aria-label="Invitation">
+      {spec.id === "atelier" && <><span className="sc-impression" aria-hidden="true"/><span className="sc-impression-crest" aria-hidden="true">✳</span></>}
+      {spec.id === "vellum" && <><div className="sc-vellum-photo" aria-hidden="true">{photo ? <PhotoFill photo={photo}/> : <span className="sc-vellum-placeholder"/>}</div><span className="sc-vellum-layer" aria-hidden="true"/><span className="sc-vellum-clip" aria-hidden="true"/></>}
+      {spec.id === "nocturne" && <><span className="sc-nocturne-rule" aria-hidden="true"/><span className="sc-nocturne-monogram" aria-hidden="true">{names.a.slice(0,1)}<i>&amp;</i>{names.b.slice(0,1)}</span></>}
+      {spec.id === "postmark" && <><div className="sc-postmark-photo" aria-hidden="true">{photo ? <PhotoFill photo={photo}/> : <span className="sc-postmark-placeholder"/>}</div><span className="sc-postmark-stamp" aria-hidden="true">SAVE<br/>THE DATE</span><span className="sc-postmark-rule" aria-hidden="true"/></>}
       {spec.id === "botanica" && (<><Cut id={A ?? "peony-pink"} className="sc-a1" /><Cut id={B ?? "rose-wild"} className="sc-a2" /><Cut id="olive-b" className="sc-a3" /></>)}
       {spec.id === "gallery" && (
         <div className="sc-photo" aria-hidden={!photo}>
