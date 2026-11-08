@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight, Eye, PanelLeftClose, PanelLeftOpen, LayoutTemplate, Settings2, Send, MapPin } from "lucide-react";
+import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, RotateCw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil, Share2, Music2, Image as ImageIcon, SlidersHorizontal, ChevronRight, Eye, PanelLeftClose, PanelLeftOpen, LayoutTemplate, Settings2, Send, MapPin } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
@@ -55,7 +55,7 @@ const tones = [
 ];
 
 export function Studio() {
-  const { draft, patch, state, ready, account, reload } = useStudioDraft();
+  const { draft, patch, undo, redo, canUndo, canRedo, state, ready, account, reload } = useStudioDraft();
   const params = useSearchParams();
   const [tab, setTab] = useState<Tab>("words");
   const [open, setOpen] = useState(false);
@@ -120,6 +120,7 @@ export function Studio() {
           <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
         </div>
         <div className="st-right">
+          <div className="st-history" role="group" aria-label="Edit history"><button type="button" aria-label="Undo change" title="Undo change" onClick={undo} disabled={!canUndo}><RotateCcw size={16}/></button><button type="button" aria-label="Redo change" title="Redo change" onClick={redo} disabled={!canRedo}><RotateCw size={16}/></button></div>
           <SaveBadge state={state} account={!!account} reload={reload} />
           {account
             ? <Link href="/dashboard" className="btn btn-dark st-guest"><span>Guests &amp; publish</span></Link>
@@ -130,11 +131,16 @@ export function Studio() {
       </header>
       {shareStatus && <div className="st-share-toast" role="status">{shareStatus}</div>}
 
-      <nav className="st-rail" aria-label="Studio workspaces">
-        <div className="st-rail-heading">CREATE</div>
-        {workspaces.map((item) => <button key={item.id} type="button" className="st-rail-button" aria-current={workspace === item.id ? "page" : undefined} onClick={() => selectWorkspace(item.id)} title={item.description}>
-          <item.icon size={20} strokeWidth={1.8} /><span>{item.label}</span>
-        </button>)}
+      <nav className="st-rail" aria-label="Invitation sections">
+        <div className="st-rail-heading">YOUR INVITATION <span>SECTIONS</span></div>
+        {workspaces.map((item) => <div className="st-rail-group" key={item.id}>
+          <button type="button" className="st-rail-button" aria-expanded={workspace === item.id} aria-current={workspace === item.id ? "page" : undefined} onClick={() => selectWorkspace(item.id)} title={item.description}>
+            <item.icon size={19} strokeWidth={1.8} /><span>{item.label}</span><ChevronRight className="st-rail-chevron" size={15}/>
+          </button>
+          <div className="st-rail-children" aria-label={`${item.label} sections`}>
+            {item.tasks.map((task) => { const entry = tabs.find((t) => t.id === task)!; return <button type="button" key={task} onClick={() => go(task)} aria-current={tab === task ? "page" : undefined} className="st-rail-child"><entry.icon size={15}/><span>{entry.label}</span>{tab === task && <span className="st-selected-dot"/>}</button>; })}
+          </div>
+        </div>)}
         <div className="st-rail-bottom"><button type="button" onClick={() => setFocusMode((value) => !value)} title={focusMode ? "Show editor" : "Focus on the preview"} aria-pressed={focusMode}>{focusMode ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}<span>{focusMode ? "Show editor" : "Focus"}</span></button></div>
       </nav>
 

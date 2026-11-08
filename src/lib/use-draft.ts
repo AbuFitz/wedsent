@@ -43,6 +43,9 @@ export function useStudioDraft() {
   const [account, setAccount] = useState<{ email: string } | null>(null);
   const rev = useRef(0);
   const dirty = useRef(false);
+  const undoHistory = useRef<InviteData[]>([]);
+  const redoHistory = useRef<InviteData[]>([]);
+  const [historyVersion, setHistoryVersion] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -96,6 +99,30 @@ export function useStudioDraft() {
     return () => clearTimeout(t);
   }, [draft, ready, account]);
 
-  const patch = useCallback((p: Partial<InviteData>) => { dirty.current = true; setDraft((d) => ({ ...d, ...p })); }, []);
-  return { draft, patch, state, ready, account, reload: () => location.reload() };
+  const patch = useCallback((p: Partial<InviteData>) => {
+    dirty.current = true;
+    setDraft((current) => {
+      undoHistory.current.push(current);
+      if (undoHistory.current.length > 60) undoHistory.current.shift();
+      redoHistory.current = [];
+      return { ...current, ...p };
+    });
+    setHistoryVersion((value) => value + 1);
+  }, []);
+  const undo = useCallback(() => {
+    const previous = undoHistory.current.pop();
+    if (!previous) return;
+    dirty.current = true;
+    setDraft((current) => { redoHistory.current.push(current); return previous; });
+    setHistoryVersion((value) => value + 1);
+  }, []);
+  const redo = useCallback(() => {
+    const next = redoHistory.current.pop();
+    if (!next) return;
+    dirty.current = true;
+    setDraft((current) => { undoHistory.current.push(current); return next; });
+    setHistoryVersion((value) => value + 1);
+  }, []);
+  void historyVersion;
+  return { draft, patch, undo, redo, canUndo: undoHistory.current.length > 0, canRedo: redoHistory.current.length > 0, state, ready, account, reload: () => location.reload() };
 }

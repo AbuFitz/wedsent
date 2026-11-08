@@ -77,6 +77,8 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 ## Build order from here (dependency order, one journey at a time)
 **Studio workbench update, 8 Nov:** Replaced the eight-item horizontal category bar and previous/next wizard navigation with four workspaces (Content, Design, Sound, Finishing), local focused task tabs, direct preview edit shortcuts, and a mobile Edit/Preview switch. The existing invitation renderer, draft autosave/conflict handling, owner-only uploads, events API and soundtrack data were retained. `npm run build` and all 40 unit/backend tests passed. Browser viewport interaction and mobile visual QA have **not** been completed; do not call this a verified UX release. Remaining shortcomings include contextual selection directly inside rendered invitation elements, section-specific visual controls beyond the existing fields, a hands-on usability pilot and accessible real-device QA.
 
+**Studio navigator revision:** Desktop now separates a labelled section hierarchy on the left, the guest canvas in the middle, and an inspector on the right. Draft-only Undo/Redo was added. Framer/Webflow/Canva official editor documentation was used to evaluate this interaction structure, but no proprietary source code or UI assets were copied. Existing media and wedding records are not migrated or deleted. Real mobile QA and usability testing are still pending.
+
 1. Design maturity: art pass for Vermilion, Monolith, Nocturne; higher-resolution re-cuts of the hero plates; paper/marble photo textures; a Chinese/East Asian and a Jewish design family; reply inside the invitation card.
 2. Onboarding to publish: guests and sharing inside the guided flow; QR and share sheet.
 4. Sharing: QR, native share sheet, share card.
