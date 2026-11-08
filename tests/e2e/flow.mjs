@@ -15,10 +15,10 @@ const email = `e2e${Date.now()}@example.com`;
 
 // Local draft first (signed out), then sign up claims it.
 await p.goto(base + "/studio"); await p.waitForTimeout(800);
-await p.getByRole("tab", { name: "Wording" }).click();
+await p.getByRole("navigation", { name: "Invitation sections" }).getByRole("button", { name: "Wording" }).click();
 await p.getByLabel("Names").fill("Layla & Omar");
 await p.waitForTimeout(700);
-await p.getByRole("link", { name: /Save & publish/ }).click();
+await p.goto(base + "/signin?next=%2Fstudio");
 await p.waitForURL(/signin/);
 await p.getByLabel("Email").fill(email); await p.getByLabel("Password").fill("a-long-passphrase");
 await p.getByRole("button", { name: "Create account" }).click();
@@ -27,18 +27,18 @@ ok(true, "sign-up returns to Studio (next param)");
 
 // Draft claimed from local.
 await p.goto(base + "/studio"); await p.waitForTimeout(1200);
-await p.getByRole("tab", { name: "Wording" }).click();
+await p.getByRole("navigation", { name: "Invitation sections" }).getByRole("button", { name: "Wording" }).click();
 ok((await p.getByLabel("Names").inputValue()) === "Layla & Omar", "local draft claimed into account");
-await p.getByRole("tab", { name: "Details" }).click();
+await p.getByRole("navigation", { name: "Invitation sections" }).getByRole("button", { name: "Details" }).click();
 await p.getByLabel("Venue", { exact: true }).fill("Hall of Mirrors");
 await p.getByText("Saved to your account").first().waitFor({ timeout: 10000 }).catch(() => {});
 ok(await p.getByText("Saved to your account").first().isVisible(), "studio autosaves to server");
 await p.reload(); await p.waitForTimeout(1200);
-await p.getByRole("tab", { name: "Details" }).click();
+await p.getByRole("navigation", { name: "Invitation sections" }).getByRole("button", { name: "Details" }).click();
 ok((await p.getByLabel("Venue", { exact: true }).inputValue()) === "Hall of Mirrors", "draft persists across reload (server)");
 
 // Events created in the Studio (account-saved), visible in the live preview.
-await p.getByRole("tab", { name: "Events" }).click();
+await p.getByRole("navigation", { name: "Invitation sections" }).getByRole("button", { name: "Events" }).click();
 const addEvent = async (title, date, venue, visibility) => {
   await p.getByLabel("Name", { exact: true }).fill(title);
   await p.getByLabel("Date", { exact: true }).fill(date);

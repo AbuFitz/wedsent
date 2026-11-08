@@ -49,9 +49,9 @@ const stepText: Record<Tab, { title: string; summary: string }> = {
 };
 const occasions = ["Wedding", "Nikah", "Walima", "Mehndi", "Reception", "Civil ceremony"];
 const tones = [
-  { label: "Warm", text: "We’re so happy to share this day with the people we love most. Please join us." },
-  { label: "Short", text: "Come celebrate with us." },
-  { label: "Playful", text: "A little love, a lot of joy, and a dance floor with your name on it." },
+  { label: "Warm & heartfelt", text: "We’re so happy to share this day with the people we love most. Please join us." },
+  { label: "Simple & timeless", text: "Come celebrate with us." },
+  { label: "Joyful & personal", text: "A little love, a lot of joy, and a dance floor with your name on it." },
 ];
 
 export function Studio() {
@@ -253,15 +253,17 @@ function DesignTab({ draft, patch }: TabProps) {
 function WordsTab({ draft, patch }: TabProps) {
   const custom = !occasions.includes(draft.occasion);
   return (
-    <div className="st-stack">
-      <div className="st-panel-intro"><span>02 / WORDS</span><p>Make the invitation sound like you. All copy updates live.</p></div>
+    <div className="st-stack st-editorial-controls">
+      <div className="st-control-section"><div className="st-control-heading"><span>01</span><div><h2>The couple</h2><p>Exactly how your names should appear on the invitation.</p></div></div>
       <label className="st-field">
-        <span>Names</span>
+        <span>Your names</span>
         <input value={draft.names} maxLength={60} onChange={(e) => patch({ names: e.target.value })} placeholder="Amina & Yusuf" autoComplete="off" aria-invalid={!draft.names.trim()} />
         {!draft.names.trim() ? <small className="st-err">Add your names. Guests see “Your names” until you do.</small> : <small>Use “&” or “and” between two names to split them across lines.</small>}
       </label>
+      </div>
+      <div className="st-control-section"><div className="st-control-heading"><span>02</span><div><h2>The celebration</h2><p>Choose a familiar title, or write your own.</p></div></div>
       <fieldset className="st-field">
-        <legend>Occasion</legend>
+        <legend>What are you celebrating?</legend>
         <div className="st-chips">
           {occasions.map((o) => (
             <button key={o} type="button" className="st-chip" aria-pressed={draft.occasion === o} onClick={() => patch({ occasion: o })}>{o}</button>
@@ -270,20 +272,24 @@ function WordsTab({ draft, patch }: TabProps) {
         </div>
         {custom && <input value={draft.occasion} maxLength={30} onChange={(e) => patch({ occasion: e.target.value })} placeholder="Name your occasion" aria-label="Custom occasion" />}
       </fieldset>
+      </div>
+      <div className="st-control-section"><div className="st-control-heading"><span>03</span><div><h2>A note to your guests</h2><p>A few words, or nothing at all. The layout will adapt.</p></div></div>
       <label className="st-field">
-        <span>Message</span>
+        <span>Your message</span>
         <textarea rows={4} maxLength={300} value={draft.message} onChange={(e) => patch({ message: e.target.value })} />
         <small>{draft.message.length}/300</small>
       </label>
-      <div className="st-chips" aria-label="Starting points">
-        {tones.map((t) => <button key={t.label} type="button" className="st-chip st-chip--ghost" onClick={() => patch({ message: t.text })}>{t.label}</button>)}
+      <p className="st-mini-label">OR TRY A STARTING POINT</p>
+      <div className="st-copy-presets" aria-label="Message starting points">
+        {tones.map((t) => <button key={t.label} type="button" className="st-copy-preset" aria-pressed={draft.message === t.text} onClick={() => patch({ message: t.text })}><strong>{t.label}</strong><span>“{t.text}”</span><small>{draft.message === t.text ? "Selected" : "Use wording"} <ArrowUpRight size={13}/></small></button>)}
       </div>
-      <h2 className="st-h">Message presentation</h2>
-      <p className="st-help">Style this section independently of the cover. The rest of the invitation stays as you designed it.</p>
-      <div className="st-chips" role="group" aria-label="Message layout">
+      </div>
+      <div className="st-control-section"><div className="st-control-heading"><span>04</span><div><h2>How it’s presented</h2><p>Choose a typographic treatment for this note.</p></div></div>
+      <div className="st-message-layouts" role="group" aria-label="Message layout">
         {([{ id: "plain", label: "Minimal" }, { id: "framed", label: "Fine border" }, { id: "editorial", label: "Editorial quote" }] as const).map((style) => (
-          <button type="button" className="st-chip" key={style.id} aria-pressed={(draft.messageStyle || "plain") === style.id} onClick={() => patch({ messageStyle: style.id })}>{style.label}</button>
+          <button type="button" className="st-message-layout" key={style.id} aria-pressed={(draft.messageStyle || "plain") === style.id} onClick={() => patch({ messageStyle: style.id })}><span className={`st-message-sample st-message-sample--${style.id}`}><i />Together, always.<i /></span><strong>{style.label}</strong>{(draft.messageStyle || "plain") === style.id && <Check size={15}/>}</button>
         ))}
+      </div>
       </div>
     </div>
   );
@@ -431,25 +437,21 @@ function StyleTab({ draft, patch, account, mode }: TabProps & { account: boolean
       {!account && <p className="st-help">Build mode: the photo stays in this browser. Signed-in uploads use private owner-scoped storage.</p>}
       </>}
       {mode === "appearance" && <>
-      <h2 className="st-h st-section-anchor" id="studio-colours">Colours</h2>
-      <p className="st-help">Each design has its own palettes. Text colour adjusts so it stays readable.</p>
-      <div className="st-pals">
+      <div className="st-control-heading"><span>01</span><div><h2>Colour story</h2><p>Thoughtfully paired shades for this invitation. Choose a palette or refine the accent.</p></div></div>
+      <div className="st-pals st-palette-cards" id="studio-colours">
         {spec.palettes.map((p) => (
           <button key={p.id} type="button" aria-pressed={pal.id === p.id && !draft.accent} onClick={() => patch({ palette: p.id, accent: "" })}>
-            <i style={{ background: p.accent, boxShadow: p.bg ? `inset 0 0 0 6px ${p.bg}` : undefined }} />{p.name}
+            <span className="st-palette-preview" style={{ background: p.bg || "#f2ede6", color: p.fg || "#26221f" }}><i style={{ background: p.accent }} /><b>A &amp; Y</b><em style={{ background: p.soft || p.accent }}/></span><strong>{p.name}</strong>{pal.id === p.id && !draft.accent && <Check size={15} />}
           </button>
         ))}
-        <label className="st-swatch st-swatch--custom" aria-label="Custom accent colour" title="Custom accent colour">
-          <input type="color" value={custom} onChange={(e) => patch({ accent: e.target.value })} />
-        </label>
       </div>
-      <h2 className="st-h st-section-anchor" id="studio-motion">Opening motion</h2>
-      <p className="st-help">Choose how your invitation opens. Replay it on the phone to feel the difference.</p>
-      <div className="st-chips" role="group" aria-label="Opening animation">
-        <button type="button" className="st-chip" aria-pressed={!draft.opening} onClick={() => patch({ opening: "" })}>Designer’s choice</button>
+      <label className="st-widget-colour"><span>Accent colour</span><input type="color" aria-label="Custom accent colour" value={custom} onChange={(e) => patch({ accent: e.target.value })} /><button type="button" onClick={() => patch({ accent: "" })}>Restore palette colour</button></label>
+      <div className="st-control-heading st-control-heading--spaced"><span>02</span><div><h2>The opening scene</h2><p>The first few seconds guests experience. Every motion can be skipped.</p></div></div>
+      <div className="st-opening-grid" id="studio-motion" role="group" aria-label="Opening animation">
+        <button type="button" className="st-opening-option" aria-pressed={!draft.opening} onClick={() => patch({ opening: "" })}><span className="st-opening-symbol">✳</span><strong>Original</strong><small>Designed for this look</small></button>
         {(Object.keys(OPENINGS) as OpeningKind[]).map((kind) => (
-          <button key={kind} type="button" className="st-chip" aria-pressed={draft.opening === kind} title={OPENINGS[kind].hint} onClick={() => patch({ opening: kind })}>
-            {{ lift: "Lift", bloom: "Bloom", veil: "Veil", focus: "Focus", doors: "Doors", curtain: "Curtain" }[kind]}
+          <button key={kind} type="button" className="st-opening-option" aria-pressed={draft.opening === kind} title={OPENINGS[kind].hint} onClick={() => patch({ opening: kind })}>
+            <span className={`st-opening-symbol st-opening-symbol--${kind}`} aria-hidden="true"><i /><i /></span><strong>{{ lift: "Lift", bloom: "Bloom", veil: "Veil", focus: "Focus", doors: "Doors", curtain: "Curtain" }[kind]}</strong><small>{OPENINGS[kind].hint}</small>
           </button>
         ))}
       </div>

@@ -85,3 +85,17 @@ No source from the projects above has been incorporated into Wedsent as of this 
 Implementation: a content/design/sound/finishing workbench with task-specific inspectors and preview shortcuts, native keyboard-accessible tabs and disclosure, mobile edit/preview modes. No third-party editor source code was copied; Wavesurfer remains the actual adopted waveform dependency. This is a workflow overhaul of the shell, not a new template renderer or an independent proof of usability.
 
 Further source review: [Framer's interface](https://www.framer.com/academy/lessons/framer-interface) separates canvas, layer structure and selection-specific properties; [Webflow Navigator](https://help.webflow.com/hc/en-us/articles/33961320786451-Navigator) gives section hierarchy and selection; [Canva's editor](https://www.canva.com/help/glow-up/) shows controls based on the selected item. Wedsent implements the constrained variant: a section tree, centre guest canvas and right-side inspector, not a general-purpose HTML designer. Undo/redo are local draft history actions; events are separately persisted and do not participate in that history. The user experience requires independent viewport and task-based testing.
+
+### Second research pass: actual application editors and CRM controls
+
+| Source | What is applicable | Adoption |
+| --- | --- | --- |
+| [Twenty](https://github.com/twentyhq/twenty) | Compact object navigation, right-side record peeks, only show key details in context, fast shortcuts | Interaction research, no source copied |
+| [Plane](https://github.com/makeplane/plane) | Side peek vs full-screen modes and properties grouped by purpose | Interaction research, no source copied |
+| [Payload](https://github.com/payloadcms/payload) | Draft-aware live preview in the same editing session, publish separate from draft | Architectural comparison; our draft/publish paths remain authoritative |
+| [Puck](https://github.com/puckeditor/puck) | MIT visual React editor with component-specific field configuration, viewport preview, compositional UI and inline text | Candidate for a future controlled section editing engine; not yet installed or migrated |
+| [Craft.js](https://craft.js.org/docs/overview) | Node/selection architecture without a mandatory UI | Research; unconstrained canvas editing inappropriate for current invitation contracts |
+| [Formbricks](https://github.com/formbricks/formbricks) | Guided editor UX | Research only; project licence restricts extracting/reusing the editor for another platform |
+| [Typebot](https://github.com/baptisteArno/typebot.io) | Flow-builder patterns | Research only; Functional Source License, not freely reusable as MIT code |
+
+This pass also led to rendered choice cards in the Wording and Appearance inspectors: full copy examples, miniature type treatments, palette cards, and motion thumbnails. Existing editing fields still require a wider art-directed component pass, and visual QA remains required.

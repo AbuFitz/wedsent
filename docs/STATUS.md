@@ -79,6 +79,8 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 
 **Studio navigator revision:** Desktop now separates a labelled section hierarchy on the left, the guest canvas in the middle, and an inspector on the right. Draft-only Undo/Redo was added. Framer/Webflow/Canva official editor documentation was used to evaluate this interaction structure, but no proprietary source code or UI assets were copied. Existing media and wedding records are not migrated or deleted. Real mobile QA and usability testing are still pending.
 
+**Studio control art direction pass:** Wording controls now use copy-sample cards and illustrated message-layout choices; Appearance has visual palette cards and miniature opening-motion cards rather than unlabeled pills. Research expanded to Twenty, Plane, Payload, Puck, Craft.js, Formbricks and Typebot with source/licence boundaries in `OPEN_SOURCE.md`. No Puck adoption or replacement of the editor engine is claimed. The venue/date, events, uploads and music inspectors still need the same deep interaction review. Real couple testing remains outstanding.
+
 1. Design maturity: art pass for Vermilion, Monolith, Nocturne; higher-resolution re-cuts of the hero plates; paper/marble photo textures; a Chinese/East Asian and a Jewish design family; reply inside the invitation card.
 2. Onboarding to publish: guests and sharing inside the guided flow; QR and share sheet.
 4. Sharing: QR, native share sheet, share card.
