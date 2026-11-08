@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, Check, ChevronUp, Palette, Printer, RotateCcw, Sparkles, Type, CalendarDays, CalendarRange, AlertCircle, Loader2, Plus, Trash2, Pencil } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
-import { designs, daysUntil, onColor, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
+import { designs, daysUntil, onColor, PENDING_EVENTS_KEY, type DesignId, type InviteData, type InviteEvent } from "@/lib/designs";
 import { FONT_PACKS, INTRO_PRESETS, paletteOf, specById } from "@/engine/registry";
 import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
@@ -36,7 +36,13 @@ export function Studio() {
   const [sheet, setSheet] = useState(true);
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
   const loadEvents = useCallback(async () => {
-    if (!account) return;
+    if (!account) {
+      try {
+        const pending = JSON.parse(localStorage.getItem(PENDING_EVENTS_KEY) || "[]") as { id?: string; title: string; startsOn?: string | null; startsAt?: string | null; venue?: string; city?: string; visibility?: "invited" | "everyone" }[];
+        setRawEvents(pending.map((e, i) => ({ id: e.id ?? `local-${i}`, title: e.title, starts_on: e.startsOn ?? null, starts_at_local: e.startsAt ?? null, venue: e.venue ?? "", city: e.city ?? "", visibility: e.visibility ?? "invited" })));
+      } catch { setRawEvents([]); }
+      return;
+    }
     try { setRawEvents((await call("GET", "/api/wedding/events")).events); } catch { /* keep what we have */ }
   }, [account]);
   useEffect(() => { loadEvents(); }, [loadEvents]);
@@ -67,7 +73,7 @@ export function Studio() {
           <Link href="/invite" target="_blank" className="btn btn-light st-guest"><span>Guest preview</span> <ArrowUpRight size={16} /></Link>
           {account
             ? <Link href="/dashboard" className="btn btn-dark st-guest"><span>Guests &amp; publish</span></Link>
-            : <Link href="/signin?next=/studio" className="btn btn-dark st-guest"><span>Save &amp; publish</span></Link>}
+            : <Link href="/invite" className="btn btn-dark st-guest"><span>View invitation</span> <ArrowUpRight size={16} /></Link>}
         </div>
       </header>
 
@@ -104,7 +110,7 @@ export function Studio() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Not signed in: this draft only lives in this browser."}</p>
+        <p className="st-note">{account ? "Edits save to your account. Publish from Guests & publish when you’re ready." : "Build mode: your invitation and events save on this device. Publishing and private guest links need an account later."}</p>
       </aside>
     </div>
   );
@@ -268,26 +274,29 @@ function EventsTab({ account, events, reload }: { account: boolean; events: RawE
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  if (!account)
-    return (
-      <div className="st-stack">
-        <h2 className="st-h">Events</h2>
-        <p className="st-help st-help--flat">Add the Nikah, ceremony, reception or any other celebration, and each guest sees only the ones they’re invited to. Events are saved to your account, so sign in first. Until then your invitation shows the single date and venue from Details.</p>
-        <Link href="/signin?next=/studio" className="btn btn-dark">Sign in to add events</Link>
-      </div>
-    );
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr(null);
     const body = { ...f, startsOn: f.startsOn || null, startsAt: f.startsAt || null };
     try {
-      if (editing) await call("PUT", `/api/wedding/events/${editing}`, body); else await call("POST", "/api/wedding/events", body);
+      if (!account) {
+        const next = editing
+          ? events.map((event) => event.id === editing ? { ...event, title: body.title, starts_on: body.startsOn, starts_at_local: body.startsAt, venue: body.venue, city: body.city, visibility: body.visibility } : event)
+          : [...events, { id: crypto.randomUUID(), title: body.title, starts_on: body.startsOn, starts_at_local: body.startsAt, venue: body.venue, city: body.city, visibility: body.visibility }];
+        localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(next.map((event) => ({ id: event.id, title: event.title, startsOn: event.starts_on, startsAt: event.starts_at_local, venue: event.venue, city: event.city, visibility: event.visibility }))));
+      } else if (editing) await call("PUT", `/api/wedding/events/${editing}`, body); else await call("POST", "/api/wedding/events", body);
       setF(blank); setEditing(null); await reload();
     } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t save the event."); }
     setBusy(false);
   };
   const del = async (id: string, title: string) => {
     if (!confirm(`Delete “${title}”? Replies to it will be removed.`)) return;
-    try { await call("DELETE", `/api/wedding/events/${id}`); if (editing === id) { setEditing(null); setF(blank); } await reload(); } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t delete."); }
+    try {
+      if (!account) {
+        localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(events.filter((event) => event.id !== id).map((event) => ({ id: event.id, title: event.title, startsOn: event.starts_on, startsAt: event.starts_at_local, venue: event.venue, city: event.city, visibility: event.visibility }))));
+      } else await call("DELETE", `/api/wedding/events/${id}`);
+      if (editing === id) { setEditing(null); setF(blank); }
+      await reload();
+    } catch (x) { setErr(x instanceof ApiError ? x.message : "Couldn’t delete."); }
   };
   return (
     <div className="st-stack">
@@ -320,7 +329,7 @@ function EventsTab({ account, events, reload }: { account: boolean; events: RawE
           <button className="btn btn-dark" disabled={busy || !f.title.trim()}>{editing ? "Save event" : <><Plus size={16} /> Add event</>}</button>
           {editing && <button type="button" className="btn btn-light" onClick={() => { setEditing(null); setF(blank); }}>Cancel</button>}
         </div>
-        <p className="st-help st-help--flat">Choose who’s invited to each event in <Link href="/dashboard" className="st-inl">Guests</Link>.</p>
+        <p className="st-help st-help--flat">{account ? <>Choose who’s invited to each event in <Link href="/dashboard" className="st-inl">Guests</Link>.</> : "These are local build-mode events. Private guest permissions and publishing will be available when account access is enabled."}</p>
       </form>
     </div>
   );

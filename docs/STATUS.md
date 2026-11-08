@@ -1,5 +1,7 @@
 # Status and feature matrix — 2026-11-07 (round 3)
 
+**Build-mode access update (8 Nov):** Signed-out onboarding now goes directly to Studio, and Studio supports local-only creation, editing and deletion of events. No sign-in is needed to explore invitation designs and the editor. This does **not** bypass owner authentication for server-side guest lists, publishing or private links; those actions remain account-protected. Local drafts/events are tied to the browser and can be lost if its storage is cleared.
+
 Source of truth for what is real. States: **Verified** = covered by an automated test or a browser run this session. **Partial** = built, with named gaps. **UI only** = looks real, is not. **Planned**. **Blocked** = needs something outside the code.
 Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs` (16 browser checks, cold server), screenshots reviewed at 390 and 1440 widths.
 

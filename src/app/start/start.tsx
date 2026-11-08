@@ -83,7 +83,7 @@ export function Start() {
     const titles = events.filter((e) => e.trim());
     if (!user) {
       try { localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(titles.map((title) => ({ title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city })))); } catch {}
-      router.push("/signin?next=/studio");
+      router.push("/studio");
       return;
     }
     try {
@@ -199,7 +199,7 @@ export function Start() {
         </ul>
         {err && <p className="s8-err" role="alert">{err}</p>}
         <button className="btn btn-dark s8-save" onClick={finish} disabled={busy}>{busy ? "Saving…" : "Save and continue"} <ArrowRight size={18} /></button>
-        <p className="s8-fine">You’ll create a free account so your invitation is saved. Nothing is sent to guests until you publish.</p>
+        <p className="s8-fine">For now, your draft and event choices save on this device. No account needed to explore Studio. Nothing is sent to guests.</p>
       </>
     ),
   };
