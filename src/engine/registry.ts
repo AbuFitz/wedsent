@@ -68,11 +68,11 @@ export type DesignSpec = {
   site: { bg: string; ink: string };  // marketing-page tone for this design
 };
 
-export const DESIGN_IDS = ["pearl", "embossed", "gilt", "rosewood", "velvet", "atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
+export const DESIGN_IDS = ["pearl", "embossed", "gilt", "rosewood", "velvet", "heritage", "nikah-etched", "atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
 export type DesignId = (typeof DESIGN_IDS)[number];
 /** The original set remains renderable for existing invitations, but is not offered to new couples. */
 /** Old schemes remain readable for previously saved invitations, but the public gallery is rebuilt. */
-export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "embossed", "rosewood", "velvet", "gilt"];
+export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "embossed", "rosewood", "velvet", "heritage", "nikah-etched", "gilt"];
 
 const pal = (id: string, name: string, accent: string, rest: Partial<Palette> = {}): Palette => ({ id, name, accent, ...rest });
 
@@ -139,6 +139,28 @@ export const DESIGNS: DesignSpec[] = [
       pal("wine", "Wine velvet", "#713744", { bg: "#E6D8D4", soft: "#F6EEE4", fg: "#3D3030", line: "#AE8E68" }),
       pal("forest", "Forest velvet", "#3D624E", { bg: "#DBE0D6", soft: "#F4EDE0", fg: "#393C32", line: "#9E946D" }),
       pal("navy", "Midnight velvet", "#365672", { bg: "#D9DFE4", soft: "#F6EDE1", fg: "#323640", line: "#B59A75" }),
+    ],
+  },
+  {
+    id: "heritage", name: "The Heritage Portrait", family: "Victorian engraving", blurb: "A finely etched garden portrait inspired by antique illustrated wedding stationery, with personalised live typography beneath the artwork.",
+    styles: ["Classic & Traditional", "Illustrated", "Luxury"], colours: ["Earthy", "Neutral Tones", "Pastel"], shape: "Portrait", cultures: ["Any wedding", "Civil", "Garden", "Church"],
+    opening: { kind: "focus", ...OPENINGS.focus }, layout: "stationery", fonts: "garamond", art: "none", intro: "families", sample: { names: "Eleanor & James", occasion: "Wedding" },
+    site: { bg: "#EBE2D3", ink: "#5A493D" }, palettes: [
+      pal("sepia", "Antique copper", "#77533E", { bg: "#F1E5D2", soft: "#FCF4E7", fg: "#44362C", line: "#B7A18A" }),
+      pal("sage", "Estate sage", "#596B5B", { bg: "#E4E8DE", soft: "#F7F6EE", fg: "#35453A", line: "#AEBBA9" }),
+      pal("slate", "Blue grey", "#52667B", { bg: "#E2E8E9", soft: "#F6F6F1", fg: "#344552", line: "#ABBDCA" }),
+      pal("wine", "Vintage claret", "#794D5A", { bg: "#E9DEE1", soft: "#FCF3EE", fg: "#51343D", line: "#C3A4A9" }),
+    ],
+  },
+  {
+    id: "nikah-etched", name: "The Garden Nikah", family: "Botanical portrait engraving", blurb: "A respectful bridal portrait featuring a modest hijab and detailed garden etching, created for couples who want representation in their invitation artwork.",
+    styles: ["Illustrated", "Floral & Botanical", "Classic & Traditional"], colours: ["Earthy", "Neutral Tones", "Pastel"], shape: "Portrait", cultures: ["Nikah", "Walima", "Any wedding"],
+    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "garamond", art: "none", intro: "families", sample: { names: "Amina & Yusuf", occasion: "Nikah" },
+    site: { bg: "#E5E7D9", ink: "#4A5E49" }, palettes: [
+      pal("sage", "Botanical sage", "#506B52", { bg: "#E6E9DF", soft: "#F8F7ED", fg: "#334837", line: "#A8B79E" }),
+      pal("olive", "Antique olive", "#696A46", { bg: "#E9E8DA", soft: "#FAF7E9", fg: "#424635", line: "#BABC9C" }),
+      pal("clay", "Terracotta", "#925B47", { bg: "#EEE1D8", soft: "#FCF5E9", fg: "#553F33", line: "#D0AF9E" }),
+      pal("indigo", "Deep indigo", "#515D7C", { bg: "#E0E4EC", soft: "#F9F7EF", fg: "#363F56", line: "#ACB5C7" }),
     ],
   },
   {

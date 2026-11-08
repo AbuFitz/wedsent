@@ -273,3 +273,17 @@
 .cv-velvet-instruction{position:absolute;bottom:8%;left:50%;translate:-50% 0;z-index:4;white-space:nowrap;color:#fff5df;font:2.8cqw var(--f-caps);letter-spacing:.24em;text-shadow:0 .3cqw 1cqw #0d000c;pointer-events:none}
 .cv-velvet .cv-hit:focus-visible{outline:.8cqw solid #efd7af;outline-offset:-2cqw}
 @media(prefers-reduced-motion:reduce){.cv-rosewood-letter,.cv-rosewood-envelope,.cv-rosewood-flap,.cv-rosewood-stamp,.cv-velvet-card,.cv-velvet-drape{will-change:auto;transition:none!important}}
+
+/* Etched portrait suites — source artwork is independent from editable live typography. */
+.sc--heritage,.sc--nikah-etched{isolation:isolate;overflow:hidden;background:var(--soft);color:var(--fg);box-shadow:inset 0 0 0 2cqw var(--bg),inset 0 0 0 2.2cqw var(--line),0 1.4cqw 4cqw #251b1630}
+.sc--heritage::before,.sc--nikah-etched::before{content:"";position:absolute;inset:1.5cqw;border:.25cqw solid color-mix(in srgb,var(--a) 35%,transparent);pointer-events:none;z-index:2}
+.sc--heritage .sc-engraving,.sc--nikah-etched .sc-engraving{position:absolute;inset:1cqw 4cqw 34%;background-position:center top;background-repeat:no-repeat;background-size:contain;opacity:.9;pointer-events:none;filter:drop-shadow(0 .25cqw .35cqw #5c493727);transition:filter .5s ease}
+.sc--heritage .sc-engraving{background-image:url('/art/heritage-couple-engraving.webp')}
+.sc--nikah-etched .sc-engraving{background-image:url('/art/nikah-engraving.webp')}
+.sc--heritage .sc-text,.sc--nikah-etched .sc-text{position:absolute;inset:58% 6cqw 6cqw;z-index:3;justify-content:center;gap:1.2cqw;padding:1cqw 4cqw 2cqw;text-align:center;background:linear-gradient(transparent,color-mix(in srgb,var(--soft) 96%,transparent) 7%);text-shadow:0 .1cqw .2cqw #fff9}
+.sc--heritage .sc-intro,.sc--nikah-etched .sc-intro{font-family:var(--f-head);font-style:italic;letter-spacing:.06em;font-size:3cqw}
+.sc--heritage .sc-line,.sc--nikah-etched .sc-line{font-family:var(--f-caps);font-size:2.8cqw;letter-spacing:.17em;text-transform:uppercase}
+.sc--heritage .sc-names,.sc--nikah-etched .sc-names{font-family:var(--f-head);font-size:8.5cqw!important;line-height:.98;letter-spacing:.03em;font-weight:400;color:var(--fg)}
+.sc--heritage .sc-and,.sc--nikah-etched .sc-and{font-family:var(--f-head);font-size:.46em;font-style:italic;margin:.12em 0}
+.sc--heritage .sc-date,.sc--nikah-etched .sc-date{font-family:var(--f-caps);letter-spacing:.1em;font-size:2.6cqw}
+.sc--heritage .sc-venue,.sc--nikah-etched .sc-venue{font-family:var(--f-head);font-style:italic;font-size:3cqw;letter-spacing:.02em}

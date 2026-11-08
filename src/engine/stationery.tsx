@@ -57,6 +57,7 @@ export function StationeryCard({ data, spec, palette, greeting, event, fill }: {
       {spec.id === "pearl" && <><span className="sc-pearl-sheen" aria-hidden="true"/><span className="sc-pearl-rule" aria-hidden="true" /></>}
       {(spec.id === "embossed" || spec.id === "gilt") && <span className="sc-material-light" aria-hidden="true" />}
       {(spec.id === "rosewood" || spec.id === "velvet") && <span className="sc-material-light" aria-hidden="true" />}
+      {(spec.id === "heritage" || spec.id === "nikah-etched") && <span className="sc-engraving" aria-hidden="true" />}
       {spec.id === "botanica" && (<><Cut id={A ?? "peony-pink"} className="sc-a1" /><Cut id={B ?? "rose-wild"} className="sc-a2" /><Cut id="olive-b" className="sc-a3" /></>)}
       {spec.id === "gallery" && (
         <div className="sc-photo" aria-hidden={!photo}>
