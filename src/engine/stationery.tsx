@@ -36,12 +36,13 @@ export function StationeryCard({ data, spec, palette, greeting, event, fill }: {
   const occ = (data.occasion || "wedding").toLowerCase();
   const nameLine = names.joined ? [names.a, names.b] : [names.a];
   const longest = Math.max(...nameLine.map((n) => n.length));
-  const script = ["botanica"].includes(spec.id) || (data.type && ["pinyon", "vibes", "allura", "parisienne"].includes(data.type));
+  const script = ["botanica", "pearl"].includes(spec.id) || (data.type && ["pinyon", "vibes", "allura", "parisienne"].includes(data.type));
   const size = fit("x".repeat(longest + (names.joined ? 3 : 0)), 72, script ? 0.42 : 0.5, script ? 13 : 12, 7);
   const photo = data.photo;
 
   const wording =
-    spec.id === "botanica" ? `request the pleasure of your company at the ${occ} of`
+    spec.id === "pearl" ? "request the honour of your presence"
+    : spec.id === "botanica" ? `request the pleasure of your company at the ${occ} of`
     : spec.id === "arch" ? `invite you to celebrate the ${occ} of`
     : spec.id === "marigold" ? `celebrate the ${occ} of`
     : spec.id === "zellige" ? `request the honour of your presence at the ${occ} of`
@@ -53,6 +54,7 @@ export function StationeryCard({ data, spec, palette, greeting, event, fill }: {
       {spec.id === "vellum" && <><div className="sc-vellum-photo" aria-hidden="true">{photo ? <PhotoFill photo={photo}/> : <span className="sc-vellum-placeholder"/>}</div><span className="sc-vellum-layer" aria-hidden="true"/><span className="sc-vellum-clip" aria-hidden="true"/></>}
       {spec.id === "nocturne" && <><span className="sc-nocturne-rule" aria-hidden="true"/><span className="sc-nocturne-monogram" aria-hidden="true">{names.a.slice(0,1)}<i>&amp;</i>{names.b.slice(0,1)}</span></>}
       {spec.id === "postmark" && <><div className="sc-postmark-photo" aria-hidden="true">{photo ? <PhotoFill photo={photo}/> : <span className="sc-postmark-placeholder"/>}</div><span className="sc-postmark-stamp" aria-hidden="true">SAVE<br/>THE DATE</span><span className="sc-postmark-rule" aria-hidden="true"/></>}
+      {spec.id === "pearl" && <><span className="sc-pearl-sheen" aria-hidden="true"/><span className="sc-pearl-rule" aria-hidden="true" /></>}
       {spec.id === "botanica" && (<><Cut id={A ?? "peony-pink"} className="sc-a1" /><Cut id={B ?? "rose-wild"} className="sc-a2" /><Cut id="olive-b" className="sc-a3" /></>)}
       {spec.id === "gallery" && (
         <div className="sc-photo" aria-hidden={!photo}>

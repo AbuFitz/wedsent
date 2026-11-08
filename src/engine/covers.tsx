@@ -4,9 +4,41 @@ import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 
 import type { InviteData } from "@/lib/designs";
 import { paletteOf, type DesignSpec } from "./registry";
 import { StationeryCard } from "./stationery";
+import { splitNames } from "@/lib/designs";
 
 type P = { data: InviteData; spec: DesignSpec; onOpen: () => void; still: boolean };
 const ease = [0.22, 0.8, 0.2, 1] as const;
+
+/** A separate envelope face: the invitation text stays on the card beneath it. */
+export function PearlCover({ data, onOpen, still }: P) {
+  const reduced = useReducedMotion();
+  const [opening, setOpening] = useState(false);
+  const names = splitNames(data.names);
+  useEffect(() => {
+    if (!opening) return;
+    const timer = window.setTimeout(onOpen, 1250);
+    return () => window.clearTimeout(timer);
+  }, [opening, onOpen]);
+  const start = () => {
+    if (still || opening) return;
+    if (reduced) onOpen();
+    else setOpening(true);
+  };
+  return (
+    <motion.section className="cover cv cv-pearl" aria-label="Pearlescent floral envelope" exit={{ opacity: 0, transition: { duration: 0.18 } }}>
+      <div className="cv-pearl-paper" aria-hidden="true" />
+      <div className="cv-pearl-panels" aria-hidden="true">
+        <motion.div className="cv-pearl-panel cv-pearl-panel--left" animate={opening ? { rotateY: -115, x: "-5%" } : { rotateY: 0, x: 0 }} transition={{ duration: 1.18, ease: [0.24, 0.7, 0.12, 1] }} />
+        <motion.div className="cv-pearl-panel cv-pearl-panel--right" animate={opening ? { rotateY: 115, x: "5%" } : { rotateY: 0, x: 0 }} transition={{ duration: 1.18, ease: [0.24, 0.7, 0.12, 1] }} />
+      </div>
+      <motion.div className="cv-pearl-seal" aria-hidden="true" animate={opening ? { opacity: 0, scale: 1.2, rotate: 12 } : { opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: .46 }}>
+        <span className="cv-pearl-seal-inner">{names.a.slice(0, 1)}<i>&amp;</i>{names.b.slice(0, 1)}</span>
+      </motion.div>
+      <motion.span className="cv-pearl-caption" animate={opening ? { opacity: 0 } : { opacity: 1 }}>TAP TO OPEN</motion.span>
+      <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Open the floral invitation" />
+    </motion.section>
+  );
+}
 
 function Face({ data, spec, hint }: { data: InviteData; spec: DesignSpec; hint: string }) {
   return (

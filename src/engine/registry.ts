@@ -68,10 +68,10 @@ export type DesignSpec = {
   site: { bg: string; ink: string };  // marketing-page tone for this design
 };
 
-export const DESIGN_IDS = ["atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
+export const DESIGN_IDS = ["atelier", "vellum", "nocturne", "postmark", "pearl", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
 export type DesignId = (typeof DESIGN_IDS)[number];
 /** The original set remains renderable for existing invitations, but is not offered to new couples. */
-export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["atelier", "vellum", "nocturne", "postmark"];
+export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "atelier", "vellum", "nocturne", "postmark"];
 
 const pal = (id: string, name: string, accent: string, rest: Partial<Palette> = {}): Palette => ({ id, name, accent, ...rest });
 
@@ -85,6 +85,17 @@ export const OPENINGS: Record<OpeningKind, { label: string; hint: string }> = {
 };
 
 export const DESIGNS: DesignSpec[] = [
+  {
+    id: "pearl", name: "Pearl Garden", family: "Pearlescent botanical", blurb: "A luminous rose-and-gold keepsake. Lift the floral seal and two mother-of-pearl panels part to reveal your invitation.",
+    styles: ["Floral & Botanical", "Romantic", "Classic & Traditional", "Luxury"], colours: ["Pastel", "Ivory & Gold", "Neutral Tones"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Walima", "Garden", "Civil"],
+    opening: { kind: "doors", label: "Tap the seal to open", hint: "An embossed floral envelope opens from the centre" }, layout: "stationery", fonts: "pinyon", art: "none", intro: "families", sample: { names: "Alba & Felipe", occasion: "Wedding" },
+    site: { bg: "#E7E2D8", ink: "#50463D" }, palettes: [
+      pal("blush", "Rose pearl", "#A58164", { bg: "#E9E0D6", soft: "#F8EFE4", fg: "#4C4035", line: "#BE9D70" }),
+      pal("sage", "Sage pearl", "#778477", { bg: "#DCE0D7", soft: "#F5F1E8", fg: "#3D4C42", line: "#B59B6B" }),
+      pal("champagne", "Champagne", "#987A53", { bg: "#E8E0D1", soft: "#FBF4E7", fg: "#514337", line: "#B69863" }),
+      pal("lavender", "Lavender pearl", "#8B7A91", { bg: "#E5DFE8", soft: "#F8F1F1", fg: "#534655", line: "#B5A1B9" }),
+    ],
+  },
   {
     id: "atelier", name: "Atelier Press", family: "Letterpress", blurb: "A warm cotton-paper keepsake with blind-pressed borders, restrained ink and sculpted lettering.",
     styles: ["Letterpress", "Classic & Traditional", "Simple & Minimalist"], colours: ["Neutral Tones", "Earthy"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Civil", "Church"],

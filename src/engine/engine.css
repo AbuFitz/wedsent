@@ -167,3 +167,28 @@
 .sc--postmark .sc-text{align-items:flex-start;text-align:left;justify-content:flex-end;padding:0 9cqw 20cqw;gap:1.7cqw}.sc--postmark .sc-intro{font-size:2.5cqw}.sc--postmark .sc-names{font-family:var(--f-head);align-items:flex-start;font-style:italic;font-weight:500;letter-spacing:-.05em;line-height:.85;max-width:60cqw}.sc--postmark .sc-and{font-size:.5em;align-self:flex-start}.sc--postmark .sc-line{font-style:normal;text-transform:uppercase;letter-spacing:.2em;font-size:2.5cqw}.sc--postmark .sc-date{margin-top:2cqw;font-size:2.8cqw}.sc--postmark .sc-venue{font-style:normal;font-size:3.1cqw}
 .sc--fill.sc--postmark .sc-postmark-photo{bottom:70cqw}.sc--fill.sc--postmark .sc-stamp{top:80cqw}.sc--fill.sc--postmark .sc-text{padding-bottom:36cqw}
 @media(prefers-reduced-motion:reduce){.sc-vellum-layer{transform:none}}
+
+/* Pearl Garden: original painted stationery artwork, not a generic floral skin. */
+.sc--pearl{background:#f7eee4 url('/art/pearl-garden.webp') center/100% 100% no-repeat;aspect-ratio:2/3;isolation:isolate;color:var(--fg)}
+.sc--pearl::after{background:linear-gradient(112deg,transparent 26%,#fffaf344 45%,transparent 56%,#f9f2e622 78%),var(--grain);mix-blend-mode:screen;opacity:.64}
+.sc-pearl-sheen{position:absolute;inset:0;background:linear-gradient(130deg,transparent 23%,#f9fbff4c 41%,transparent 50%,#ffe8c038 68%,transparent 78%);mix-blend-mode:screen;pointer-events:none}
+.sc-pearl-rule{position:absolute;left:50%;top:32%;bottom:25%;border-left:1px solid #bd9f724c;opacity:.6}
+.sc--pearl .sc-text{justify-content:center;padding:19cqw 13cqw 15cqw;gap:2.6cqw;text-shadow:0 .15cqw .5cqw #fffdf2b0}
+.sc--pearl .sc-intro{text-transform:none;letter-spacing:.015em;font-family:var(--f-head);font-size:3.8cqw;font-style:italic;opacity:.8}
+.sc--pearl .sc-line{font-family:var(--f-head);font-style:italic;letter-spacing:.012em;font-size:3.5cqw}
+.sc--pearl .sc-names{font-family:var(--f-script);font-size:14cqw!important;line-height:.93;font-weight:400;color:#534b36;filter:drop-shadow(0 .1cqw .2cqw #fffdf3)}
+.sc--pearl .sc-and{font-family:var(--f-head);font-size:.32em;margin:.23em 0}
+.sc--pearl .sc-date{margin-top:1.8cqw;letter-spacing:.29em;font-size:2.6cqw}
+.sc--pearl .sc-venue{font-family:var(--f-head);font-style:normal;text-transform:uppercase;letter-spacing:.12em;font-size:3.2cqw}
+.sc--fill.sc--pearl{background-size:cover}.sc--fill.sc--pearl .sc-text{padding:24cqw 12cqw 21cqw}
+.cv-pearl{background:#f5ebdd;isolation:isolate;perspective:1000px}
+.cv-pearl-paper{position:absolute;inset:0;background:#f9eddf url('/art/pearl-garden.webp') center/cover no-repeat;filter:brightness(1.05)}
+.cv-pearl-panels{position:absolute;inset:0;display:flex;perspective:1000px;z-index:2;pointer-events:none;overflow:hidden}
+.cv-pearl-panel{position:relative;width:50%;height:100%;flex:none;background-image:linear-gradient(100deg,#fff9ee26,#fff4dd11 55%,#33251a35),url('/art/pearl-garden.webp');background-size:100% 100%,200% 100%;backface-visibility:hidden;box-shadow:0 0 3cqw #55412a52}
+.cv-pearl-panel--left{background-position:center,left center;transform-origin:left center;border-right:.24cqw solid #a47c49}
+.cv-pearl-panel--right{background-position:center,right center;transform-origin:right center;border-left:.24cqw solid #d4b685}
+.cv-pearl-seal{position:absolute;left:50%;top:50%;translate:-50% -50%;width:33cqw;height:33cqw;display:grid;place-items:center;z-index:3;border-radius:50%;background:radial-gradient(circle at 38% 30%,#fff5e6 0,#eecdb9 26%,#cda982 56%,#9b794e 76%,#f3d9aa 94%);box-shadow:0 1.2cqw 3.8cqw #5b3a2366,inset 0 .5cqw 1cqw #fff9eea6,inset 0 -1cqw 1.4cqw #78503655;border:.5cqw double #aa8655;color:#6a4b31}
+.cv-pearl-seal::before{content:"";position:absolute;inset:1cqw;border:1.4cqw double #d3ac83;border-radius:46%;clip-path:polygon(50% 0,65% 7%,85% 5%,94% 24%,100% 50%,94% 74%,85% 95%,63% 93%,50% 100%,35% 93%,15% 95%,6% 74%,0 50%,6% 26%,15% 5%,35% 7%);background:radial-gradient(circle,#ffefdaab,#f0d6b855)}
+.cv-pearl-seal-inner{position:relative;z-index:1;font-family:"Pinyon Script",cursive;font-size:12cqw;letter-spacing:-.04em;white-space:nowrap;text-shadow:0 .2cqw #fff9eb}.cv-pearl-seal-inner i{font-family:Georgia,serif;font-size:.4em;font-style:italic;padding:0 .05em}
+.cv-pearl-caption{position:absolute;z-index:3;bottom:7%;left:50%;translate:-50% 0;font-family:var(--f-caps);font-size:2.9cqw;letter-spacing:.3em;color:#5e5044;text-shadow:0 1px 1px #fff8ee;white-space:nowrap}
+.cv-pearl .cv-hit:focus-visible{outline:.7cqw solid #9d774a;outline-offset:-2cqw}
