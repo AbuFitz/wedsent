@@ -329,6 +329,17 @@
 .cv-velvet-emblem span{position:relative;font:10cqw "Pinyon Script",cursive;color:#483529;text-shadow:0 .2cqw .2cqw #fff2c1;white-space:nowrap}.cv-velvet-emblem i{font:italic .42em Georgia,serif;padding:0 .05em}
 .cv-velvet-instruction{position:absolute;bottom:8%;left:50%;translate:-50% 0;z-index:4;white-space:nowrap;color:#fff5df;font:2.8cqw var(--f-caps);letter-spacing:.24em;text-shadow:0 .3cqw 1cqw #0d000c;pointer-events:none}
 .cv-velvet .cv-hit:focus-visible{outline:.8cqw solid #efd7af;outline-offset:-2cqw}
+.cv-velvet-spotlight{position:absolute;inset:-7% -45% 0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 31% 65% at 50% 37%,#fff8d72c,transparent 94%);mix-blend-mode:screen}
+.cv-velvet-pair{perspective:1100px}
+.cv-velvet-drape{background-size:100% 100%,210% 100%;border-right:.3cqw solid #13040e70}
+.cv-velvet-pleats{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,#0500058c 0%,#1608175e 4%,#f4d9cd19 11%,#fff0e322 14%,#26081b3b 19%,#05000594 24%,#020004c4 27%,#260a20a0 30%);background-size:57% 100%;mix-blend-mode:overlay;filter:contrast(1.18)}
+.cv-velvet-pleats::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#fff2dc22,transparent 17%,#14031111 48%,#0600068c 100%);mix-blend-mode:multiply}
+.cv-velvet-pleats::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0008,transparent 12%,#fff4e310 40%,transparent 70%,#000b);opacity:.8}
+.cv-velvet-tieback{position:absolute;z-index:4;top:56%;width:18cqw;height:7cqw;border-top:1.1cqw solid #d8ba79;border-bottom:.4cqw solid #9a703c;border-radius:50%;box-shadow:0 1cqw 1.5cqw #0d040dc2;pointer-events:none}
+.cv-velvet-tieback--left{left:-9cqw;transform:rotate(-21deg)}
+.cv-velvet-tieback--right{right:-9cqw;transform:rotate(21deg)}
+.cv-velvet-top{height:8cqw;background:linear-gradient(180deg,#080209aa,color-mix(in srgb,var(--a) 56%,#241021) 55%,color-mix(in srgb,var(--a) 28%,#080409));border-bottom:.4cqw solid #d6b77e77;box-shadow:0 1cqw 2cqw #040105d0}
+.cv-velvet-top::after{height:10cqw;top:65%;background:radial-gradient(ellipse 7cqw 6cqw at 7cqw 0,color-mix(in srgb,var(--a) 56%,#100711) 90%,transparent 97%) left top/14cqw 100% repeat-x;filter:drop-shadow(0 1.3cqw .6cqw #0008)}
 @media(prefers-reduced-motion:reduce){.cv-rosewood-letter,.cv-rosewood-envelope,.cv-rosewood-flap,.cv-rosewood-stamp,.cv-velvet-card,.cv-velvet-drape{will-change:auto;transition:none!important}}
 
 /* Etched portrait suites — source artwork is independent from editable live typography. */
