@@ -11,6 +11,7 @@ import { FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type OpeningK
 import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
 import { saveLocalMusic } from "@/lib/local-music";
+import { recommendExperience, type Mood, type AudioPreference } from "@/lib/recommendations";
 import "./studio.css";
 
 type Tab = "design" | "words" | "details" | "events" | "style";
@@ -129,8 +130,23 @@ function SaveBadge({ state, account, reload }: { state: string; account: boolean
 type TabProps = { draft: InviteData; patch: (p: Partial<InviteData>) => void };
 
 function DesignTab({ draft, patch }: TabProps) {
+  const [mood, setMood] = useState<Mood>("romantic");
+  const [audio, setAudio] = useState<AudioPreference>("undecided");
+  const suggestion = recommendExperience(draft.occasion, mood, audio);
   return (
     <div className="st-stack">
+      <section className="st-recommend" aria-label="Personalised starting point">
+        <div className="st-recommend-head"><Sparkles size={17} /><strong>Find your starting point</strong></div>
+        <p className="st-help st-help--flat">Tell us the feeling you want. Suggestions never lock your choices or change anything until you apply them.</p>
+        <label className="st-field"><span>What feels like you?</span><select value={mood} onChange={(e) => setMood(e.target.value as Mood)}>
+          <option value="minimal">Minimal and modern</option><option value="romantic">Soft and romantic</option><option value="grand">Grand and glamorous</option><option value="heritage">Heritage and detail</option><option value="celebration">Colourful celebration</option>
+        </select></label>
+        <label className="st-field"><span>Soundtrack preference</span><select value={audio} onChange={(e) => setAudio(e.target.value as AudioPreference)}>
+          <option value="undecided">Show me options</option><option value="vocal">Vocals-only nasheed</option><option value="duff">Nasheed with duff</option><option value="instrumental">Instrumental music</option><option value="ambient">Ambient sound</option><option value="silent">No music</option>
+        </select></label>
+        <div className="st-recommend-result"><strong>{suggestion.title}</strong><p>{suggestion.reason}</p><small>{suggestion.audioHint}</small></div>
+        <button type="button" className="btn btn-dark" onClick={() => patch({ design: suggestion.design, opening: suggestion.opening, accent: "", ...(audio === "silent" ? { music: null } : {}) })}>Use this design and opening</button>
+      </section>
       <h2 className="st-h">Pick a design</h2>
       <p className="st-help">Your details carry over when you switch.</p>
       <div className="st-designs">
