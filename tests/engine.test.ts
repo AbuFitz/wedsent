@@ -66,7 +66,7 @@ describe("design engine registry", () => {
     expect(ContentSchema.safeParse({ ...defaults, music: { src: "/library/suspicious-track", title: "Unknown" } }).success).toBe(false);
     expect(ContentSchema.safeParse({ ...defaults, music: { src: "data:audio/mpeg;base64,AAA", title: "Injected audio" } }).success).toBe(false);
     expect(ContentSchema.safeParse({ ...defaults, music: { src: "https://elsewhere.invalid/song.mp3", title: "External" } }).success).toBe(false);
-    expect(MAX_MUSIC_BYTES).toBe(8_000_000);
+    expect(MAX_MUSIC_BYTES).toBe(12_000_000);
     expect(isMp3(Uint8Array.from([0x49, 0x44, 0x33, 0x03]))).toBe(true);
     expect(isMp3(Uint8Array.from([0xff, 0xfb, 0x90, 0x64]))).toBe(true);
     expect(isMp3(Uint8Array.from([0x52, 0x49, 0x46, 0x46]))).toBe(false);

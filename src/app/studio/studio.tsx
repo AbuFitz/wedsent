@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, CalendarDays, Check, Eye, Film, ImagePlus, ListMusic, LoaderCircle, MapPin, Maximize2, Minus, Palette, Pencil, Plus, RotateCcw, RotateCw, Search, Settings2, Share2, Sparkles, Trash2, Type, UploadCloud, Volume2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, Eye, Film, ImagePlus, Layers3, ListMusic, LoaderCircle, MapPin, Maximize2, Minus, Palette, Pencil, Plus, RotateCcw, RotateCw, Search, Settings2, Share2, Sparkles, Trash2, Type, UploadCloud, Volume2, X } from "lucide-react";
 import { Confetti, MusicNotes, TextT, CalendarBlank, ImageSquare, PaintBrush } from "@phosphor-icons/react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
@@ -19,6 +19,8 @@ import "./studio.css";
 
 type Panel = "story" | "events" | "look" | "photo" | "sound" | "extras";
 type View = "cover" | "inside";
+type CanvasScene = "paper" | "gallery" | "ink";
+type CanvasFrame = "device" | "soft" | "edge";
 type RawEvent = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
 type Patch = (changes: Partial<InviteData>) => void;
 const tools: { id: Panel; name: string; detail: string; icon: typeof Pencil }[] = [
@@ -45,6 +47,9 @@ export function Studio() {
   const [mobileFull, setMobileFull] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [canvasOpen, setCanvasOpen] = useState(false);
+  const [canvasScene, setCanvasScene] = useState<CanvasScene>("paper");
+  const [canvasFrame, setCanvasFrame] = useState<CanvasFrame>("device");
   const [search, setSearch] = useState("");
   const searchInput = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState("");
@@ -76,6 +81,10 @@ export function Studio() {
   }, []);
   useEffect(() => { if (searchOpen) searchInput.current?.focus(); }, [searchOpen]);
   useEffect(() => { if (window.matchMedia("(max-width: 860px)").matches) setInspectorOpen(false); }, []);
+  useEffect(() => {
+    try { const prefs = JSON.parse(localStorage.getItem("wedsent-studio-canvas-v1") || "{}"); if (["paper", "gallery", "ink"].includes(prefs.scene)) setCanvasScene(prefs.scene); if (["device", "soft", "edge"].includes(prefs.frame)) setCanvasFrame(prefs.frame); } catch { /* default to paper */ }
+  }, []);
+  useEffect(() => { localStorage.setItem("wedsent-studio-canvas-v1", JSON.stringify({ scene: canvasScene, frame: canvasFrame })); }, [canvasScene, canvasFrame]);
 
   const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
   const select = (id: Panel) => { setPanel(id); setInspectorOpen(true); setSearchOpen(false); setSearch(""); setMobileFull(false); setView(id === "look" || id === "photo" ? "cover" : "inside"); };
@@ -107,8 +116,9 @@ export function Studio() {
       <div className="atelier-dock-bottom"><button type="button" onClick={() => setSearchOpen(true)}><Search size={17}/> Find a tool <kbd>⌘ K</kbd></button><Link href="/dashboard"><Settings2 size={17}/> Wedding dashboard</Link></div>
     </nav>
 
-    <main className="atelier-stage" aria-label="Live invitation composition">
-      <div className="atelier-stage-top"><div><span className="atelier-eyebrow">LIVE COMPOSITION</span><h1>{view === "cover" ? "The first impression" : "Inside the invitation"}</h1></div><div className="atelier-view-switch" role="group" aria-label="Invitation preview state"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Opening</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div></div>
+    <main className="atelier-stage" data-scene={canvasScene} data-frame={canvasFrame} aria-label="Live invitation composition">
+      <div className="atelier-stage-top"><div><span className="atelier-eyebrow">LIVE COMPOSITION</span><h1>{view === "cover" ? "The first impression" : "Inside the invitation"}</h1></div><div className="atelier-stage-tools"><button type="button" className="atelier-canvas-trigger" aria-expanded={canvasOpen} aria-controls="atelier-canvas-menu" onClick={() => setCanvasOpen((v) => !v)}><Layers3 size={15}/> Canvas</button><div className="atelier-view-switch" role="group" aria-label="Invitation preview state"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Opening</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div></div></div>
+      {canvasOpen && <div className="atelier-canvas-menu" id="atelier-canvas-menu"><div className="atelier-canvas-menu-head"><strong>Canvas appearance</strong><button type="button" onClick={() => setCanvasOpen(false)} aria-label="Close canvas options"><X size={16}/></button></div><p>Just your workspace. Your guests see the original invitation.</p><span className="atelier-canvas-label">Backdrop</span><div className="atelier-scene-choices">{(["paper", "gallery", "ink"] as const).map((scene) => <button type="button" key={scene} aria-pressed={canvasScene === scene} onClick={() => setCanvasScene(scene)}><i className={`atelier-scene-dot atelier-scene-dot--${scene}`}/><span>{scene === "paper" ? "Paper" : scene === "gallery" ? "Gallery" : "Midnight"}</span></button>)}</div><span className="atelier-canvas-label">Frame</span><div className="atelier-frame-choices">{(["device", "soft", "edge"] as const).map((frame) => <button key={frame} type="button" aria-pressed={canvasFrame === frame} onClick={() => setCanvasFrame(frame)}><i className={`atelier-frame-icon atelier-frame-icon--${frame}`}/><span>{frame === "device" ? "Phone" : frame === "soft" ? "Soft" : "Minimal"}</span></button>)}</div></div>}
       <div className="atelier-stage-centre">
         <div className="atelier-preview-frame" style={{ ["--preview-tone" as string]: specById(draft.design).site.bg }}>
           <Phone label="Your live invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")} onEditTarget={(target) => select(target === "words" ? "story" : target === "details" || target === "events" ? "events" : "extras")}/></Phone>
@@ -234,12 +244,20 @@ function PhotoEditor({ draft, patch, account }: { draft: InviteData; patch: Patc
 
 function SoundEditor({ draft, patch, account }: { draft: InviteData; patch: Patch; account: boolean }) {
   const [step, setStep] = useState<"browse" | "edit" | "upload">("browse");
+  const [myTracks, setMyTracks] = useState<{ id: string; title: string; bytes: number; src: string }[]>([]);
+  const [libraryError, setLibraryError] = useState("");
   const [category, setCategory] = useState<"nasheed" | "duff" | "instrumental">("nasheed");
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState("");
   const [revision, setRevision] = useState(0);
+  const refreshMyTracks = useCallback(async () => {
+    if (!account) return;
+    try { const result = await call<{ tracks: { id: string; title: string; bytes: number; src: string }[] }>("GET", "/api/music"); setMyTracks(result.tracks); setLibraryError(""); }
+    catch { setLibraryError("Your uploads couldn't load. Please try again."); }
+  }, [account]);
+  useEffect(() => { void refreshMyTracks(); }, [refreshMyTracks]);
   useEffect(() => {
     let alive = true; let url = "";
     const src = draft.music?.src;
@@ -249,13 +267,13 @@ function SoundEditor({ draft, patch, account }: { draft: InviteData; patch: Patc
   }, [draft.music?.src, revision]);
   const upload = async (file?: File) => {
     if (!file) return;
-    if (!confirmed || !/\.mp3$/i.test(file.name) || file.size > 8_000_000) { setError("Confirm your rights and choose an MP3 smaller than 8 MB."); return; }
+    if (!confirmed || !/\.mp3$/i.test(file.name) || file.size > 12_000_000) { setError("Confirm your rights and choose an MP3 smaller than 12 MB."); return; }
     setBusy(true); setError("");
     try {
       let src = "local-music";
-      if (account) { const r = await fetch("/api/music", { method: "POST", body: file, credentials: "same-origin", headers: { "x-music-rights": "confirmed" } }); const j = await r.json(); if (!r.ok) throw new Error(j?.error?.message || "Couldn't upload the recording."); src = j.src; }
+      if (account) { const r = await fetch("/api/music", { method: "POST", body: file, credentials: "same-origin", headers: { "x-music-rights": "confirmed", "x-music-title": file.name.replace(/\.mp3$/i, "").slice(0, 100) } }); const j = await r.json(); if (!r.ok) throw new Error(j?.error?.message || "Couldn't upload the recording."); src = j.src; await refreshMyTracks(); }
       else await saveLocalMusic(file);
-      patch({ music: { src, title: file.name.replace(/\.mp3$/i, "").slice(0, 80), startAt: 0, endAt: 15, trigger: "open", volume: .45 } }); setRevision((i) => i + 1);
+      patch({ music: { src, title: file.name.replace(/\.mp3$/i, "").slice(0, 80), startAt: 0, endAt: 15, trigger: "open", volume: .45 } }); setRevision((i) => i + 1); setStep("edit");
     } catch (e) { setError(e instanceof Error ? e.message : "Couldn't upload the recording."); }
     finally { setBusy(false); }
   };
@@ -265,7 +283,7 @@ function SoundEditor({ draft, patch, account }: { draft: InviteData; patch: Patc
     <div className="atelier-selected-track"><span><Volume2 size={16}/> CURRENT SOUNDTRACK</span><strong>{draft.music?.title || "No music selected"}</strong><p>{draft.music ? "The selected excerpt will play according to your timing settings." : "Your invitation opens quietly until you choose a recording."}</p>{draft.music && <button type="button" onClick={() => patch({ music: null })}>Remove music <Minus size={14}/></button>}</div>
     {step === "browse" && <Group title="Explore by sound"><div className="atelier-filter-row" role="group" aria-label="Soundtrack categories">{([{ id: "nasheed", name: "Vocals-only" }, { id: "duff", name: "Duff" }, { id: "instrumental", name: "Instrumental" }] as const).map((c) => <button type="button" key={c.id} aria-pressed={category === c.id} onClick={() => setCategory(c.id)}>{c.name}</button>)}</div><div className="atelier-track-list">{CURATED_TRACKS.filter((t) => t.category === category).map((track) => <div key={track.id} className="atelier-track"><div><strong>{track.title}</strong><small>{track.mood} · {track.artist}</small></div><button type="button" className="atelier-track-select" aria-pressed={draft.music?.src === track.src} onClick={() => { patch({ music: { src: track.src, title: track.title, startAt: 0, endAt: 15, trigger: "open", volume: .45 } }); setStep("edit"); }}>{draft.music?.src === track.src ? <Check size={17}/> : <Plus size={17}/>}</button><audio controls preload="none" src={track.src} aria-label={`Listen to ${track.title}`}/><small className="atelier-source"><a href={track.source} target="_blank" rel="noreferrer">Source</a> · <a href={track.licenseUrl} target="_blank" rel="noreferrer">{track.license}</a></small></div>)}{!CURATED_TRACKS.some((t) => t.category === category) && <p className="atelier-small-note">Nothing rights-cleared in this collection yet. No unrelated filler tracks.</p>}</div><p className="atelier-small-note">Catalogue candidates still require full production rights review and mobile auditioning.</p></Group>}
     {step === "edit" && draft.music && <Group title="Shape your sound" note="Drag the excerpt boundaries, or enter exact times.">{selectedSrc && <SoundWaveform key={selectedSrc} src={selectedSrc} title={draft.music.title} start={draft.music.startAt ?? 0} end={draft.music.endAt} onTrim={(startAt, endAt) => patch({ music: { ...draft.music!, startAt, endAt } })}/>}<div className="atelier-two"><Field title="Start at (seconds)"><input type="number" min="0" max="1799" value={draft.music.startAt ?? 0} onChange={(e) => { const startAt = Math.max(0, Math.min(1799, Number(e.target.value) || 0)); patch({ music: { ...draft.music!, startAt, endAt: draft.music!.endAt && draft.music!.endAt <= startAt ? undefined : draft.music!.endAt } }); }}/></Field><Field title="End at (seconds)"><input type="number" min="1" max="1800" placeholder="Full track" value={draft.music.endAt ?? ""} onChange={(e) => patch({ music: { ...draft.music!, endAt: e.target.value ? Math.max((draft.music!.startAt ?? 0) + 1, Math.min(1800, Number(e.target.value))) : undefined } })}/></Field></div><Field title="Playback moment"><select value={draft.music.trigger ?? "open"} onChange={(e) => patch({ music: { ...draft.music!, trigger: e.target.value as "load" | "open" | "manual" } })}><option value="open">After the opening gesture</option><option value="manual">When a guest presses play</option><option value="load">When the link loads, if permitted</option></select></Field><Field title={`Volume · ${Math.round((draft.music.volume ?? .45) * 100)}%`}><input type="range" min="0.05" max="1" step="0.05" value={draft.music.volume ?? .45} onChange={(e) => patch({ music: { ...draft.music!, volume: Number(e.target.value) } })}/></Field><p className="atelier-small-note">The excerpt loops between your chosen times. Browsers may prevent audio until a guest taps.</p><button className="atelier-text-action" type="button" onClick={() => setStep("browse")}>Choose another recording <ArrowRight size={14}/></button></Group>}
-    {step === "upload" && <Group title="Add your own recording" note="MP3, maximum 8 MB. You must have the right to distribute it to guests."><label className="atelier-toggle"><input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)}/><span>I have the rights to use this audio</span></label><label className="atelier-upload"><UploadCloud size={23}/><strong>{busy ? "Uploading…" : "Choose MP3"}</strong><input type="file" accept=".mp3,audio/mpeg" disabled={!confirmed || busy} onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }}/></label>{error && <p role="alert" className="atelier-error">{error}</p>}{!account && <p className="atelier-small-note">Local music won't transfer automatically to another device.</p>}</Group>}
+    {step === "upload" && <Group title="Your recordings" note={account ? "Saved to this wedding. Choose one, or add another with appropriate rights." : "Build mode keeps one recording on this device until you create an account."}>{account && <div className="atelier-track-list">{myTracks.length === 0 && <p className="atelier-small-note">No recordings uploaded to this wedding yet.</p>}{myTracks.map((track) => <div className="atelier-track" key={track.id}><div><strong>{track.title}</strong><small>{(track.bytes / 1_000_000).toFixed(1)} MB · Your upload</small></div><button className="atelier-track-select" type="button" aria-label={`Use ${track.title}`} aria-pressed={draft.music?.src === track.src} onClick={() => { patch({ music: { src: track.src, title: track.title, startAt: 0, endAt: 15, trigger: "open", volume: .45 } }); setStep("edit"); }}>{draft.music?.src === track.src ? <Check size={17}/> : <Plus size={17}/>}</button><audio controls preload="none" src={track.src}/></div>)}{libraryError && <p role="alert" className="atelier-error">{libraryError} <button type="button" onClick={() => void refreshMyTracks()}>Retry</button></p>}</div>}<p className="atelier-small-note">Up to eight recordings per wedding; each MP3 can be up to 12 MB.</p><label className="atelier-toggle"><input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)}/><span>I have permission to stream and edit this recording for wedding guests</span></label><label className="atelier-upload"><UploadCloud size={23}/><strong>{busy ? "Uploading…" : "Add MP3"}</strong><input type="file" accept=".mp3,audio/mpeg" disabled={!confirmed || busy} onChange={(e) => { void upload(e.target.files?.[0]); e.target.value = ""; }}/></label>{error && <p role="alert" className="atelier-error">{error}</p>}{!account && <p className="atelier-small-note">Local music won't transfer automatically to another device.</p>}</Group>}
   </>;
 }
 
