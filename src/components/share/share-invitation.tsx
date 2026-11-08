@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import QRCode from "qrcode";
 import { Check, Copy, Download, Link2, MessageCircle, QrCode, Share2, X } from "lucide-react";
 import "./share-invitation.css";
 
-type Props = { url: string; title: string; privateLink?: boolean; label?: string };
+type Props = { url: string; title: string; privateLink?: boolean; label?: string; theme?: { paper: string; ink: string; accent: string } };
 
-export function ShareInvitation({ url, title, privateLink = false, label = "Share invitation" }: Props) {
+export function ShareInvitation({ url, title, privateLink = false, label = "Share invitation", theme }: Props) {
   const [open, setOpen] = useState(false);
   const [png, setPng] = useState("");
   const [svg, setSvg] = useState("");
@@ -56,11 +57,12 @@ export function ShareInvitation({ url, title, privateLink = false, label = "Shar
   };
   return <>
     <button className="share-entry" type="button" onClick={() => setOpen(true)}><QrCode size={17}/>{label}</button>
-    {open && <div className="share-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
+    {open && createPortal(<div className="share-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
       <section className="share-dialog" role="dialog" aria-modal="true" aria-label="Share invitation">
         <header><div><span>WEDSENT / SHARING</span><h2>{privateLink ? "A personal invitation" : "Share your celebration"}</h2></div><button type="button" aria-label="Close sharing" onClick={() => setOpen(false)}><X size={19}/></button></header>
         <p className="share-intro">{privateLink ? "This link is for one household. Anyone who receives it may be able to view and reply for that household." : "This public link shows the general invitation. It does not grant access to private guest details."}</p>
-        <div className={`share-card share-card--${qrStyle}`}>
+        <div className={`share-card share-card--${qrStyle}${theme ? " share-card--themed" : ""}`} style={theme ? { "--share-paper": theme.paper, "--share-ink": theme.ink, "--share-accent": theme.accent } as CSSProperties : undefined}>
+          <div className="share-card-brand"><span>W</span><small>W E D S E N T</small></div>
           <div className="share-qr">{png ? <img src={png} alt="QR code linking to this invitation" width="224" height="224"/> : <span>{busy ? "Creating QR code…" : "QR preview unavailable"}</span>}</div>
           <div className="share-card-caption"><strong>{title}</strong><small>Scan to open the invitation</small></div>
         </div>
@@ -74,6 +76,6 @@ export function ShareInvitation({ url, title, privateLink = false, label = "Shar
         {notice && <p className="share-feedback" role="status"><Check size={15}/>{notice}</p>}
         <footer><Link2 size={14}/>{privateLink ? "Treat this as a private link. Reset it from the guest list if shared accidentally." : "Public replies are unverified until you review them."}</footer>
       </section>
-    </div>}
+    </div>, document.body)}
   </>;
 }

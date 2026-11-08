@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { call, ApiError } from "@/lib/api-client";
+import { ShareInvitation } from "@/components/share/share-invitation";
+import { Wallet } from "lucide-react";
+import { paletteOf, specById } from "@/engine/registry";
 import "@/components/guest/guest.css";
 
 export function PersonalInvite({ token }: { token: string }) {
@@ -13,6 +16,8 @@ export function PersonalInvite({ token }: { token: string }) {
   const [googleWallet, setGoogleWallet] = useState(false);
   const [walletBusy, setWalletBusy] = useState(false);
   const [walletError, setWalletError] = useState("");
+  const [shareUrl, setShareUrl] = useState("");
+  useEffect(() => { setShareUrl(window.location.href); }, []);
   useEffect(() => {
     call("GET", `/api/r/${token}`).then(setView, (e) => setErr(e));
   }, [token]);
@@ -39,6 +44,7 @@ export function PersonalInvite({ token }: { token: string }) {
     </div></main>
   );
   if (!view) return <main className="guest" />;
+  const palette = paletteOf(specById(view.content.design), view.content.palette);
   return (
     <main className="guest" style={{ ["--g-bg" as string]: "#101014" }}>
       <div className="guest-wrap">
@@ -46,7 +52,10 @@ export function PersonalInvite({ token }: { token: string }) {
           <Invitation data={view.content} syncChrome open={open} onOpenChange={(v) => { setOpen(v); if (v) sessionStorage.setItem(`opened:${token.slice(0, 10)}`, "1"); }} rsvpHref={`/r/${token}/reply`} events={view.events} greeting={view.household.name} />
         </Phone>
         <p className="guest-note">Invitation for {view.household.name}</p>
-        {googleWallet && <button type="button" className="guest-wallet" onClick={() => void addToGoogleWallet()} disabled={walletBusy}>{walletBusy ? "Preparing your pass…" : "Add to Google Wallet"}</button>}
+        {open && <nav className="guest-utilities" aria-label="Your invitation tools">
+          {shareUrl && <ShareInvitation url={shareUrl} title={view.content.names || "Wedding invitation"} privateLink label="Show QR / Share" theme={{ paper: palette.soft || "#fff8ed", ink: palette.fg || "#24211c", accent: view.content.accent || palette.accent }} />}
+          {googleWallet && <button type="button" className="guest-wallet" onClick={() => void addToGoogleWallet()} disabled={walletBusy}><Wallet size={17}/>{walletBusy ? "Preparing pass…" : "Save to Google Wallet"}</button>}
+        </nav>}
         {walletError && <p className="guest-note" role="alert">{walletError}</p>}
       </div>
     </main>

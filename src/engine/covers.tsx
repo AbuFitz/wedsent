@@ -52,12 +52,35 @@ export function VelvetStageCover({ data, spec, onOpen, still }: P) {
     <motion.div className="cv-velvet-card" aria-hidden="true" animate={{ scale: opening ? 1.025 : .93, filter: opening ? "brightness(1)" : "brightness(.64)" }} transition={{ duration: 1.22, ease }}><StationeryCard data={data} spec={spec} palette={paletteOf(spec, data.palette)} fill /></motion.div>
     <div className="cv-velvet-top" aria-hidden="true" />
     <div className="cv-velvet-pair" aria-hidden="true">
-      <motion.div className="cv-velvet-drape cv-velvet-left" animate={opening ? { x: "-99%", scaleX: .72 } : { x: 0, scaleX: 1 }} transition={{ duration: 1.34, delay: .12, ease: [.38,.06,.14,1] }} />
-      <motion.div className="cv-velvet-drape cv-velvet-right" animate={opening ? { x: "99%", scaleX: .72 } : { x: 0, scaleX: 1 }} transition={{ duration: 1.34, delay: .18, ease: [.38,.06,.14,1] }} />
+      <motion.div className="cv-velvet-drape cv-velvet-left" animate={opening ? { x: "-103%", scaleX: .66, skewY: -1.8, rotateY: -8 } : { x: 0, scaleX: 1, skewY: 0, rotateY: 0 }} transition={{ duration: 1.36, delay: .1, ease: [.56,.08,.16,1] }} />
+      <motion.div className="cv-velvet-drape cv-velvet-right" animate={opening ? { x: "103%", scaleX: .66, skewY: 1.8, rotateY: 8 } : { x: 0, scaleX: 1, skewY: 0, rotateY: 0 }} transition={{ duration: 1.4, delay: .15, ease: [.56,.08,.16,1] }} />
     </div>
-    <motion.div className="cv-velvet-emblem" aria-hidden="true" animate={opening ? { opacity: 0, scale: 1.12 } : { opacity: 1, scale: 1 }} transition={{ duration: .38 }}><span><Initials names={data.names} /></span></motion.div>
+    <motion.div className="cv-velvet-cord" aria-hidden="true" animate={opening ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }} transition={{ duration: .25 }}><span /></motion.div>
     <motion.span className="cv-velvet-instruction" animate={{ opacity: opening ? 0 : 1 }}>PULL BACK THE CURTAIN</motion.span>
     <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Draw the curtains and reveal the invitation" />
+  </motion.section>;
+}
+
+/** Illustrated collections arrive as a separate letter jacket, not a duplicate of the invitation card. */
+export function EngravedLetterCover({ data, spec, onOpen, still }: P) {
+  const reduced = useReducedMotion();
+  const [opening, setOpening] = useState(false);
+  useEffect(() => {
+    if (!opening) return;
+    const t = window.setTimeout(onOpen, 920);
+    return () => window.clearTimeout(t);
+  }, [opening, onOpen]);
+  const start = () => { if (opening || still) return; if (reduced) onOpen(); else setOpening(true); };
+  const names = splitNames(data.names);
+  return <motion.section className={`cover cv cv-engraved cv-engraved--${spec.id}`} aria-label="Open the illustrated letter" exit={{ opacity: 0, transition: { duration: .13 } }}>
+    <motion.div className="cv-engraved-jacket" animate={opening ? { y: "-96%", rotateX: -10, opacity: .45 } : { y: "0%", rotateX: 0, opacity: 1 }} transition={{ duration: .88, ease: [.3,.78,.12,1] }}>
+      <span className="cv-engraved-ornament" aria-hidden="true">✦</span>
+      <span className="cv-engraved-kicker">AN INVITATION</span>
+      <h2>{names.a}<i>&amp;</i>{names.b || "Your celebration"}</h2>
+      <span className="cv-engraved-rule" aria-hidden="true" />
+      <span className="cv-engraved-action">LIFT TO DISCOVER</span>
+    </motion.div>
+    <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Lift the letter jacket and open the invitation" />
   </motion.section>;
 }
 
@@ -148,8 +171,8 @@ export function DoorsCover({ data, spec, onOpen, still }: P) {
     <motion.section className="cover cv cv-doors" aria-label="Invitation cover" exit={{ opacity: 0, transition: { duration: 0.1 } }}>
       <Face data={data} spec={spec} hint="" />
       <div className="cv-pair" aria-hidden="true">
-        <motion.div className="cv-door cv-door--left" animate={opening ? { rotateY: -112 } : { rotateY: 0 }} transition={{ duration: 0.95, ease: [0.23, 0.65, 0.2, 1] }} />
-        <motion.div className="cv-door cv-door--right" animate={opening ? { rotateY: 112 } : { rotateY: 0 }} transition={{ duration: 0.95, ease: [0.23, 0.65, 0.2, 1] }} />
+        <motion.div className="cv-door cv-door--left" animate={opening ? { rotateY: -118, x: "-3%", filter: "brightness(.58)" } : { rotateY: 0, x: 0, filter: "brightness(1)" }} transition={{ duration: 1.05, ease: [0.28, 0.76, 0.14, 1] }} />
+        <motion.div className="cv-door cv-door--right" animate={opening ? { rotateY: 118, x: "3%", filter: "brightness(.58)" } : { rotateY: 0, x: 0, filter: "brightness(1)" }} transition={{ duration: 1.07, delay: .06, ease: [0.28, 0.76, 0.14, 1] }} />
       </div>
       {!opening && <span className="cv-invite-action" aria-hidden="true">Tap to enter</span>}
       <button type="button" className="cv-hit" onClick={() => reduced ? onOpen() : setOpening(true)} disabled={still || opening} aria-label="Open the invitation doors" />

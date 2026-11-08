@@ -17,6 +17,35 @@
 .inv[data-layout=stationery] .in-rsvp{background:var(--a);color:var(--on-a);border-radius:99cqw;box-shadow:none}
 .inv[data-layout=stationery] .in-foot{opacity:.55}
 .inv[data-layout=stationery] .in-links{justify-content:center}
+.inv[data-layout=stationery] .in-section-overline{font:500 2.7cqw var(--f-caps);letter-spacing:.28em;color:var(--a);padding:0 0 2cqw}
+
+/* Every visual family continues beyond its cover: sections, rhythm and actions are art-directed. */
+.inv--velvet .inside{background:linear-gradient(155deg,color-mix(in srgb,var(--a) 17%,#1a121a),#161318 64%);color:#f3e4cf}
+.inv--velvet .inside-scroll{gap:8cqw}
+.inv--velvet .in-card{background:#f5eddf;color:#3d3435;border:1.2cqw double #ba9a6b;border-radius:0;padding:9cqw 5cqw;box-shadow:0 2cqw 6cqw #0008}
+.inv--velvet .in-card .in-label,.inv--velvet .in-card .in-evtitle,.inv--velvet .in-section-overline{color:#735749}
+.inv--velvet .in-countdown{background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--a) 40%,#352532),transparent 80%);padding:10cqw 2cqw;border-top:1px solid #cbb58b66;border-bottom:1px solid #cbb58b66;color:#f8ead6}
+.inv--velvet .in-count-segment strong{color:#e1c390}
+.inv--velvet .in-countdown--tiles .in-count-segment{background:#fcf0dd12;border-color:#e3c99c70}
+.inv--velvet .in-actions{padding:7cqw 0;background:linear-gradient(#ffffff08,transparent)}
+.inv--velvet .in-foot,.inv--velvet .in-note{color:#f8ead6}
+.inv--rosewood .inside{background:radial-gradient(circle at top,var(--soft),var(--bg) 60%)}
+.inv--rosewood .in-card{background:linear-gradient(135deg,var(--soft),color-mix(in srgb,var(--a) 8%,var(--soft)));border-radius:.5cqw;border:.2cqw solid var(--line);box-shadow:0 1.5cqw 3cqw #55322720,inset 0 0 0 1.2cqw var(--soft),inset 0 0 0 1.4cqw var(--line)}
+.inv--rosewood .in-rsvp{border-radius:1cqw;letter-spacing:.1em;text-transform:uppercase;font:500 3.9cqw var(--f-caps)}
+.inv--rosewood .in-countdown{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--a) 8%,var(--soft)),transparent);border-color:var(--line)}
+.inv--heritage .inside,.inv--nikah-etched .inside{background:var(--bg)}
+.inv--heritage .in-card,.inv--nikah-etched .in-card{border-radius:0;background:var(--soft);border:.25cqw solid var(--line);box-shadow:inset 0 0 0 1.3cqw var(--soft),inset 0 0 0 1.45cqw var(--line);padding:9cqw 6cqw}
+.inv--heritage .in-evtitle,.inv--nikah-etched .in-evtitle{font-family:var(--f-head);font-style:normal;letter-spacing:.05em}
+.inv--heritage .in-countdown,.inv--nikah-etched .in-countdown{padding:8cqw 3cqw;border-color:var(--line);background:var(--soft)}
+.inv--heritage .in-countdown--tiles .in-count-segment,.inv--nikah-etched .in-countdown--tiles .in-count-segment{border-radius:0;background:var(--bg)}
+.inv--heritage .in-rsvp,.inv--nikah-etched .in-rsvp{border-radius:0;border:.3cqw solid color-mix(in srgb,var(--a) 60%,#fff);font-family:var(--f-caps);font-weight:500;letter-spacing:.17em;text-transform:uppercase}
+.inv--pearl .in-card,.inv--embossed .in-card{background:linear-gradient(130deg,#fff9f4,var(--soft) 60%,#eee0d5);border-radius:0;box-shadow:0 1cqw 3cqw #77593c19,inset 0 0 0 1cqw #fff9ef,inset 0 0 0 1.25cqw var(--line)}
+.inv--gilt .inside{background:linear-gradient(#171410,#262019);color:#edd8ac}
+.inv--gilt .in-card{background:#242019;color:#e9d3ab;border:1px solid #9d8058;border-radius:.5cqw;box-shadow:inset 0 0 0 1cqw #272017,inset 0 0 0 1.3cqw #947753}
+.inv--gilt .in-card .in-label,.inv--gilt .in-card .in-evtitle,.inv--gilt .in-countdown{color:#ead09b}
+.inv--gilt .in-countdown{border-color:#997e5780}
+.inv--gilt .in-countdown--tiles .in-count-segment{background:#30261b;border-color:#806947}
+.inv--gilt .in-foot,.inv--gilt .in-note{color:#e9d3ab}
 
 /* ---------- Stationery card ---------- */
 .sc{position:relative;overflow:hidden;background:var(--soft);border-radius:1.4cqw;aspect-ratio:5/7.2;box-shadow:0 1.2cqw 4cqw -1cqw rgba(30,20,10,.28),0 0 0 .25cqw color-mix(in srgb,var(--line) 70%,transparent)}
@@ -123,6 +152,11 @@
 .cv-door--left{transform-origin:left center;border-right:.3cqw solid rgba(10,8,5,.3)}
 .cv-door--right{transform-origin:right center;border-left:.3cqw solid rgba(10,8,5,.3);background-image:linear-gradient(270deg,rgba(0,0,0,.24),transparent 15%,rgba(255,255,255,.09) 56%,rgba(0,0,0,.2)),linear-gradient(110deg,color-mix(in srgb,var(--a) 43%,var(--bg)),color-mix(in srgb,var(--a) 28%,#1a1512))}
 .cv-door--left::after{right:5%}.cv-door--right::after{left:5%}
+.cv-doors .cv-pair{perspective:1400px;overflow:visible;transform-style:preserve-3d}
+.cv-doors .cv-door{transform-style:preserve-3d;background-image:var(--grain),linear-gradient(90deg,#150e0b5c,transparent 16%,#fff6e62a 58%,#2115087c),linear-gradient(130deg,color-mix(in srgb,var(--a) 44%,var(--bg)),color-mix(in srgb,var(--a) 59%,#5b3d2d));background-size:55cqw 55cqw,100% 100%,100% 100%;background-blend-mode:multiply,normal,normal;box-shadow:inset 0 0 0 .7cqw color-mix(in srgb,var(--line) 65%,transparent),inset 0 0 0 1.3cqw #fff8e01a,inset 0 0 10cqw #140b0c4d,0 1cqw 2cqw #110b0833}
+.cv-doors .cv-door--right{background-image:var(--grain),linear-gradient(270deg,#150e0b5c,transparent 16%,#fff6e62a 58%,#2115087c),linear-gradient(230deg,color-mix(in srgb,var(--a) 44%,var(--bg)),color-mix(in srgb,var(--a) 59%,#5b3d2d))}
+.cv-doors .cv-door::before{inset:6% 10%;border:.5cqw ridge color-mix(in srgb,var(--line) 65%,#d8b77d);box-shadow:inset 0 0 0 1.4cqw #fff8e018,inset 0 0 0 1.7cqw #301c1744,0 0 0 .35cqw #140b0b44}
+.cv-doors .cv-door::after{width:3.1cqw;height:3.1cqw;background:radial-gradient(circle at 32% 23%,#fff1bc,#c59c50 38%,#5a3917 85%);border:.28cqw solid #6e522b;box-shadow:0 .7cqw 1.4cqw #0007,0 0 0 .6cqw #9e7d43a0}
 .cv-drape{position:relative;width:52%;height:100%;flex-shrink:0;box-shadow:2cqw 0 5cqw rgba(0,0,0,.32);background:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.04) 5%,rgba(255,255,255,.18) 10%,rgba(0,0,0,.18) 17%,rgba(255,255,255,.03) 23%),linear-gradient(180deg,color-mix(in srgb,var(--a) 75%,#261a21),color-mix(in srgb,var(--a) 50%,#22171a));filter:drop-shadow(0 1cqw 2cqw rgba(0,0,0,.2))}
 .cv-drape--right{margin-left:-4%;transform-origin:right center;box-shadow:-2cqw 0 5cqw rgba(0,0,0,.32)}
 .cv-drape--left{transform-origin:left center}
@@ -267,6 +301,12 @@
 .cv-velvet-left{background-position:center,left center;transform-origin:left center}
 .cv-velvet-right{margin-left:-6%;background-position:center,right center;transform-origin:right center;box-shadow:inset 0 0 3cqw #17021aa8,-3cqw 0 6cqw #0a000cc9}
 .cv-velvet-top{position:absolute;z-index:4;left:0;right:0;top:0;height:6cqw;background:linear-gradient(color-mix(in srgb,var(--a) 48%,#322532),color-mix(in srgb,var(--a) 35%,#100815));box-shadow:0 .4cqw 2cqw #020003;pointer-events:none}
+.cv-velvet-top::after{content:"";position:absolute;top:70%;left:0;right:0;height:8cqw;background:radial-gradient(ellipse 8cqw 5cqw at 8cqw 0,color-mix(in srgb,var(--a) 55%,#170916) 90%,transparent 95%) left top/16cqw 100% repeat-x;filter:drop-shadow(0 1cqw .7cqw #0006)}
+.cv-velvet-cord{position:absolute;z-index:4;left:50%;top:48%;translate:-50% -50%;width:22cqw;height:22cqw;pointer-events:none;display:grid;place-items:center}
+.cv-velvet-cord::before,.cv-velvet-cord::after{content:"";position:absolute;top:48%;width:23cqw;height:4cqw;border-top:.9cqw solid #d7b576;border-bottom:.35cqw solid #7f623c;border-radius:50%;box-shadow:0 .4cqw 1cqw #0008}
+.cv-velvet-cord::before{right:50%;rotate:12deg;transform-origin:right center}.cv-velvet-cord::after{left:50%;rotate:-12deg;transform-origin:left center}
+.cv-velvet-cord span{position:relative;width:9cqw;height:12cqw;border-radius:50% 50% 45% 45%;background:repeating-linear-gradient(90deg,#866535 0 9%,#e0bd78 11% 18%,#9c783f 21% 29%);border:.4cqw solid #e2c48b;box-shadow:0 .6cqw 1cqw #0009;z-index:1}
+.cv-velvet-cord span::after{content:"";position:absolute;left:50%;top:96%;translate:-50% 0;width:5cqw;height:13cqw;background:repeating-linear-gradient(90deg,#96703b 0 12%,#e5c786 12% 22%,#826132 23% 34%);clip-path:polygon(10% 0,90% 0,100% 100%,0 100%);border-radius:0 0 45% 45%;filter:drop-shadow(0 .8cqw .5cqw #0008)}
 .cv-velvet-emblem{position:absolute;z-index:4;left:50%;top:49%;translate:-50% -50%;width:37cqw;height:37cqw;display:grid;place-items:center;background:url('/art/pearl-medallion.webp') center/contain no-repeat;filter:drop-shadow(0 1cqw 2cqw #13030ebd);pointer-events:none;isolation:isolate}
 .cv-velvet-emblem::before{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--a) 65%,#dcb974);mix-blend-mode:color;opacity:.34;mask:url('/art/pearl-medallion.webp') center/contain no-repeat;pointer-events:none}
 .cv-velvet-emblem span{position:relative;font:10cqw "Pinyon Script",cursive;color:#483529;text-shadow:0 .2cqw .2cqw #fff2c1;white-space:nowrap}.cv-velvet-emblem i{font:italic .42em Georgia,serif;padding:0 .05em}
@@ -278,8 +318,8 @@
 .sc--heritage,.sc--nikah-etched{isolation:isolate;overflow:hidden;background:var(--soft);color:var(--fg);box-shadow:inset 0 0 0 2cqw var(--bg),inset 0 0 0 2.2cqw var(--line),0 1.4cqw 4cqw #251b1630}
 .sc--heritage::before,.sc--nikah-etched::before{content:"";position:absolute;inset:1.5cqw;border:.25cqw solid color-mix(in srgb,var(--a) 35%,transparent);pointer-events:none;z-index:2}
 .sc--heritage .sc-engraving,.sc--nikah-etched .sc-engraving{position:absolute;inset:1cqw 4cqw 34%;background-position:center top;background-repeat:no-repeat;background-size:contain;opacity:.9;pointer-events:none;filter:drop-shadow(0 .25cqw .35cqw #5c493727);transition:filter .5s ease}
-.sc--heritage .sc-engraving{background-image:url('/art/heritage-couple-engraving.webp')}
-.sc--nikah-etched .sc-engraving{background-image:url('/art/nikah-engraving.webp')}
+.sc--heritage .sc-engraving{background-image:url('/art/heritage-couple-light.webp')}
+.sc--nikah-etched .sc-engraving{background-image:url('/art/nikah-couple-light.webp')}
 .sc--heritage .sc-text,.sc--nikah-etched .sc-text{position:absolute;inset:58% 6cqw 6cqw;z-index:3;justify-content:center;gap:1.2cqw;padding:1cqw 4cqw 2cqw;text-align:center;background:linear-gradient(transparent,color-mix(in srgb,var(--soft) 96%,transparent) 7%);text-shadow:0 .1cqw .2cqw #fff9}
 .sc--heritage .sc-intro,.sc--nikah-etched .sc-intro{font-family:var(--f-head);font-style:italic;letter-spacing:.06em;font-size:3cqw}
 .sc--heritage .sc-line,.sc--nikah-etched .sc-line{font-family:var(--f-caps);font-size:2.8cqw;letter-spacing:.17em;text-transform:uppercase}
@@ -287,3 +327,23 @@
 .sc--heritage .sc-and,.sc--nikah-etched .sc-and{font-family:var(--f-head);font-size:.46em;font-style:italic;margin:.12em 0}
 .sc--heritage .sc-date,.sc--nikah-etched .sc-date{font-family:var(--f-caps);letter-spacing:.1em;font-size:2.6cqw}
 .sc--heritage .sc-venue,.sc--nikah-etched .sc-venue{font-family:var(--f-head);font-style:italic;font-size:3cqw;letter-spacing:.02em}
+
+/* A quiet outer jacket for illustrated collections; the actual etched artwork is inside. */
+.cv-engraved{background:var(--bg);perspective:1100px;isolation:isolate}
+.cv-engraved::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 48% 30%,#fff8e366,transparent 60%);pointer-events:none}
+.cv-engraved-jacket{position:absolute;inset:4cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5cqw;padding:7cqw;border:1cqw solid color-mix(in srgb,var(--a) 65%,var(--soft));outline:.22cqw solid var(--line);outline-offset:-3cqw;background:linear-gradient(135deg,#fff9ed33,var(--soft) 55%,#654f2c10);box-shadow:0 2cqw 6cqw #2b201c42,inset 0 0 0 1cqw var(--soft);color:var(--fg);transform-origin:50% 0;pointer-events:none}
+.cv-engraved-jacket::before,.cv-engraved-jacket::after{content:"";position:absolute;width:20cqw;height:20cqw;border:.25cqw solid var(--line);opacity:.8;pointer-events:none}
+.cv-engraved-jacket::before{left:5cqw;top:5cqw;border-right:0;border-bottom:0}.cv-engraved-jacket::after{right:5cqw;bottom:5cqw;border-left:0;border-top:0}
+.cv-engraved-ornament{font:12cqw var(--f-head);color:var(--a)}
+.cv-engraved-kicker,.cv-engraved-action{font:3cqw var(--f-caps);letter-spacing:.3em;text-align:center}
+.cv-engraved-jacket h2{display:flex;flex-direction:column;align-items:center;text-align:center;font:400 12cqw/1.15 var(--f-head);overflow-wrap:anywhere;max-width:100%;font-weight:400}
+.cv-engraved-jacket h2 i{font:italic .58em var(--f-head);margin:3cqw 0}
+.cv-engraved-rule{height:.25cqw;width:30cqw;background:var(--line)}
+.cv-engraved .cv-hit:focus-visible{outline:.8cqw solid var(--a);outline-offset:-2cqw}
+
+/* Paper fibres belong to the objects themselves, with soft edge relief and light variation. */
+.cv-rosewood-back,.cv-rosewood-pocket,.cv-rosewood-flap,.cv-engraved-jacket{background-blend-mode:multiply,normal}
+.cv-rosewood-back::after{content:"";position:absolute;inset:0;background-image:var(--grain);opacity:.17;mix-blend-mode:multiply;pointer-events:none}
+.cv-rosewood-flap::after{content:"";position:absolute;inset:0;background-image:var(--grain);opacity:.14;mix-blend-mode:multiply;pointer-events:none}
+.cv-engraved-jacket{background-image:var(--grain),linear-gradient(135deg,#fff9ed33,var(--soft) 55%,#654f2c10);background-size:70cqw 70cqw,100% 100%;box-shadow:0 2cqw 6cqw #2b201c42,inset 0 0 0 1cqw var(--soft),inset 0 0 2.5cqw #6b503c18}
+.inv--heritage .in-card,.inv--nikah-etched .in-card,.inv--rosewood .in-card,.inv--embossed .in-card{background-image:var(--grain),linear-gradient(135deg,var(--soft),color-mix(in srgb,var(--a) 6%,var(--soft)));background-blend-mode:multiply,normal;background-size:65cqw 65cqw,100% 100%}

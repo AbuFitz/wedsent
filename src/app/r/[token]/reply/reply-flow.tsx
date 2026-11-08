@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { call, ApiError } from "@/lib/api-client";
 import { accentFor, friendlyDate, onColor } from "@/lib/designs";
+import { paletteOf, specById, fontPackById } from "@/engine/registry";
 import "../../../invite/rsvp/rsvp.css";
 import "./reply.css";
 
@@ -38,7 +39,10 @@ export function ReplyFlow({ token }: { token: string }) {
 
   const c = view.content;
   const a = accentFor(c);
-  const style = { "--a": a, "--on-a": onColor(a) } as CSSProperties;
+  const design = specById(c.design);
+  const palette = paletteOf(design, c.palette);
+  const font = fontPackById(c.type) ?? fontPackById(design.fonts);
+  const style = { "--a": a, "--on-a": onColor(a), "--paper": palette.soft ?? "#fff8ec", "--ink": palette.fg ?? "#28221b", "--reply-bg": palette.bg ?? "#eae2d8", "--reply-font": font?.head ?? "Georgia, serif" } as CSSProperties;
   const title = (id: string) => view.events.find((e: any) => e.id === id)?.title;
 
   const send = async () => {
@@ -72,7 +76,8 @@ export function ReplyFlow({ token }: { token: string }) {
         <AnimatePresence mode="wait" initial={false}>
           {step === 1 && (
             <motion.div key="1" className="rs-card" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4, ease }}>
-              <h1 className="rs-h">Who’s coming, {view.household.name}?</h1>
+              <p className="rp-eyebrow">A PERSONAL REPLY</p><h1 className="rs-h">Will you celebrate with us?</h1>
+              <p className="rp-household">An invitation for {view.household.name}</p>
               {problem && <p className="rs-err" role="alert">{problem}</p>}
               {view.events.map((ev: any) => (
                 <fieldset key={ev.id} className="rp-event" disabled={view.locked}>
@@ -84,8 +89,8 @@ export function ReplyFlow({ token }: { token: string }) {
                       <div className="rp-person" key={k}>
                         <span>{g.name}</span>
                         <div className="rp-yn" role="group" aria-label={`${g.name}, ${ev.title}`}>
-                          <button type="button" aria-pressed={pick[k] === "attending"} onClick={() => setPick({ ...pick, [k]: "attending" })}>Yes</button>
-                          <button type="button" aria-pressed={pick[k] === "declined"} data-no onClick={() => setPick({ ...pick, [k]: "declined" })}>No</button>
+                          <button type="button" aria-pressed={pick[k] === "attending"} onClick={() => setPick({ ...pick, [k]: "attending" })}><Check size={15}/>Joyfully accepts</button>
+                          <button type="button" aria-pressed={pick[k] === "declined"} data-no onClick={() => setPick({ ...pick, [k]: "declined" })}>Regretfully declines</button>
                         </div>
                       </div>);
                   })}
@@ -97,7 +102,7 @@ export function ReplyFlow({ token }: { token: string }) {
           )}
           {step === 2 && (
             <motion.div key="2" className="rs-card" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4, ease }}>
-              <h1 className="rs-h">Anything we should know?</h1>
+              <p className="rp-eyebrow">ONE LAST DETAIL</p><h1 className="rs-h">Anything we should know?</h1>
               <p className="rs-sub">Dietary needs, access, anything that helps. Optional.</p>
               {view.guests.filter((g: any) => pairs.some((p) => p.startsWith(g.id) && pick[p] === "attending")).map((g: any) => (
                 <label className="rs-field" key={g.id}><span>{g.name}</span>
@@ -118,7 +123,7 @@ export function ReplyFlow({ token }: { token: string }) {
                 ))}
               </ul>
               {!view.locked && <p className="rs-sub">You can change your answers from this same link{view.deadline ? " until the reply-by date" : ""}.</p>}
-              <div className="rs-pair"><button className="rs-ghost" onClick={() => setStep(1)} disabled={view.locked}>Change reply</button></div>
+              <div className="rs-pair"><button className="rs-ghost" onClick={() => setStep(1)} disabled={view.locked}>Change reply</button><Link className="rs-go" href={`/r/${token}`}>Return to invitation <ArrowRight size={17}/></Link></div>
             </motion.div>
           )}
         </AnimatePresence>

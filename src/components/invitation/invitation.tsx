@@ -2,14 +2,14 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
-import { CalendarPlus, MapPin } from "lucide-react";
+import { CalendarPlus, MapPin, ChevronDown, ExternalLink } from "lucide-react";
 import {
   accentFor, appleMapsUrl, buildEventIcs, buildIcs, dateParts, eventMapsUrl, fit, friendlyDate, friendlyTime,
   mapsUrl, onColor, splitNames, type InviteData, type InviteEvent,
 } from "@/lib/designs";
 import "./invitation.css";
 import "@/engine/engine.css";
-import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover, KeepsakeCover, RosewoodCover, VelvetStageCover } from "@/engine/covers";
+import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover, KeepsakeCover, RosewoodCover, VelvetStageCover, EngravedLetterCover } from "@/engine/covers";
 import { StationeryCard } from "@/engine/stationery";
 import { fontPackById, paletteOf, specById, OPENINGS, type DesignSpec, type Palette } from "@/engine/registry";
 import { CountdownWidget, label } from "./widgets";
@@ -47,17 +47,20 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
   const palette = paletteOf(spec, data.palette);
   useEffect(() => {
     if (!syncChrome) return;
-    const color = palette.bg || "#F4F4F2";
+    const color = spec.id === "velvet" ? (open ? "#1b151a" : "#251725") : spec.id === "gilt" ? "#181512" : palette.bg || "#F4F4F2";
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
     const previous = meta?.content;
     if (meta) meta.content = color;
     const oldBackground = document.documentElement.style.backgroundColor;
+    const oldBodyBackground = document.body.style.backgroundColor;
     document.documentElement.style.backgroundColor = color;
+    document.body.style.backgroundColor = color;
     return () => {
       if (meta && previous !== undefined) meta.content = previous;
       document.documentElement.style.backgroundColor = oldBackground;
+      document.body.style.backgroundColor = oldBodyBackground;
     };
-  }, [syncChrome, palette.bg]);
+  }, [syncChrome, palette.bg, spec.id, open]);
   const pack = fontPackById(data.type) ?? fontPackById(spec.fonts);
   const style = {
     "--a": accent, "--on-a": onColor(accent),
@@ -84,6 +87,7 @@ type CoverProps = { data: InviteData; onOpen: () => void; still: boolean };
 function Cover({ spec, ...p }: CoverProps & { spec: DesignSpec }) {
   if (spec.id === "rosewood" && (!p.data.opening || p.data.opening === "doors")) return <RosewoodCover spec={spec} {...p} />;
   if (spec.id === "velvet" && (!p.data.opening || p.data.opening === "curtain")) return <VelvetStageCover spec={spec} {...p} />;
+  if (["heritage", "nikah-etched"].includes(spec.id) && (!p.data.opening || p.data.opening === specById(spec.id).opening.kind)) return <EngravedLetterCover spec={spec} {...p} />;
   if (["pearl", "embossed", "gilt"].includes(spec.id) && (!p.data.opening || p.data.opening === specById(spec.id).opening.kind)) return <KeepsakeCover spec={spec} {...p} />;
   switch (spec.opening.kind) {
     case "lift": return <LiftCover spec={spec} {...p} />;
@@ -169,6 +173,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
           const t = friendlyTime(ev.startsAt ?? "");
           return (
             <motion.section key={ev.id} data-studio-edit="events" className="in-card in-event" {...reveal(2 + i)}>
+              {i === 0 && <p className="in-section-overline">THE CELEBRATIONS</p>}
               <h3 className="in-label in-evtitle">{ev.title}</h3>
               {ev.startsOn ? (
                 <div className="in-date"><strong>{p.day}</strong><span>{p.month}<br />{p.year}</span></div>
@@ -180,6 +185,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
                 {(ev.venue || ev.city) && <a className="in-link" href={eventMapsUrl(ev)} target="_blank" rel="noreferrer"><MapPin size="1em" /> {label(data.languages?.details ?? "en", "maps")}</a>}
                 {ev.startsOn && <button type="button" className="in-cal" onClick={() => downloadEvent(ev)}><CalendarPlus size="1.1em" /> {label(data.languages?.details ?? "en", "calendar")}</button>}
               </div>
+              {(ev.venue || ev.city) && <VenueMap place={[ev.venue, ev.city].filter(Boolean).join(", ")} mapsHref={eventMapsUrl(ev)} />}
             </motion.section>
           );
         }) : (<>
@@ -201,6 +207,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
               <MapPin size="1em" /> {label(data.languages?.details ?? "en", "maps")}
             </a>
           )}
+          {(data.venue || data.city) && <VenueMap place={[data.venue, data.city].filter(Boolean).join(", ")} mapsHref={mapsUrl(data)} />}
         </motion.section></>)}
 
         <CountdownWidget date={evs?.[0]?.startsOn ?? data.date} time={evs?.[0]?.startsAt ?? data.time} config={data.countdown ?? { enabled: false, style: "type", accent: "", label: "" }} lang={data.languages?.countdown ?? "en"} />
@@ -230,4 +237,18 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
       </div>
     </div>
   );
+}
+
+/** An opt-in map reveal; only load Google Maps after a guest chooses to view it. */
+function VenueMap({ place, mapsHref }: { place: string; mapsHref: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY;
+  const src = key ? `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(key)}&q=${encodeURIComponent(place)}` : "";
+  return <div className="in-map-wrap">
+    <button type="button" className="in-map-toggle" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}><MapPin size="1.1em"/> <span>{expanded ? "Hide venue map" : "Explore the venue"}</span><ChevronDown className={expanded ? "in-map-chevron in-map-chevron--up" : "in-map-chevron"} size="1em"/></button>
+    {expanded && <div className="in-map-panel">
+      {src ? <iframe src={src} title={`Map of ${place}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /> : <div className="in-map-fallback"><MapPin size="2.3em" strokeWidth={1.3}/><strong>{place}</strong><p>Open directions to view the location on your map.</p></div>}
+      <a href={mapsHref} target="_blank" rel="noopener noreferrer"><ExternalLink size="1em"/> Directions & nearby places</a>
+    </div>}
+  </div>;
 }
