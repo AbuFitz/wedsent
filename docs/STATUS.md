@@ -6,6 +6,8 @@
 
 **Media and motion experiment (8 Nov):** Added experimental door and curtain opening treatments and signed-in/local build-mode guided photograph upload with focal-point controls. See [MUSIC_MOTION_BACKDROP_RESEARCH.md](MUSIC_MOTION_BACKDROP_RESEARCH.md) for the audio source/licensing study and art-direction gates. No music recordings have been bundled or described as rights-cleared. Door/curtain realism and upload interaction still need visual/device review before release.
 
+**Personal widgets (8 Nov):** Added optional countdown in three visual compositions with editable accent and heading, and independently configurable label languages for details/countdown/reply (English, French, Arabic, Somali). See [WIDGETS_CULTURAL_DESIGN_RESEARCH.md](WIDGETS_CULTURAL_DESIGN_RESEARCH.md). These are **label-only** translations; RSVP forms, owner text, event timezone semantics and native-speaker review remain open work. Guest audio control is designed but not shipped until cleared tracks exist.
+
 Source of truth for what is real. States: **Verified** = covered by an automated test or a browser run this session. **Partial** = built, with named gaps. **UI only** = looks real, is not. **Planned**. **Blocked** = needs something outside the code.
 Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs` (16 browser checks, cold server), screenshots reviewed at 390 and 1440 widths.
 

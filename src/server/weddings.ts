@@ -27,6 +27,17 @@ export const ContentSchema = z.object({
   type: z.string().max(30).default(""),
   intro: z.string().max(120).default(""),
   opening: z.enum(["", "lift", "bloom", "veil", "focus", "doors", "curtain"]).default(""),
+  countdown: z.object({
+    enabled: z.boolean(),
+    style: z.enum(["type", "tiles", "dial"]),
+    accent: z.string().regex(/^#[0-9a-fA-F]{6}$/).or(z.literal("")),
+    label: z.string().max(48),
+  }).default({ enabled: false, style: "type", accent: "", label: "" }),
+  languages: z.object({
+    details: z.enum(["en", "fr", "ar", "so"]),
+    countdown: z.enum(["en", "fr", "ar", "so"]),
+    reply: z.enum(["en", "fr", "ar", "so"]),
+  }).default({ details: "en", countdown: "en", reply: "en" }),
 });
 export type Content = z.infer<typeof ContentSchema>;
 

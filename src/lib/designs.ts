@@ -3,6 +3,10 @@ export type { DesignId };
 
 /** A cover photograph. `src` is /media/<id> (uploaded), /art/<file> (library artwork) or a data: URL (signed-out local draft). fx/fy are the focal point, 0-100. */
 export type Photo = { src: string; fx: number; fy: number };
+export type WidgetLanguage = "en" | "fr" | "ar" | "so";
+export type CountdownStyle = "type" | "tiles" | "dial";
+export type CountdownConfig = { enabled: boolean; style: CountdownStyle; accent: string; label: string };
+export type SectionLanguages = { details: WidgetLanguage; countdown: WidgetLanguage; reply: WidgetLanguage };
 
 export type InviteData = {
   names: string;
@@ -22,6 +26,8 @@ export type InviteData = {
   type: string; // font pairing id; "" = the design's own
   intro: string; // opening line text; "" = the design's default, "none" = no line
   opening: OpeningKind | ""; // "" = the design's art-directed opening; otherwise a selected motion
+  countdown: CountdownConfig;
+  languages: SectionLanguages;
 };
 
 export const defaults: InviteData = {
@@ -42,6 +48,8 @@ export const defaults: InviteData = {
   type: "",
   intro: "",
   opening: "",
+  countdown: { enabled: false, style: "type", accent: "", label: "" },
+  languages: { details: "en", countdown: "en", reply: "en" },
 };
 
 export { DESIGN_IDS };
@@ -118,7 +126,8 @@ export function loadDraft(): InviteData {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return defaults;
-    const parsed = { ...defaults, ...JSON.parse(raw) };
+    const saved = JSON.parse(raw);
+    const parsed = { ...defaults, ...saved, countdown: { ...defaults.countdown, ...saved.countdown }, languages: { ...defaults.languages, ...saved.languages } };
     parsed.design = designById(parsed.design).id;
     if (parsed.photo && typeof parsed.photo.src !== "string") parsed.photo = null;
     return parsed;

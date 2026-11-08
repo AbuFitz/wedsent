@@ -5,6 +5,7 @@ import { ASSETS } from "@/engine/assets";
 import { DESIGNS, DESIGN_IDS, FONT_PACKS, INTRO_PRESETS, FACETS, specById } from "@/engine/registry";
 import { ContentSchema } from "@/server/weddings";
 import { onColor, defaults } from "@/lib/designs";
+import { label } from "@/components/invitation/widgets";
 extend([a11y]);
 
 describe("design engine registry", () => {
@@ -48,6 +49,15 @@ describe("design engine registry", () => {
     expect(ContentSchema.safeParse({ ...defaults, opening: "doors" }).success).toBe(true);
     expect(ContentSchema.safeParse({ ...defaults, opening: "curtain" }).success).toBe(true);
     expect(ContentSchema.safeParse({ ...defaults, opening: "not-a-motion" }).success).toBe(false);
+    expect(ContentSchema.safeParse({ ...defaults, countdown: { enabled: true, style: "tiles", accent: "#724C66", label: "Until our day" } }).success).toBe(true);
+    expect(ContentSchema.safeParse({ ...defaults, countdown: { enabled: true, style: "fake", accent: "red", label: "" } }).success).toBe(false);
+    expect(ContentSchema.safeParse({ ...defaults, languages: { details: "ar", countdown: "so", reply: "fr" } }).success).toBe(true);
+    expect(ContentSchema.safeParse({ ...defaults, languages: { details: "not-a-language", countdown: "en", reply: "en" } }).success).toBe(false);
+  });
+  it("offers separately selectable guest interface languages without translating user content", () => {
+    expect(label("fr", "reply")).toBe("Répondre");
+    expect(label("ar", "where")).toBe("المكان");
+    expect(label("so", "days")).toBe("Maalmood");
   });
   it("filter facets cover every design", () => {
     for (const d of DESIGNS) { expect(FACETS.shape).toContain(d.shape); expect(FACETS.opening).toContain(d.opening.kind); }

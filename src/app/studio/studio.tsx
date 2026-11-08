@@ -300,6 +300,27 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           </button>
         ))}
       </div>
+      <h2 className="st-h">Little extras</h2>
+      <label className="st-widget-toggle">
+        <span><strong>Wedding countdown</strong><small>A sweet live countdown on the invitation</small></span>
+        <input type="checkbox" checked={draft.countdown?.enabled ?? false} onChange={(e) => patch({ countdown: { ...(draft.countdown ?? { style: "type", accent: "", label: "" }), enabled: e.target.checked } })} />
+      </label>
+      {draft.countdown?.enabled && <>
+        <div className="st-chips" role="group" aria-label="Countdown appearance">
+          {([{ id: "type", label: "Editorial" }, { id: "tiles", label: "Soft tiles" }, { id: "dial", label: "Circles" }] as const).map((o) => (
+            <button className="st-chip" key={o.id} type="button" aria-pressed={draft.countdown.style === o.id} onClick={() => patch({ countdown: { ...draft.countdown, style: o.id } })}>{o.label}</button>
+          ))}
+        </div>
+        <label className="st-field"><span>Countdown heading <i>optional</i></span><input maxLength={48} value={draft.countdown.label} placeholder="Until our day" onChange={(e) => patch({ countdown: { ...draft.countdown, label: e.target.value } })} /></label>
+        <label className="st-widget-colour"><span>Countdown colour</span><input type="color" aria-label="Countdown accent colour" value={draft.countdown.accent || pal.accent} onChange={(e) => patch({ countdown: { ...draft.countdown, accent: e.target.value } })} /><button type="button" onClick={() => patch({ countdown: { ...draft.countdown, accent: "" } })}>Use theme colour</button></label>
+      </>}
+      <h2 className="st-h">Languages by section</h2>
+      <p className="st-help">Choose the language for labels in each section. Your own names, messages and event descriptions stay exactly as you wrote them.</p>
+      {([{ id: "details", label: "Details and directions" }, { id: "countdown", label: "Countdown" }, { id: "reply", label: "Reply button" }] as const).map((section) => (
+        <label className="st-field" key={section.id}><span>{section.label}</span><select value={draft.languages?.[section.id] ?? "en"} onChange={(e) => patch({ languages: { ...(draft.languages ?? { details: "en", countdown: "en", reply: "en" }), [section.id]: e.target.value as "en" | "fr" | "ar" | "so" } })}>
+          <option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option><option value="so">Soomaali</option>
+        </select></label>
+      ))}
       {stationery && (
         <>
           <h2 className="st-h">Lettering</h2>

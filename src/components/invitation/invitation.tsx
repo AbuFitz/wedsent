@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { CalendarPlus, MapPin } from "lucide-react";
 import {
-  accentFor, appleMapsUrl, buildEventIcs, buildIcs, dateParts, daysUntil, eventMapsUrl, fit, friendlyDate, friendlyTime,
+  accentFor, appleMapsUrl, buildEventIcs, buildIcs, dateParts, eventMapsUrl, fit, friendlyDate, friendlyTime,
   mapsUrl, onColor, splitNames, type InviteData, type InviteEvent,
 } from "@/lib/designs";
 import "./invitation.css";
@@ -12,6 +12,7 @@ import "@/engine/engine.css";
 import { LiftCover, BloomCover, VeilCover, FocusCover, DoorsCover, CurtainCover } from "@/engine/covers";
 import { StationeryCard } from "@/engine/stationery";
 import { fontPackById, paletteOf, specById, OPENINGS, type DesignSpec, type Palette } from "@/engine/registry";
+import { CountdownWidget, label } from "./widgets";
 
 export type InvitationProps = {
   data: InviteData;
@@ -80,11 +81,8 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
   const design = spec.id;
   const names = splitNames(data.names);
   const parts = dateParts(data.date);
-  const left = daysUntil(data.date);
   const time = friendlyTime(data.time);
   const hideUntilOpen = true;
-  const countdown =
-    left === null ? "" : left > 1 ? `${left} days to go` : left === 1 ? "Tomorrow" : left === 0 ? "Today" : "Celebrated";
   const rsvpBy = data.rsvpBy ? friendlyDate(data.rsvpBy).replace(/^\w+day,? /, "") : "";
   const nameSize = fit(names.a + (names.joined ? " & " + names.b : ""), 84, 0.55, 15, 8);
 
@@ -140,7 +138,6 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
         {evs ? evs.map((ev, i) => {
           const p = dateParts(ev.startsOn ?? "");
           const t = friendlyTime(ev.startsAt ?? "");
-          const left = ev.startsOn ? daysUntil(ev.startsOn) : null;
           return (
             <motion.section key={ev.id} className="in-card in-event" {...reveal(2 + i)}>
               <h3 className="in-label in-evtitle">{ev.title}</h3>
@@ -148,54 +145,54 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
                 <div className="in-date"><strong>{p.day}</strong><span>{p.month}<br />{p.year}</span></div>
               ) : <p className="in-sub">Date to be confirmed</p>}
               {ev.startsOn && <p className="in-sub">{p.weekday}{t && ` at ${t}`}</p>}
-              {i === 0 && left !== null && left >= 0 && <p className="in-count">{left > 1 ? `${left} days to go` : left === 1 ? "Tomorrow" : "Today"}</p>}
               {(ev.venue || ev.city) && <p className="in-venue">{ev.venue || ev.city}</p>}
               {ev.venue && ev.city && <p className="in-sub">{ev.city}</p>}
               <div className="in-links">
-                {(ev.venue || ev.city) && <a className="in-link" href={eventMapsUrl(ev)} target="_blank" rel="noreferrer"><MapPin size="1em" /> Open in Maps</a>}
-                {ev.startsOn && <button type="button" className="in-cal" onClick={() => downloadEvent(ev)}><CalendarPlus size="1.1em" /> Add to calendar</button>}
+                {(ev.venue || ev.city) && <a className="in-link" href={eventMapsUrl(ev)} target="_blank" rel="noreferrer"><MapPin size="1em" /> {label(data.languages?.details ?? "en", "maps")}</a>}
+                {ev.startsOn && <button type="button" className="in-cal" onClick={() => downloadEvent(ev)}><CalendarPlus size="1.1em" /> {label(data.languages?.details ?? "en", "calendar")}</button>}
               </div>
             </motion.section>
           );
         }) : (<>
         <motion.section className="in-card in-when" {...reveal(2)}>
-          <h3 className="in-label">When</h3>
+          <h3 className="in-label">{label(data.languages?.details ?? "en", "when")}</h3>
           <div className="in-date">
             <strong>{parts.day}</strong>
             <span>{parts.month}<br />{parts.year}</span>
           </div>
           <p className="in-sub">{parts.weekday}{time && ` at ${time}`}</p>
-          {countdown && <p className="in-count">{countdown}</p>}
         </motion.section>
 
         <motion.section className="in-card in-where" {...reveal(3)}>
-          <h3 className="in-label">Where</h3>
+          <h3 className="in-label">{label(data.languages?.details ?? "en", "where")}</h3>
           <p className="in-venue">{data.venue || "Venue to be confirmed"}</p>
           {data.city && <p className="in-sub">{data.city}</p>}
           {(data.venue || data.city) && (
             <a className="in-link" href={mapsUrl(data)} target="_blank" rel="noreferrer">
-              <MapPin size="1em" /> Open in Maps
+              <MapPin size="1em" /> {label(data.languages?.details ?? "en", "maps")}
             </a>
           )}
         </motion.section></>)}
 
+        <CountdownWidget date={evs?.[0]?.startsOn ?? data.date} time={evs?.[0]?.startsAt ?? data.time} config={data.countdown ?? { enabled: false, style: "type", accent: "", label: "" }} lang={data.languages?.countdown ?? "en"} />
+
         {data.dress.trim() && (
           <motion.section className="in-card in-dress" {...reveal(4)}>
-            <h3 className="in-label">Dress</h3>
+            <h3 className="in-label">{label(data.languages?.details ?? "en", "dress")}</h3>
             <p className="in-venue">{data.dress}</p>
           </motion.section>
         )}
 
         <motion.div className="in-actions" {...reveal(5)}>
           {rsvpHref ? (
-            <Link className="in-rsvp" href={rsvpHref}>Reply</Link>
+            <Link className="in-rsvp" href={rsvpHref}>{label(data.languages?.reply ?? "en", "reply")}</Link>
           ) : (
-            <button type="button" className="in-rsvp" aria-disabled="true" title="Replies are switched off in previews">Reply</button>
+            <button type="button" className="in-rsvp" aria-disabled="true" title="Replies are switched off in previews">{label(data.languages?.reply ?? "en", "reply")}</button>
           )}
           {rsvpBy && <p className="in-sub in-by">Please reply by {rsvpBy}</p>}
           {!evs && (
             <button type="button" className="in-cal" onClick={addToCalendar}>
-              <CalendarPlus size="1.1em" /> Add to calendar
+              <CalendarPlus size="1.1em" /> {label(data.languages?.details ?? "en", "calendar")}
             </button>
           )}
         </motion.div>

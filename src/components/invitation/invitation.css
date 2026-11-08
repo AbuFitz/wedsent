@@ -30,4 +30,16 @@
 .in-card .in-evtitle{margin-bottom:2cqw}
 .in-addr{font-size:3.6cqw;opacity:.75;margin-top:.4cqw}
 .in-photo{border-radius:2cqw;overflow:hidden;aspect-ratio:4/5;background:var(--soft)}
+.in-countdown{--count-tone:var(--a);display:flex;flex-direction:column;align-items:center;gap:3cqw;padding:6cqw 3cqw;text-align:center;color:var(--fg);border-top:.25cqw solid var(--line);border-bottom:.25cqw solid var(--line)}
+.in-count-title{font-family:var(--f-head);font-size:5cqw;line-height:1.1;font-weight:500}
+.in-count-segments{width:100%;display:flex;justify-content:center;gap:3cqw}
+.in-count-segment{min-width:0;flex:1;display:flex;flex-direction:column;align-items:center;gap:1.2cqw;padding:3cqw 1cqw}
+.in-count-segment strong{font-family:var(--f-head);color:var(--count-tone);font-weight:500;font-size:12cqw;line-height:1;font-variant-numeric:tabular-nums}
+.in-count-segment span{font-family:var(--f-body);font-size:2.9cqw;line-height:1.25;letter-spacing:.04em}
+.in-count-done{font-size:4cqw;font-weight:500}
+.in-countdown--tiles{border:0}
+.in-countdown--tiles .in-count-segment{border:.2cqw solid var(--line);border-radius:2cqw;background:var(--soft);padding:4cqw 1cqw}
+.in-countdown--dial{border:0}
+.in-countdown--dial .in-count-segment{aspect-ratio:1;border:.9cqw solid color-mix(in srgb,var(--count-tone) 65%,transparent);border-radius:50%;justify-content:center;max-width:27cqw;padding:1cqw}
+.in-countdown--dial .in-count-segment strong{font-size:9cqw}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
