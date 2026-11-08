@@ -55,6 +55,12 @@
 .st-recommend-result p{font-size:14px}.st-recommend-result small{font-size:12.5px;color:var(--muted);line-height:1.5}
 .st-audio-preview{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#f7f7f4}
 .st-audio-preview label{font-size:13px;font-weight:600}.st-audio-preview audio{display:block;width:100%;max-width:100%;height:44px}
+.st-audio-trim{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.st-audio-trim legend{padding:0 6px;font-size:14px;font-weight:650}.st-audio-trim legend small{font-size:12px;font-weight:400;color:var(--muted)}
+.st-audio-trim p{font-size:12px;color:var(--muted)}
+.st-audio-trim-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.st-audio-trim-fields label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600}
+.st-audio-trim-fields input{height:44px;min-width:0;border:1px solid var(--line);border-radius:9px;padding:0 12px;background:#fff;font:inherit;font-size:15px}
 .st-library{display:flex;flex-direction:column;gap:9px}
 .st-library-track{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
 .st-library-track>div{display:flex;flex-direction:column;gap:3px;min-width:0}

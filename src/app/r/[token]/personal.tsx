@@ -10,10 +10,26 @@ export function PersonalInvite({ token }: { token: string }) {
   const [view, setView] = useState<any>(null);
   const [err, setErr] = useState<ApiError | null>(null);
   const [open, setOpen] = useState(false);
+  const [googleWallet, setGoogleWallet] = useState(false);
+  const [walletBusy, setWalletBusy] = useState(false);
+  const [walletError, setWalletError] = useState("");
   useEffect(() => {
     call("GET", `/api/r/${token}`).then(setView, (e) => setErr(e));
   }, [token]);
   useEffect(() => { if (view && sessionStorage.getItem(`opened:${token.slice(0, 10)}`)) setOpen(true); }, [view, token]);
+  useEffect(() => {
+    fetch("/api/wallet/status", { cache: "no-store" }).then((r) => r.json()).then((result) => setGoogleWallet(!!result.google)).catch(() => {});
+  }, []);
+  const addToGoogleWallet = async () => {
+    setWalletBusy(true); setWalletError("");
+    try {
+      const response = await fetch(`/api/r/${encodeURIComponent(token)}/wallet`, { cache: "no-store" });
+      if (!response.ok) throw new Error("Your Wallet pass could not be prepared. Please try again.");
+      const { url } = await response.json();
+      if (typeof url !== "string" || !url.startsWith("https://pay.google.com/gp/v/save/")) throw new Error("Invalid Wallet link");
+      window.location.assign(url);
+    } catch (error) { setWalletError(error instanceof Error ? error.message : "Wallet unavailable"); setWalletBusy(false); }
+  };
 
   if (err) return (
     <main className="guest guest--msg"><div className="guest-msg">
@@ -30,6 +46,8 @@ export function PersonalInvite({ token }: { token: string }) {
           <Invitation data={view.content} syncChrome open={open} onOpenChange={(v) => { setOpen(v); if (v) sessionStorage.setItem(`opened:${token.slice(0, 10)}`, "1"); }} rsvpHref={`/r/${token}/reply`} events={view.events} greeting={view.household.name} />
         </Phone>
         <p className="guest-note">Invitation for {view.household.name}</p>
+        {googleWallet && <button type="button" className="guest-wallet" onClick={() => void addToGoogleWallet()} disabled={walletBusy}>{walletBusy ? "Preparing your pass…" : "Add to Google Wallet"}</button>}
+        {walletError && <p className="guest-note" role="alert">{walletError}</p>}
       </div>
     </main>
   );

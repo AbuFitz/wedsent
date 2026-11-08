@@ -32,19 +32,26 @@ export function GuestMusic({ choice }: { choice: MusicChoice | null }) {
     const player = audio.current;
     // Opening the cover is a guest gesture. Try to start then, but honour browser
     // autoplay policy: if blocked, leave the play control available and silent.
+    if (choice?.startAt) player.currentTime = choice.startAt;
     player.play().then(() => { setPlaying(true); setError(""); }).catch(() => setPlaying(false));
     return () => { player.pause(); };
-  }, [src]);
+  }, [src, choice?.startAt]);
   if (!choice) return null;
   const toggle = async () => {
     if (!audio.current) return;
     if (playing) { audio.current.pause(); setPlaying(false); return; }
-    try { await audio.current.play(); setPlaying(true); setError(""); }
+    try {
+      if (audio.current.currentTime < (choice.startAt ?? 0) || (choice.endAt !== undefined && audio.current.currentTime >= choice.endAt)) audio.current.currentTime = choice.startAt ?? 0;
+      await audio.current.play(); setPlaying(true); setError("");
+    }
     catch { setError("Tap again to play music"); setPlaying(false); }
   };
   return (
     <div className="in-music" aria-label="Invitation music">
-      <audio ref={audio} src={src || undefined} loop preload="none" onEnded={() => setPlaying(false)} onError={() => { if (src) setError("Music could not be loaded"); }} />
+      <audio ref={audio} src={src || undefined} loop preload="none" onTimeUpdate={() => {
+        const player = audio.current;
+        if (player && choice.endAt !== undefined && player.currentTime >= choice.endAt) player.currentTime = choice.startAt ?? 0;
+      }} onEnded={() => setPlaying(false)} onError={() => { if (src) setError("Music could not be loaded"); }} />
       <button type="button" disabled={!src} onClick={toggle} aria-label={playing ? `Pause ${choice.title}` : `Play ${choice.title}`} aria-pressed={playing} title={error || choice.title}>
         {error ? <VolumeX size="1em" /> : playing ? <Pause size="1em" fill="currentColor" /> : <Play size="1em" fill="currentColor" />}
       </button>

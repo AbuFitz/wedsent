@@ -203,6 +203,13 @@ function WordsTab({ draft, patch }: TabProps) {
       <div className="st-chips" aria-label="Starting points">
         {tones.map((t) => <button key={t.label} type="button" className="st-chip st-chip--ghost" onClick={() => patch({ message: t.text })}>{t.label}</button>)}
       </div>
+      <h2 className="st-h">Message presentation</h2>
+      <p className="st-help">Style this section independently of the cover. The rest of the invitation stays as you designed it.</p>
+      <div className="st-chips" role="group" aria-label="Message layout">
+        {([{ id: "plain", label: "Minimal" }, { id: "framed", label: "Fine border" }, { id: "editorial", label: "Editorial quote" }] as const).map((style) => (
+          <button type="button" className="st-chip" key={style.id} aria-pressed={(draft.messageStyle || "plain") === style.id} onClick={() => patch({ messageStyle: style.id })}>{style.label}</button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -254,6 +261,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
   const [audioPreview, setAudioPreview] = useState("");
   const [audioPreviewError, setAudioPreviewError] = useState("");
+  const [musicMood, setMusicMood] = useState("all");
   const [musicRevision, setMusicRevision] = useState(0);
   useEffect(() => {
     let active = true;
@@ -420,8 +428,13 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
       )}
       <h2 className="st-h st-section-anchor" id="studio-music">Music</h2>
       <p className="st-help st-help--flat">Playable demo collection: three original instrumental tracks released as CC0 by their creator. Listen, then add one to your invitation. No account needed.</p>
+      <div className="st-chips" role="group" aria-label="Filter soundtrack mood">
+        {([{ id: "all", label: "All demos" }, { id: "calm", label: "Quiet" }, { id: "warm", label: "Warm" }, { id: "nostalgic", label: "Nostalgic" }] as const).map((mood) => (
+          <button type="button" key={mood.id} className="st-chip" aria-pressed={musicMood === mood.id} onClick={() => setMusicMood(mood.id)}>{mood.label}</button>
+        ))}
+      </div>
       <div className="st-library" aria-label="Demo soundtrack library">
-        {DEMO_TRACKS.map((track) => (
+        {DEMO_TRACKS.filter((track) => musicMood === "all" || track.mood.toLowerCase().includes(musicMood)).map((track) => (
           <div key={track.id} className="st-library-track">
             <div><strong>{track.title}</strong><small>{track.mood} · {track.creator}</small></div>
             <audio controls preload="none" src={demoTrackSrc(track.id)} aria-label={`Preview ${track.title}`} />
@@ -436,6 +449,15 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
       <label className="st-field"><span>{musicBusy ? "Uploading music…" : "Choose MP3 (up to 8 MB)"}</span><input type="file" accept="audio/mpeg,.mp3" disabled={!rightsConfirmed || musicBusy} onChange={(e) => { void uploadMusic(e.target.files?.[0]); e.target.value = ""; }} /></label>
       {draft.music && <div className="st-music-selected"><span>Selected: {draft.music.title}</span><button type="button" className="st-chip" onClick={() => patch({ music: null })}>Remove music</button></div>}
       {draft.music && audioPreview && <div className="st-audio-preview"><label htmlFor="studio-track-player">Listen to your selected track</label><audio id="studio-track-player" key={audioPreview} controls preload="metadata" src={audioPreview} onError={() => setAudioPreviewError("The selected MP3 could not play. Try another file or re-upload it.")} /></div>}
+      {draft.music && <fieldset className="st-audio-trim"><legend>Playback excerpt <small>optional</small></legend><p>Choose where guests hear the track from. The audio loops within the selected section.</p>
+        <div className="st-audio-trim-fields">
+          <label>Start (seconds)<input type="number" min="0" max="1799" step="1" value={draft.music.startAt ?? 0} onChange={(e) => {
+            const startAt = Math.max(0, Math.min(1799, Number(e.target.value) || 0));
+            patch({ music: { ...draft.music!, startAt, endAt: draft.music!.endAt && draft.music!.endAt <= startAt ? undefined : draft.music!.endAt } });
+          }} /></label>
+          <label>End (seconds)<input type="number" min="1" max="1800" step="1" placeholder="Full track" value={draft.music.endAt ?? ""} onChange={(e) => patch({ music: { ...draft.music!, endAt: e.target.value ? Math.max((draft.music!.startAt ?? 0) + 1, Math.min(1800, Number(e.target.value))) : undefined } })} /></label>
+        </div>
+      </fieldset>}
       {draft.music && audioPreviewError && <small className="st-err" role="alert">{audioPreviewError}</small>}
       <p className="st-help st-help--flat">Vocals-only nasheed and duff recommendations are not playable tracks yet. The three instrumentals above are real demo recordings; uploaded MP3s play here and on the guest invitation after opening.</p>
       {!account && <p className="st-help">Build mode music stays in this browser only. Re-upload once account publishing is enabled.</p>}

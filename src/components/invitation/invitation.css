@@ -47,3 +47,5 @@
 .in-music button:disabled{opacity:.5;cursor:not-allowed}
 .in-music-caption{display:inline-flex;gap:1cqw;align-items:center;font-family:var(--f-body);font-size:2.8cqw;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+.in-message--framed{border:1px solid var(--line,var(--a));border-radius:2cqw;padding:5cqw 3cqw!important;margin-block:3cqw!important;background:color-mix(in srgb,var(--soft,#fff) 86%,transparent)}
+.in-message--editorial{font-family:var(--f-head,Georgia,serif)!important;font-size:5cqw!important;line-height:1.23!important;letter-spacing:-.025em;text-align:center;padding:3cqw 1.5cqw!important;margin-block:4cqw!important}

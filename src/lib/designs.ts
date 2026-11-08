@@ -3,11 +3,12 @@ export type { DesignId };
 
 /** A cover photograph. `src` is /media/<id> (uploaded), /art/<file> (library artwork) or a data: URL (signed-out local draft). fx/fy are the focal point, 0-100. */
 export type Photo = { src: string; fx: number; fy: number };
-export type MusicChoice = { src: string; title: string };
+export type MusicChoice = { src: string; title: string; startAt?: number; endAt?: number };
 export type WidgetLanguage = "en" | "fr" | "ar" | "so";
 export type CountdownStyle = "type" | "tiles" | "dial";
 export type CountdownConfig = { enabled: boolean; style: CountdownStyle; accent: string; label: string };
 export type SectionLanguages = { details: WidgetLanguage; countdown: WidgetLanguage; reply: WidgetLanguage };
+export type MessageStyle = "plain" | "framed" | "editorial";
 
 export type InviteData = {
   names: string;
@@ -17,6 +18,7 @@ export type InviteData = {
   venue: string;
   city: string;
   message: string;
+  messageStyle: MessageStyle;
   dress: string;
   rsvpBy: string; // yyyy-mm-dd or ""
   accent: string; // custom colour override; "" = the palette's accent
@@ -40,6 +42,7 @@ export const defaults: InviteData = {
   venue: "The Glasshouse",
   city: "London",
   message: "A little love, a lot of joy. Come celebrate with us.",
+  messageStyle: "plain",
   dress: "",
   rsvpBy: "",
   accent: "",

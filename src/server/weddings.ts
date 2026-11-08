@@ -38,7 +38,8 @@ export const ContentSchema = z.object({
     countdown: z.enum(["en", "fr", "ar", "so"]),
     reply: z.enum(["en", "fr", "ar", "so"]),
   }).default({ details: "en", countdown: "en", reply: "en" }),
-  music: z.object({ src: z.string().regex(/^\/(?:music\/[0-9a-f-]{36}|library\/(?:quiet-room|afterglow-vast|old-photos-outlands))$/), title: z.string().trim().min(1).max(80) }).nullable().default(null),
+  music: z.object({ src: z.string().regex(/^\/(?:music\/[0-9a-f-]{36}|library\/(?:quiet-room|afterglow-vast|old-photos-outlands))$/), title: z.string().trim().min(1).max(80), startAt: z.number().min(0).max(1800).optional(), endAt: z.number().min(0).max(1800).optional() }).refine((v) => v.endAt === undefined || v.endAt > (v.startAt ?? 0), "End time must follow start time").nullable().default(null),
+  messageStyle: z.enum(["plain", "framed", "editorial"]).default("plain"),
 });
 export type Content = z.infer<typeof ContentSchema>;
 

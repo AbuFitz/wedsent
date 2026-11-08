@@ -136,7 +136,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
         {spec.layout === "stationery" ? (
           <motion.div {...reveal(0)}>
             <StationeryCard data={data} spec={spec} palette={palette} greeting={greeting} event={evs?.[0]} />
-            {data.message.trim() && <p className="in-message in-note">{data.message}</p>}
+            {data.message.trim() && <p className={`in-message in-note in-message--${data.messageStyle || "plain"}`}>{data.message}</p>}
           </motion.div>
         ) : (<>
         <motion.header className="in-hero" {...reveal(0)}>
@@ -148,7 +148,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette }: { dat
         </motion.header>
 
         {data.message.trim() && (
-          <motion.p className="in-message" {...reveal(1)}>{data.message}</motion.p>
+          <motion.p className={`in-message in-message--${data.messageStyle || "plain"}`} {...reveal(1)}>{data.message}</motion.p>
         )}
         </>)}
 
