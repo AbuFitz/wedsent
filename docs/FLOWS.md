@@ -83,6 +83,8 @@ Data invariants: household is a delivery grouping, not one attendee. One person 
 
 ## F04 — private link and RSVP
 
+**Public-link branch (build-mode implementation, 8 Nov 2026):** A published `/w/:slug` invitation links to `/w/:slug/reply`. The form asks for a name, email, attendance choice and optional note. Only events marked `everyone` may receive public replies; if no events are defined, it supports a generic wedding reply. Public submissions are stored separately in `public_rsvps`, surfaced in the owner's Replies tab as **unverified**, and are excluded from personalised guest counts, allocations and admission. Invalid/private event identifiers are rejected; write rate limiting applies. Public replies are not identity-verified or editable yet. This is not an attendance credential. `/share#...` remains a feedback-only preview with RSVP disabled because it has no persisted wedding identity.
+
 ```mermaid
 flowchart TD
  A["Open invitation link"] --> B{"Token valid and authorised?"}

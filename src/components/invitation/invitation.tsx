@@ -67,7 +67,7 @@ export function Invitation({ data, open: openProp, onOpenChange, rsvpHref, still
   return (
     <div className={`inv inv--${design}`} style={style} data-open={open} data-layout={spec.layout} {...(still ? { inert: true } : {})}>
       <Inside data={data} open={open || !!still} rsvpHref={rsvpHref} events={events} greeting={greeting} spec={spec} palette={palette} />
-      {open && <GuestMusic choice={data.music ?? null} />}
+      {!still && <GuestMusic choice={data.music ?? null} opened={open} />}
       <AnimatePresence>
         {!open && (
           <Cover key={design} spec={spec} data={data} onOpen={() => setOpen(true)} still={!!still} />

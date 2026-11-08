@@ -43,3 +43,7 @@
 ## Pre-publication gate
 
 Nothing becomes a bundled production media selection until (1) licence evidence exists, (2) commercial streaming/redistribution is allowed, (3) an owner approves it, (4) the source is stored with the release, and (5) it is tested on real mobile devices. Review cultural appropriateness and lyrics, especially for nasheeds, independently of the audio's instrument classification.
+# 8 November build note
+
+The soundtrack playback engine now supports on-arrival attempt, after-opening playback or manual playback; adjustable volume and start/end points. These controls do **not** add recording rights. The existing four curated records remain subject to the rights/provenance caveats below; additional duff and vocals-only recordings are pending source-level permission and auditioning. Public-link replies and guest data are unrelated to music licensing.
+

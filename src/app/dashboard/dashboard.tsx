@@ -12,6 +12,7 @@ type Event = { id: string; title: string; starts_on: string | null; starts_at_lo
 type Guest = { id: string; name: string; email: string | null; child: boolean; events: { eventId: string; status: string | null }[] };
 type Household = { id: string; name: string; link: string | null; lastOpenedAt: string | null; guests: Guest[] };
 type Counts = { eventId: string; title: string; invited: number; attending: number; declined: number; noReply: number }[];
+type PublicReply = { id: string; name: string; email: string; status: string; note: string | null; event_title: string | null; created_at: string };
 type Wedding = { id: string; rev: number; content: any; wedding: { slug: string | null; state: string; rsvp_deadline: string | null; allow_changes_after_deadline: boolean } };
 
 const tabs = ["Overview", "Events", "Guests", "Replies"] as const;
@@ -24,6 +25,7 @@ export function Dashboard() {
   const [events, setEvents] = useState<Event[]>([]);
   const [hh, setHh] = useState<Household[]>([]);
   const [counts, setCounts] = useState<Counts>([]);
+  const [publicReplies, setPublicReplies] = useState<PublicReply[]>([]);
   const [loading, setLoading] = useState(true);
   const [fatal, setFatal] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export function Dashboard() {
   const load = useCallback(async () => {
     try {
       const [wd, ev, hs, rs] = await Promise.all([call<Wedding>("GET", "/api/wedding"), call("GET", "/api/wedding/events"), call("GET", "/api/wedding/households"), call("GET", "/api/wedding/rsvps")]);
-      setW(wd); setEvents(ev.events); setHh(hs.households); setCounts(rs.counts); setFatal(null);
+      setW(wd); setEvents(ev.events); setHh(hs.households); setCounts(rs.counts); setPublicReplies(rs.publicReplies ?? []); setFatal(null);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) return router.replace("/signin?next=/dashboard");
       setFatal(e instanceof ApiError ? e.message : "Couldn’t load your wedding.");
@@ -67,7 +69,7 @@ export function Dashboard() {
             {tab === "Overview" && <Overview w={w} events={events} hh={hh} act={act} go={setTab} />}
             {tab === "Events" && <Events events={events} act={act} />}
             {tab === "Guests" && <Guests events={events} hh={hh} act={act} say={say} />}
-            {tab === "Replies" && <Replies w={w} counts={counts} events={events} act={act} />}
+            {tab === "Replies" && <Replies w={w} counts={counts} events={events} publicReplies={publicReplies} act={act} />}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -261,7 +263,7 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
 }
 
 /* ------------------------------- Replies ------------------------------ */
-function Replies({ w, counts, events, act }: { w: Wedding; counts: Counts; events: Event[]; act: any }) {
+function Replies({ w, counts, events, publicReplies, act }: { w: Wedding; counts: Counts; events: Event[]; publicReplies: PublicReply[]; act: any }) {
   const [deadline, setDeadline] = useState(w.wedding.rsvp_deadline ? w.wedding.rsvp_deadline.slice(0, 10) : "");
   const [allow, setAllow] = useState(w.wedding.allow_changes_after_deadline);
   return (
@@ -280,6 +282,15 @@ function Replies({ w, counts, events, act }: { w: Wedding; counts: Counts; event
           </li>
         ))}
       </ul>
+      <section className="db-card">
+        <h2>Public-link replies ({publicReplies.length})</h2>
+        <p className="db-muted">These people submitted the public form. Their identity and eligibility have not been verified. They are not counted as confirmed invited guests or check-ins.</p>
+        {publicReplies.length === 0 ? <p className="db-empty">No public-link replies yet.</p> :
+          <ul className="db-list">{publicReplies.map((reply) => <li key={reply.id}>
+            <div><strong>{reply.name}</strong><p>{reply.email} · {reply.event_title || "Main celebration"} · {reply.note || "No note"}</p></div>
+            <span className="db-pill">{reply.status === "attending" ? "Accepts" : "Declines"} · unverified</span>
+          </li>)}</ul>}
+      </section>
       <section className="db-card db-form">
         <h2>Reply-by date</h2>
         <label><span>Guests can reply until</span><input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} /></label>

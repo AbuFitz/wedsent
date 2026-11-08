@@ -3,7 +3,12 @@ export type { DesignId };
 
 /** A cover photograph. `src` is /media/<id> (uploaded), /art/<file> (library artwork) or a data: URL (signed-out local draft). fx/fy are the focal point, 0-100. */
 export type Photo = { src: string; fx: number; fy: number };
-export type MusicChoice = { src: string; title: string; startAt?: number; endAt?: number };
+export type MusicChoice = {
+  src: string; title: string; startAt?: number; endAt?: number;
+  /** Browser may block sound until a guest interacts. */
+  trigger?: "load" | "open" | "manual";
+  volume?: number;
+};
 export type WidgetLanguage = "en" | "fr" | "ar" | "so";
 export type CountdownStyle = "type" | "tiles" | "dial";
 export type CountdownConfig = { enabled: boolean; style: CountdownStyle; accent: string; label: string };

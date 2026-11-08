@@ -38,7 +38,7 @@ export const ContentSchema = z.object({
     countdown: z.enum(["en", "fr", "ar", "so"]),
     reply: z.enum(["en", "fr", "ar", "so"]),
   }).default({ details: "en", countdown: "en", reply: "en" }),
-  music: z.object({ src: z.string().regex(/^\/(?:music\/[0-9a-f-]{36}|library\/(?:quiet-room|afterglow-vast|old-photos-outlands|nasheed-alhamdulillah|satie-gymnopedie|chopin-nocturne|bridal-chorus))$/), title: z.string().trim().min(1).max(80), startAt: z.number().min(0).max(1800).optional(), endAt: z.number().min(0).max(1800).optional() }).refine((v) => v.endAt === undefined || v.endAt > (v.startAt ?? 0), "End time must follow start time").nullable().default(null),
+  music: z.object({ src: z.string().regex(/^\/(?:music\/[0-9a-f-]{36}|library\/(?:quiet-room|afterglow-vast|old-photos-outlands|nasheed-alhamdulillah|satie-gymnopedie|chopin-nocturne|bridal-chorus))$/), title: z.string().trim().min(1).max(80), startAt: z.number().min(0).max(1800).optional(), endAt: z.number().min(0).max(1800).optional(), trigger: z.enum(["load", "open", "manual"]).default("open"), volume: z.number().min(0).max(1).default(0.45) }).refine((v) => v.endAt === undefined || v.endAt > (v.startAt ?? 0), "End time must follow start time").nullable().default(null),
   messageStyle: z.enum(["plain", "framed", "editorial"]).default("plain"),
 });
 export type Content = z.infer<typeof ContentSchema>;
@@ -148,7 +148,8 @@ export async function getPublishedBySlug(slug: string) {
   if (!r.rowCount) return null;
   // Public payload: design content only. Never guests, tokens or events marked invited-only.
   const events = await db.query(`select id, title, to_char(starts_on,'YYYY-MM-DD') as "startsOn", to_char(starts_at_local,'HH24:MI') as "startsAt", venue, address, city from wedding_events where wedding_id=$1 and visibility='everyone' order by starts_on nulls last, starts_at_local nulls last, sort_order`, [r.rows[0].id]);
-  return { slug: r.rows[0].slug as string, content: r.rows[0].content as Content, events: events.rows };
+  const anyEvents = await db.query(`select 1 from wedding_events where wedding_id=$1 limit 1`, [r.rows[0].id]);
+  return { slug: r.rows[0].slug as string, content: r.rows[0].content as Content, events: events.rows, hasEvents: anyEvents.rowCount > 0 };
 }
 
 export async function setDeadlinePolicy(userId: string, weddingId: string, deadline: string | null, allowAfter: boolean) {

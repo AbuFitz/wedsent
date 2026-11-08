@@ -473,6 +473,20 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
           }} /></label>
           <label>End (seconds)<input type="number" min="1" max="1800" step="1" placeholder="Full track" value={draft.music.endAt ?? ""} onChange={(e) => patch({ music: { ...draft.music!, endAt: e.target.value ? Math.max((draft.music!.startAt ?? 0) + 1, Math.min(1800, Number(e.target.value))) : undefined } })} /></label>
         </div>
+        <div className="st-audio-trim-fields">
+          <label>When music begins
+            <select className="st-select" value={draft.music.trigger ?? "open"} onChange={(e) => patch({ music: { ...draft.music!, trigger: e.target.value as "load" | "open" | "manual" } })}>
+              <option value="load">When the link loads (browser permitting)</option>
+              <option value="open">After the invitation opens</option>
+              <option value="manual">Only when the guest taps play</option>
+            </select>
+          </label>
+          <label>Background volume ({Math.round((draft.music.volume ?? 0.45) * 100)}%)
+            <input type="range" min="0.05" max="1" step="0.05" value={draft.music.volume ?? 0.45}
+              onChange={(e) => patch({ music: { ...draft.music!, volume: Number(e.target.value) } })} />
+          </label>
+        </div>
+        <p>Audition from your chosen start point in the player above. For a complete track, leave the end time blank. Browser autoplay restrictions apply to every mode.</p>
       </fieldset>}
       {draft.music && audioPreviewError && <small className="st-err" role="alert">{audioPreviewError}</small>}
       <p className="st-help st-help--flat">If a selected track will not play on your device, remove it and use a properly licensed MP3 upload instead. We are continuing the duff and wedding instrumental selection.</p>
