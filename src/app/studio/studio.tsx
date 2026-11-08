@@ -12,7 +12,7 @@ import { call, ApiError } from "@/lib/api-client";
 import { useStudioDraft } from "@/lib/use-draft";
 import { readLocalMusic, saveLocalMusic } from "@/lib/local-music";
 import { recommendExperience, type Mood, type AudioPreference } from "@/lib/recommendations";
-import { DEMO_TRACKS, DEMO_TRACK_LICENCE, demoTrackSrc } from "@/lib/music-library";
+import { CURATED_TRACKS } from "@/lib/music-library";
 import "./studio.css";
 
 type Tab = "design" | "words" | "details" | "events" | "style";
@@ -261,7 +261,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
   const [audioPreview, setAudioPreview] = useState("");
   const [audioPreviewError, setAudioPreviewError] = useState("");
-  const [musicMood, setMusicMood] = useState("all");
+  const [musicMood, setMusicMood] = useState("nasheed");
   const [musicRevision, setMusicRevision] = useState(0);
   useEffect(() => {
     let active = true;
@@ -427,23 +427,23 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
         </>
       )}
       <h2 className="st-h st-section-anchor" id="studio-music">Music</h2>
-      <p className="st-help st-help--flat">Playable demo collection: three original instrumental tracks released as CC0 by their creator. Listen, then add one to your invitation. No account needed.</p>
+      <p className="st-help st-help--flat">Choose what feels right for your celebration. We've retired the generic demo beats. This small collection is being curated recording by recording, with source and rights information visible.</p>
       <div className="st-chips" role="group" aria-label="Filter soundtrack mood">
-        {([{ id: "all", label: "All demos" }, { id: "calm", label: "Quiet" }, { id: "warm", label: "Warm" }, { id: "nostalgic", label: "Nostalgic" }] as const).map((mood) => (
+        {([{ id: "nasheed", label: "Vocals-only nasheed" }, { id: "duff", label: "Duff" }, { id: "instrumental", label: "Instrumental" }] as const).map((mood) => (
           <button type="button" key={mood.id} className="st-chip" aria-pressed={musicMood === mood.id} onClick={() => setMusicMood(mood.id)}>{mood.label}</button>
         ))}
       </div>
-      <div className="st-library" aria-label="Demo soundtrack library">
-        {DEMO_TRACKS.filter((track) => musicMood === "all" || track.mood.toLowerCase().includes(musicMood)).map((track) => (
+      <div className="st-library" aria-label="Soundtrack library">
+        {CURATED_TRACKS.filter((track) => track.category === musicMood).map((track) => (
           <div key={track.id} className="st-library-track">
-            <div><strong>{track.title}</strong><small>{track.mood} · {track.creator}</small></div>
-            <audio controls preload="none" src={demoTrackSrc(track.id)} aria-label={`Preview ${track.title}`} />
-            <button type="button" className="st-chip" aria-pressed={draft.music?.src === demoTrackSrc(track.id)} onClick={() => patch({ music: { src: demoTrackSrc(track.id), title: track.title } })}>{draft.music?.src === demoTrackSrc(track.id) ? "Selected" : "Use track"}</button>
+            <div><strong>{track.title}</strong><small>{track.mood} · {track.artist}</small><small><a href={track.source} target="_blank" rel="noopener noreferrer">Source</a> · <a href={track.licenseUrl} target="_blank" rel="noopener noreferrer">{track.license}</a></small></div>
+            <audio controls preload="none" src={track.src} aria-label={`Listen to ${track.title}`} />
+            <button type="button" className="st-chip" aria-pressed={draft.music?.src === track.src} onClick={() => patch({ music: { src: track.src, title: track.title } })}>{draft.music?.src === track.src ? "Selected" : "Use track"}</button>
           </div>
         ))}
+        {!CURATED_TRACKS.some((track) => track.category === musicMood) && <p className="st-help">No approved recordings in this category yet. You can upload a recording you have permission to use below; we won't fill this section with unrelated beats.</p>}
       </div>
-      <p className="st-help st-help--flat">Demo audio is streamed from the creator’s public repository, so playback depends on that host. <a href={DEMO_TRACK_LICENCE} target="_blank" rel="noopener noreferrer" className="st-link">Read CC0 licence ↗</a></p>
-      <p className="st-help st-help--flat">Nasheed recordings are not bundled yet: sources identified so far require individual rights checks. You can select vocals-only or duff in Design recommendations, then upload a recording you have permission to use below.</p>
+      <p className="st-help st-help--flat">The vocals-only source above is hosted by Wikimedia Commons under the licence shown. Its original large FLAC file may not play on every mobile device; a verified optimised MP3 is still needed. We have not independently auditioned its lyrics or certified religious suitability.</p>
       <p className="st-help">Add your own permitted MP3. The invitation attempts music after the opening gesture; browsers may require the guest to tap play. A visible control always lets them pause or resume.</p>
       <label className="st-widget-toggle"><span><strong>I have permission to use this recording</strong><small>Only upload music you own or have rights to share with guests.</small></span><input type="checkbox" checked={rightsConfirmed} onChange={(e) => setRightsConfirmed(e.target.checked)} /></label>
       <label className="st-field"><span>{musicBusy ? "Uploading music…" : "Choose MP3 (up to 8 MB)"}</span><input type="file" accept="audio/mpeg,.mp3" disabled={!rightsConfirmed || musicBusy} onChange={(e) => { void uploadMusic(e.target.files?.[0]); e.target.value = ""; }} /></label>
@@ -459,7 +459,7 @@ function StyleTab({ draft, patch, account }: TabProps & { account: boolean }) {
         </div>
       </fieldset>}
       {draft.music && audioPreviewError && <small className="st-err" role="alert">{audioPreviewError}</small>}
-      <p className="st-help st-help--flat">Vocals-only nasheed and duff recommendations are not playable tracks yet. The three instrumentals above are real demo recordings; uploaded MP3s play here and on the guest invitation after opening.</p>
+      <p className="st-help st-help--flat">If a selected track will not play on your device, remove it and use a properly licensed MP3 upload instead. We are continuing the duff and wedding instrumental selection.</p>
       {!account && <p className="st-help">Build mode music stays in this browser only. Re-upload once account publishing is enabled.</p>}
       {musicError && <small className="st-err" role="alert">{musicError}</small>}
       <Link href="/invite/print" target="_blank" className="st-link"><Printer size={16} /> A5 print layout <ArrowUpRight size={14} /></Link>
