@@ -29,6 +29,7 @@ export function Dashboard() {
   const [counts, setCounts] = useState<Counts>([]);
   const [publicReplies, setPublicReplies] = useState<PublicReply[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [emailConfigured, setEmailConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fatal, setFatal] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -37,8 +38,8 @@ export function Dashboard() {
 
   const load = useCallback(async () => {
     try {
-      const [wd, ev, hs, rs, deliveryResult] = await Promise.all([call<Wedding>("GET", "/api/wedding"), call("GET", "/api/wedding/events"), call("GET", "/api/wedding/households"), call("GET", "/api/wedding/rsvps"), call<{deliveries:Delivery[]}>("GET", "/api/wedding/deliveries")]);
-      setW(wd); setEvents(ev.events); setHh(hs.households); setCounts(rs.counts); setPublicReplies(rs.publicReplies ?? []); setDeliveries(deliveryResult.deliveries); setFatal(null);
+      const [wd, ev, hs, rs, deliveryResult] = await Promise.all([call<Wedding>("GET", "/api/wedding"), call("GET", "/api/wedding/events"), call("GET", "/api/wedding/households"), call("GET", "/api/wedding/rsvps"), call<{deliveries:Delivery[]; emailConfigured:boolean}>("GET", "/api/wedding/deliveries")]);
+      setW(wd); setEvents(ev.events); setHh(hs.households); setCounts(rs.counts); setPublicReplies(rs.publicReplies ?? []); setDeliveries(deliveryResult.deliveries); setEmailConfigured(deliveryResult.emailConfigured); setFatal(null);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) return router.replace("/signin?next=/dashboard");
       setFatal(e instanceof ApiError ? e.message : "Couldn’t load your wedding.");
@@ -72,7 +73,10 @@ export function Dashboard() {
             {tab === "Overview" && <Overview w={w} events={events} hh={hh} act={act} go={setTab} />}
             {tab === "Events" && <Events events={events} act={act} />}
             {tab === "Guests" && <Guests events={events} hh={hh} act={act} say={say} />}
-            {tab === "Sending" && <Sending households={hh} deliveries={deliveries} go={setTab} />}
+            {tab === "Sending" && <Sending households={hh} deliveries={deliveries} emailConfigured={emailConfigured} go={setTab} onSend={async (ids) => {
+              const result = await call<{accepted:number; failed:number; nothingNew:boolean}>("POST", "/api/wedding/deliveries/send", { householdIds: ids });
+              await load(); say(result.nothingNew ? "These invitations were already queued or sent." : `${result.accepted} accepted by email provider${result.failed ? `, ${result.failed} failed` : ""}`);
+            }}/>} 
             {tab === "Replies" && <Replies w={w} counts={counts} events={events} publicReplies={publicReplies} act={act} />}
           </motion.div>
         </AnimatePresence>
@@ -82,7 +86,18 @@ export function Dashboard() {
   );
 }
 
-function Sending({ households, deliveries, go }: { households: Household[]; deliveries: Delivery[]; go: (tab: Tab) => void }) {
+function Sending({ households, deliveries, emailConfigured, go, onSend }: { households: Household[]; deliveries: Delivery[]; emailConfigured: boolean; go: (tab: Tab) => void; onSend: (ids:string[])=>Promise<void> }) {
+  const [selected, setSelected] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const eligible = households.filter((h) => h.link && h.guests.some((g) => g.email));
+  const submit = async () => {
+    if (!selected.length || !window.confirm(`Email invitations to ${selected.length} selected household(s)?`)) return;
+    setBusy(true); setError("");
+    try { await onSend(selected); setSelected([]); }
+    catch (e) { setError(e instanceof Error ? e.message : "Email sending failed."); }
+    finally { setBusy(false); }
+  };
   return <div className="db-stack">
     <h1 className="db-h">Send invitations</h1>
     <p className="db-muted">Share a personal link with each household, or use the public invitation for open sharing. Only messages sent through a connected provider can have verified delivery status.</p>
@@ -90,6 +105,15 @@ function Sending({ households, deliveries, go }: { households: Household[]; deli
       <h2>Personal invitations</h2>
       <p className="db-muted">{households.length} {households.length === 1 ? "household" : "households"} ready to invite. Their links are unique and can be reset if forwarded accidentally.</p>
       <div className="db-row"><button type="button" className="btn btn-dark" onClick={() => go("Guests")}>Manage and share guest links</button></div>
+    </section>
+    <section className="db-card db-form">
+      <h2>Automated email invitations</h2>
+      {!emailConfigured ? <p className="db-banner">Email sending isn't connected yet. Use the personal links in Guests until Wedsent's verified sending domain and provider keys are configured.</p> : <>
+        <p className="db-muted">Select the households you want to email. Each email contains that household's private invitation link. Repeating a send won't duplicate the invitation for the same active link.</p>
+        {eligible.length === 0 ? <p className="db-empty">Add an email address to a household first.</p> : <fieldset><legend>Choose recipients</legend><div className="db-chips">{eligible.map((h) => <label key={h.id} className="db-chip"><input type="checkbox" checked={selected.includes(h.id)} onChange={(e) => setSelected((s) => e.target.checked ? [...s,h.id] : s.filter((id)=>id!==h.id))}/>{h.name}</label>)}</div></fieldset>}
+        {error && <p role="alert" className="db-banner">{error}</p>}
+        <button className="btn btn-dark" type="button" disabled={!selected.length || busy} onClick={() => void submit()}>{busy ? "Sending…" : `Email ${selected.length} selected household${selected.length === 1 ? "" : "s"}`}</button>
+      </>}
     </section>
     <section className="db-card">
       <h2>Delivery history</h2>
