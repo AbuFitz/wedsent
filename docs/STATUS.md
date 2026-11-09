@@ -113,3 +113,11 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 
 **9 Nov email-send implementation (authorised provider):** Added a selected-household email action backed by `POST /api/wedding/deliveries/send`. It is only visible when server-only `RESEND_API_KEY` and `RESEND_FROM_EMAIL` exist. The server checks wedding ownership, publication, active invitation tokens and recipient email presence, reserves unique delivery keys, and sends through Resend with a 12-second request timeout and stable provider idempotency header. Acceptance is marked `sent`, never `delivered`. There is **no automated retry or delivery webhook yet**; live email provider verification and owner-domain configuration remain required. Test covers wrong-owner access, provider-shaped response and duplicate-send suppression.
 
+# Pre-launch owner checklist (9 November 2026)
+
+- [ ] **Resend:** verify Wedsent's sending domain (SPF/DKIM), configure server-side API credentials, production sender and webhook signing secret; then verify delivery, bounced mail, retries, reminders and unsubscribe/complaint handling with real recipients.
+- [ ] **Domain:** choose and connect the production Wedsent domain in Vercel, configure DNS/TLS, canonical links, redirects and email subdomain; test short household links and QR codes after cutover.
+- [ ] Complete live-database end-to-end tests from owner publishing and sending to guest RSVP and dashboard status, including revocation and repeat submission.
+- [ ] Perform real iOS Safari and Android Chrome visual/interactions QA on each invitation family and the redesigned Studio.
+- [ ] Audit the visual continuity of each invitation theme, from opening gesture through venue, timeline, countdown and RSVP, using theme-specific artwork rather than generic decorative shapes.
+
