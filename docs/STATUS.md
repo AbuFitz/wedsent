@@ -109,3 +109,5 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 
 **9 Nov delivery reliability follow-up:** Inspected OpenInvite's Resend functions, Guestroll's email queue/retry code, Resend's provider idempotency contract and WhatsApp's opt-in policy. Added [`INVITATION_DELIVERY_ENGINE.md`](INVITATION_DELIVERY_ENGINE.md) with transactional queue, token-revocation, webhook dedupe, out-of-order transitions, retry and reminder invariants. Added a database-backed owner-only delivery-history isolation test: 43 tests now pass, including queued records not masquerading as sent/delivered. The provider pipeline remains unimplemented; this is an architecture-and-test hardening slice, not an automated-email launch.
 
+**9 Nov CSV safety fix:** Household CSV import previously used `slice(0,12)`, silently dropping every guest after the twelfth in the same household. Import now rejects that batch before any database write with an explicit "split the household" message. Added an atomicity regression test to prove zero households are created after rejection. This is a guest-data integrity fix, not a messaging integration.
+
