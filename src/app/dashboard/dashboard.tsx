@@ -14,9 +14,10 @@ type Guest = { id: string; name: string; email: string | null; child: boolean; e
 type Household = { id: string; name: string; link: string | null; lastOpenedAt: string | null; guests: Guest[] };
 type Counts = { eventId: string; title: string; invited: number; attending: number; declined: number; noReply: number }[];
 type PublicReply = { id: string; name: string; email: string; status: string; note: string | null; event_title: string | null; created_at: string };
+type Delivery = { id: string; householdId: string | null; householdName: string | null; channel: "email" | "whatsapp"; category: string; recipient: string; state: string; attempts: number; createdAt: string; sentAt: string | null; deliveredAt: string | null };
 type Wedding = { id: string; rev: number; content: any; wedding: { slug: string | null; state: string; rsvp_deadline: string | null; allow_changes_after_deadline: boolean } };
 
-const tabs = ["Overview", "Events", "Guests", "Replies"] as const;
+const tabs = ["Overview", "Events", "Guests", "Sending", "Replies"] as const;
 type Tab = (typeof tabs)[number];
 
 export function Dashboard() {
@@ -27,6 +28,7 @@ export function Dashboard() {
   const [hh, setHh] = useState<Household[]>([]);
   const [counts, setCounts] = useState<Counts>([]);
   const [publicReplies, setPublicReplies] = useState<PublicReply[]>([]);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
   const [fatal, setFatal] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -35,8 +37,8 @@ export function Dashboard() {
 
   const load = useCallback(async () => {
     try {
-      const [wd, ev, hs, rs] = await Promise.all([call<Wedding>("GET", "/api/wedding"), call("GET", "/api/wedding/events"), call("GET", "/api/wedding/households"), call("GET", "/api/wedding/rsvps")]);
-      setW(wd); setEvents(ev.events); setHh(hs.households); setCounts(rs.counts); setPublicReplies(rs.publicReplies ?? []); setFatal(null);
+      const [wd, ev, hs, rs, deliveryResult] = await Promise.all([call<Wedding>("GET", "/api/wedding"), call("GET", "/api/wedding/events"), call("GET", "/api/wedding/households"), call("GET", "/api/wedding/rsvps"), call<{deliveries:Delivery[]}>("GET", "/api/wedding/deliveries")]);
+      setW(wd); setEvents(ev.events); setHh(hs.households); setCounts(rs.counts); setPublicReplies(rs.publicReplies ?? []); setDeliveries(deliveryResult.deliveries); setFatal(null);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) return router.replace("/signin?next=/dashboard");
       setFatal(e instanceof ApiError ? e.message : "Couldn’t load your wedding.");
@@ -70,6 +72,7 @@ export function Dashboard() {
             {tab === "Overview" && <Overview w={w} events={events} hh={hh} act={act} go={setTab} />}
             {tab === "Events" && <Events events={events} act={act} />}
             {tab === "Guests" && <Guests events={events} hh={hh} act={act} say={say} />}
+            {tab === "Sending" && <Sending households={hh} deliveries={deliveries} go={setTab} />}
             {tab === "Replies" && <Replies w={w} counts={counts} events={events} publicReplies={publicReplies} act={act} />}
           </motion.div>
         </AnimatePresence>
@@ -77,6 +80,26 @@ export function Dashboard() {
       <div className="db-toast" role="status" aria-live="polite">{toast}</div>
     </div>
   );
+}
+
+function Sending({ households, deliveries, go }: { households: Household[]; deliveries: Delivery[]; go: (tab: Tab) => void }) {
+  return <div className="db-stack">
+    <h1 className="db-h">Send invitations</h1>
+    <p className="db-muted">Share a personal link with each household, or use the public invitation for open sharing. Only messages sent through a connected provider can have verified delivery status.</p>
+    <section className="db-card">
+      <h2>Personal invitations</h2>
+      <p className="db-muted">{households.length} {households.length === 1 ? "household" : "households"} ready to invite. Their links are unique and can be reset if forwarded accidentally.</p>
+      <div className="db-row"><button type="button" className="btn btn-dark" onClick={() => go("Guests")}>Manage and share guest links</button></div>
+    </section>
+    <section className="db-card">
+      <h2>Delivery history</h2>
+      {deliveries.length === 0 ? <p className="db-empty">No automated messages have been sent. WhatsApp, SMS and email drafts opened on your own device are not tracked as deliveries.</p> :
+        <ul className="db-list">{deliveries.map((d) => <li key={d.id}>
+          <div><strong>{d.householdName || d.recipient}</strong><p className="db-muted">{d.category} · {d.channel} · {new Date(d.createdAt).toLocaleString()}</p></div>
+          <span className="db-pill">{d.state === "delivered" ? "Delivered" : d.state === "sent" ? "Sent to provider" : d.state === "sending" ? "Sending" : d.state === "queued" ? "Queued" : d.state === "failed" ? "Failed" : "Cancelled"}</span>
+        </li>)}</ul>}
+    </section>
+  </div>;
 }
 
 /* ------------------------------ Overview ------------------------------ */
