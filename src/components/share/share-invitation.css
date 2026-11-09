@@ -14,3 +14,4 @@
 .share-card-brand small{font-size:9px;letter-spacing:.18em;color:inherit;opacity:.65}
 .share-card--themed .share-card-caption strong{color:var(--share-ink)}
 .share-card--themed .share-card-caption small{color:var(--share-ink);opacity:.65}
+.share-delivery-note{margin:-6px 0 0;font-size:11px;line-height:1.5;color:#74786f}
