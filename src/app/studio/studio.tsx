@@ -15,8 +15,16 @@ import { saveLocalMusic, readLocalMusic } from "@/lib/local-music";
 import { CURATED_TRACKS } from "@/lib/music-library";
 import { SoundWaveform } from "@/components/studio/sound-waveform";
 import "./studio.css";
+import "./guided-studio.css";
 
 type Panel = "story" | "events" | "look" | "photo" | "sound" | "extras";
+type Step = "invitation" | "design" | "finishing" | "send";
+const steps: { id: Step; title: string; subtitle: string; panels: Panel[] }[] = [
+  { id: "invitation", title: "Your invitation", subtitle: "Names, words & celebrations", panels: ["story", "events"] },
+  { id: "design", title: "Make it yours", subtitle: "Artwork, opening & photos", panels: ["look", "photo"] },
+  { id: "finishing", title: "Final touches", subtitle: "Music & guest details", panels: ["sound", "extras"] },
+  { id: "send", title: "Invite your guests", subtitle: "Publish, send & manage replies", panels: [] },
+];
 type View = "cover" | "inside";
 type CanvasScene = "paper" | "gallery" | "ink";
 type CanvasFrame = "device" | "soft" | "edge";
@@ -42,6 +50,8 @@ export function Studio() {
   const { draft, patch, undo, redo, canUndo, canRedo, state, account, ready, reload } = useStudioDraft();
   const params = useSearchParams();
   const [panel, setPanel] = useState<Panel>("story");
+  const [step, setStep] = useState<Step>("invitation");
+  const [mobileMode, setMobileMode] = useState<"edit" | "preview">("edit");
   const [view, setView] = useState<View>("cover");
   const [mobileFull, setMobileFull] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
@@ -82,60 +92,58 @@ export function Studio() {
   useEffect(() => { localStorage.setItem("wedsent-studio-canvas-v1", JSON.stringify({ scene: canvasScene, frame: canvasFrame })); }, [canvasScene, canvasFrame]);
 
   const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
-  const select = (id: Panel) => { setPanel(id); setInspectorOpen(true); setMobileMenuOpen(false); setMobileFull(false); setView(id === "look" || id === "photo" ? "cover" : "inside"); };
+  const select = (id: Panel) => { setPanel(id); setStep(steps.find((entry) => entry.panels.includes(id))?.id ?? "invitation"); setInspectorOpen(true); setMobileMode("edit"); setMobileMenuOpen(false); setMobileFull(false); setView(id === "look" || id === "photo" ? "cover" : "inside"); };
+  const goStep = (id: Step) => { setStep(id); setMobileMode("edit"); if (id !== "send") select(steps.find((entry) => entry.id === id)!.panels[0]); };
+  const activeStep = steps.find((entry) => entry.id === step)!;
   const tool = tools.find((entry) => entry.id === panel)!;
   const saveLabel = state === "saved" ? account ? "Saved to account" : "Saved on this device" : state === "saving" ? "Saving…" : state === "conflict" ? "Changed in another tab" : state === "offline" ? "Offline, not synced" : state === "failed" ? "Save failed" : "Loading…";
   const missing = [!draft.names.trim() && "Names", !draft.date && "Date", !draft.venue.trim() && !rawEvents.some((e) => e.venue) && "Venue"].filter(Boolean);
 
-  return <div className="atelier" data-full={mobileFull} data-inspector={inspectorOpen}>
+  return <div className="atelier atelier--guided" data-full={mobileFull} data-inspector={inspectorOpen} data-mode={mobileMode} data-step={step}>
     <header className="atelier-top">
       <Link href="/dashboard" className="atelier-brand" aria-label="Back to wedding dashboard"><ArrowLeft size={17}/><span className="atelier-brand-word">wedsent</span><span>Studio</span></Link>
       <div className="atelier-top-middle"><span className="atelier-file">{draft.names || "Your invitation"}</span><span className="atelier-save" data-state={state}>{state === "saving" || state === "loading" ? <LoaderCircle size={13} className="atelier-spin"/> : <span className="atelier-save-dot"/>}{saveLabel}</span>{state === "conflict" && <button onClick={reload}>Reload</button>}</div>
       <div className="atelier-top-actions">
         <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
         <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
-        {account && <Link className="atelier-top-link" href="/dashboard">Guests & publish <ArrowRight size={15}/></Link>}
+        <Link className="atelier-top-link" href={account ? "/dashboard" : "/signup?next=%2Fdashboard"}>Guest list <ArrowRight size={15}/></Link>
       </div>
     </header>
 
-    <nav className="atelier-dock" aria-label="Studio tools">
-      <p className="atelier-dock-title">MAKE IT YOURS</p>
-      {tools.map((item, index) => { const Icon = dockIcons[item.id]; return <button key={item.id} type="button" className="atelier-dock-item" aria-current={panel === item.id ? "page" : undefined} onClick={() => select(item.id)} title={item.detail}><span className="atelier-dock-icon"><Icon size={21} weight={panel === item.id ? "fill" : "regular"}/></span><span>{item.name}</span><small>{String(index + 1).padStart(2, "0")}</small></button>; })}
-      <div className="atelier-dock-bottom"><Link href="/dashboard"><Settings2 size={17}/> Wedding dashboard</Link></div>
+    <nav className="atelier-dock" aria-label="Create your invitation">
+      <div className="studio-nav-intro"><span>YOUR WEDDING</span><strong>Make something memorable.</strong><p>Everything you need to create and send your invitation, in one place.</p></div>
+      {steps.map((item, index) => <button key={item.id} type="button" className="studio-step" aria-current={step === item.id ? "step" : undefined} onClick={() => goStep(item.id)}><span className="studio-step-number">{String(index + 1).padStart(2,"0")}</span><span className="studio-step-text"><strong>{item.title}</strong><small>{item.subtitle}</small></span><ArrowRight size={15}/></button>)}
+      <div className="studio-nav-foot"><Link href="/dashboard"><ArrowLeft size={15}/> Back to dashboard</Link></div>
     </nav>
 
     <main className="atelier-stage" data-scene={canvasScene} data-frame={canvasFrame} aria-label="Live invitation composition">
-      <div className="atelier-stage-top"><div><span className="atelier-eyebrow">YOUR INVITATION</span><h1>{view === "cover" ? "Opening" : "Guest experience"}</h1></div><div className="atelier-stage-tools"><button type="button" className="atelier-canvas-trigger" aria-expanded={canvasOpen} aria-controls="atelier-canvas-menu" onClick={() => setCanvasOpen((v) => !v)}><Layers3 size={15}/> Frame</button><div className="atelier-view-switch" role="group" aria-label="Invitation preview state"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Cover</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Opened</button></div></div></div>
+      <div className="atelier-stage-top"><div><span className="atelier-eyebrow">LIVE PREVIEW</span><h1>{view === "cover" ? "Opening scene" : "Invitation page"}</h1></div><div className="atelier-stage-tools"><div className="atelier-view-switch" role="group" aria-label="Invitation preview state"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Opening</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div></div></div>
       {canvasOpen && <div className="atelier-canvas-menu" id="atelier-canvas-menu"><div className="atelier-canvas-menu-head"><strong>Canvas appearance</strong><button type="button" onClick={() => setCanvasOpen(false)} aria-label="Close canvas options"><X size={16}/></button></div><p>Just your workspace. Your guests see the original invitation.</p><span className="atelier-canvas-label">Backdrop</span><div className="atelier-scene-choices">{(["paper", "gallery", "ink"] as const).map((scene) => <button type="button" key={scene} aria-pressed={canvasScene === scene} onClick={() => setCanvasScene(scene)}><i className={`atelier-scene-dot atelier-scene-dot--${scene}`}/><span>{scene === "paper" ? "Paper" : scene === "gallery" ? "Gallery" : "Midnight"}</span></button>)}</div><span className="atelier-canvas-label">Frame</span><div className="atelier-frame-choices">{(["device", "soft", "edge"] as const).map((frame) => <button key={frame} type="button" aria-pressed={canvasFrame === frame} onClick={() => setCanvasFrame(frame)}><i className={`atelier-frame-icon atelier-frame-icon--${frame}`}/><span>{frame === "device" ? "Phone" : frame === "soft" ? "Soft" : "Minimal"}</span></button>)}</div></div>}
       <div className="atelier-stage-centre">
         <div className="atelier-preview-frame" style={{ ["--preview-tone" as string]: specById(draft.design).site.bg }}>
           <Phone label="Your live invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")} onEditTarget={(target) => select(target === "words" ? "story" : target === "details" || target === "events" ? "events" : "extras")}/></Phone>
         </div>
       </div>
-      <div className="atelier-stage-bottom"><span><Pencil size={14}/> Select a tool to make changes</span><div><button type="button" onClick={() => setView("cover")}><RotateCcw size={15}/> Restart</button><button type="button" onClick={() => setMobileFull(true)}><Maximize2 size={15}/> Full preview</button></div></div>
+      <div className="atelier-stage-bottom"><span>Changes appear here as you edit.</span><div><button type="button" onClick={() => setMobileFull(true)}><Maximize2 size={15}/> Full preview</button></div></div>
       {!missing.length ? <span className="atelier-ready"><Check size={13}/> Essentials added</span> : <button className="atelier-ready atelier-ready--todo" type="button" onClick={() => select("story")}>{missing.length} essential {missing.length === 1 ? "detail" : "details"} to review <ArrowRight size={13}/></button>}
     </main>
 
-    <aside className="atelier-inspector" aria-label={`${tool.name} editor`}>
-      <header className="atelier-inspector-head"><div className="atelier-inspector-icon"><tool.icon size={20}/></div><div><h2>{tool.name}</h2><p>{tool.detail}</p></div><button className="atelier-collapse" type="button" aria-label="Hide editing panel" onClick={() => setInspectorOpen(false)}><X size={18}/></button></header>
+    <aside className="atelier-inspector" aria-label="Invitation editor">
+      <header className="atelier-inspector-head"><div><span className="studio-section-kicker">{String(steps.findIndex((s) => s.id === step)+1).padStart(2,"0")} / 04</span><h2>{activeStep.title}</h2><p>{activeStep.subtitle}</p></div></header>
+      {step !== "send" && <div className="studio-subnav" role="group" aria-label="Editing section">{activeStep.panels.map((id) => { const item = tools.find((t) => t.id === id)!; return <button key={id} type="button" aria-pressed={panel === id} onClick={() => select(id)}>{item.name}</button>; })}</div>}
       <div className="atelier-inspector-scroll" key={panel}>
-        {panel === "story" && <StoryEditor draft={draft} patch={patch}/>}
-        {panel === "events" && <EventsEditor account={!!account} draft={draft} patch={patch} events={rawEvents} reload={loadEvents}/>}
-        {panel === "look" && <LookEditor draft={draft} patch={patch} replay={() => setView("cover")}/>}
-        {panel === "photo" && <PhotoEditor draft={draft} patch={patch} account={!!account}/>}
-        {panel === "sound" && <SoundEditor draft={draft} patch={patch} account={!!account}/>}
-        {panel === "extras" && <ExtrasEditor draft={draft} patch={patch}/>}
+        {step === "send" && <div className="studio-send"><span className="studio-send-mark"><Check size={26}/></span><h3>Your invitation, ready to share.</h3><p>Manage households, create individual invitation links and track replies from your wedding dashboard.</p><Link href={account ? "/dashboard" : "/signup?next=%2Fdashboard"}> {account ? "Manage guests & invitations" : "Save & continue to guests"} <ArrowRight size={17}/></Link><small>Guests do not need an account to reply.</small></div>}
+        {step !== "send" && panel === "story" && <StoryEditor draft={draft} patch={patch}/>}
+        {step !== "send" && panel === "events" && <EventsEditor account={!!account} draft={draft} patch={patch} events={rawEvents} reload={loadEvents}/>}
+        {step !== "send" && panel === "look" && <LookEditor draft={draft} patch={patch} replay={() => setView("cover")}/>}
+        {step !== "send" && panel === "photo" && <PhotoEditor draft={draft} patch={patch} account={!!account}/>}
+        {step !== "send" && panel === "sound" && <SoundEditor draft={draft} patch={patch} account={!!account}/>}
+        {step !== "send" && panel === "extras" && <ExtrasEditor draft={draft} patch={patch}/>}
       </div>
-      <div className="atelier-inspector-foot"><span><Check size={14}/> Saved as you edit</span><button type="button" onClick={() => { const index = tools.findIndex((t) => t.id === panel); select(tools[(index + 1) % tools.length].id); }}>{tools[(tools.findIndex((t) => t.id === panel) + 1) % tools.length].name} <ArrowRight size={15}/></button></div>
+      <div className="atelier-inspector-foot"><span><Check size={14}/> {saveLabel}</span>{step !== "send" && <button type="button" onClick={() => { const index = steps.findIndex((s) => s.id === step); goStep(steps[index + 1].id); }}>Continue <ArrowRight size={15}/></button>}</div>
     </aside>
     {!inspectorOpen && <button className="atelier-show-panel" type="button" onClick={() => setInspectorOpen(true)}><Pencil size={17}/> Edit {tool.name}</button>}
-    <nav className="atelier-mobile-nav" aria-label="Mobile Studio navigation">
-      <button type="button" aria-current={!inspectorOpen && !mobileMenuOpen ? "page" : undefined} onClick={() => { setInspectorOpen(false); setMobileMenuOpen(false); }}><Eye size={20}/><span>Preview</span></button>
-      <button type="button" aria-current={inspectorOpen && panel === "story" ? "page" : undefined} onClick={() => select("story")}><Type size={20}/><span>Words</span></button>
-      <button type="button" aria-current={inspectorOpen && panel === "look" ? "page" : undefined} onClick={() => select("look")}><Palette size={20}/><span>Design</span></button>
-      <button type="button" aria-current={inspectorOpen && panel === "sound" ? "page" : undefined} onClick={() => select("sound")}><ListMusic size={20}/><span>Music</span></button>
-      <button type="button" aria-expanded={mobileMenuOpen} aria-current={mobileMenuOpen ? "page" : undefined} onClick={() => { setMobileMenuOpen((v) => !v); setInspectorOpen(false); }}><Settings2 size={20}/><span>More</span></button>
-    </nav>
+    <nav className="atelier-mobile-nav" aria-label="Mobile Studio navigation"><div className="studio-mobile-steps">{steps.map((item,index)=><button key={item.id} type="button" aria-current={step===item.id?"step":undefined} onClick={()=>goStep(item.id)}>{index+1}. {item.id==="invitation"?"Invite":item.id==="finishing"?"Extras":item.title.split(" ")[0]}</button>)}</div><div className="studio-mobile-modes"><button type="button" aria-pressed={mobileMode==="edit"} onClick={()=>setMobileMode("edit")}><Pencil size={16}/> Edit</button><button type="button" aria-pressed={mobileMode==="preview"} onClick={()=>setMobileMode("preview")}><Eye size={16}/> Preview</button></div></nav>
     {mobileMenuOpen && <div className="atelier-mobile-menu" role="dialog" aria-modal="false" aria-label="More Studio tools"><div><strong>Make it yours</strong><button type="button" aria-label="Close tools" onClick={() => setMobileMenuOpen(false)}><X size={19}/></button></div>{tools.map((item) => <button type="button" key={item.id} onClick={() => select(item.id)}><item.icon size={20}/><span><strong>{item.name}</strong><small>{item.detail}</small></span><ArrowRight size={15}/></button>)}{account && <Link href="/dashboard">Guests, replies & publish <ArrowRight size={16}/></Link>}</div>}
     {notice && <div className="atelier-toast" role="status">{notice}<button type="button" aria-label="Dismiss notification" onClick={() => setNotice("")}><X size={15}/></button></div>}
     {mobileFull && <div className="atelier-fullscreen" role="dialog" aria-modal="true" aria-label="Guest invitation preview"><div className="atelier-fullscreen-controls"><button onClick={() => setMobileFull(false)}><ArrowLeft size={17}/> Back to Studio</button><div><button type="button" onClick={() => setView("cover")}>Opening</button><button type="button" onClick={() => setView("inside")}>Inside</button></div></div><div className="atelier-fullscreen-invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")}/></div></div>}
