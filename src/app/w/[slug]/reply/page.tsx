@@ -8,5 +8,5 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const wedding = await getPublishedBySlug(slug).catch(() => null);
   if (!wedding) notFound();
   const events = wedding.events.map((event: any) => ({ id: event.id as string, title: event.title as string }));
-  return <PublicReplyForm slug={slug} names={wedding.content.names} events={events} hasEvents={wedding.hasEvents} />;
+  return <PublicReplyForm slug={slug} names={wedding.content.names} design={wedding.content.design ?? "pearl"} events={events} hasEvents={wedding.hasEvents} />;
 }
