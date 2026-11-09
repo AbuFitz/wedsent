@@ -75,13 +75,17 @@ export function EngravedLetterCover({ data, spec, onOpen, still }: P) {
   }, [opening, onOpen]);
   const start = () => { if (opening || still) return; if (reduced) onOpen(); else setOpening(true); };
   const names = splitNames(data.names);
+  const nikah = spec.id === "nikah-etched";
   return <motion.section className={`cover cv cv-engraved cv-engraved--${spec.id}`} aria-label="Open the illustrated letter" exit={{ opacity: 0, transition: { duration: .13 } }}>
     <motion.div className="cv-engraved-jacket" animate={opening ? { y: "-96%", rotateX: -10, opacity: .45 } : { y: "0%", rotateX: 0, opacity: 1 }} transition={{ duration: .88, ease: [.3,.78,.12,1] }}>
-      <span className="cv-engraved-ornament" aria-hidden="true">✦</span>
-      <span className="cv-engraved-kicker">AN INVITATION</span>
+      <span className="cv-engraved-edge cv-engraved-edge--top" aria-hidden="true" />
+      <span className="cv-engraved-medallion" aria-hidden="true"><span>{nikah ? "۞" : "❧"}</span></span>
+      <span className="cv-engraved-kicker">{nikah ? "A CELEBRATION OF TWO HEARTS" : "TOGETHER WITH THEIR FAMILIES"}</span>
       <h2>{names.a}<i>&amp;</i>{names.b || "Your celebration"}</h2>
-      <span className="cv-engraved-rule" aria-hidden="true" />
-      <span className="cv-engraved-action">LIFT TO DISCOVER</span>
+      <span className="cv-engraved-rule" aria-hidden="true"><i /></span>
+      <span className="cv-engraved-caption">{nikah ? "With love and blessings" : "A day to be remembered"}</span>
+      <span className="cv-engraved-action">LIFT THE LETTER</span>
+      <span className="cv-engraved-edge cv-engraved-edge--bottom" aria-hidden="true" />
     </motion.div>
     <button type="button" className="cv-hit" onClick={start} disabled={still || opening} aria-label="Lift the letter jacket and open the invitation" />
   </motion.section>;
