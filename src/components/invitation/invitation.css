@@ -80,6 +80,61 @@
 .in-map-panel>a{display:flex;align-items:center;justify-content:center;gap:1.6cqw;min-height:10cqw;color:var(--fg);font:500 3.4cqw var(--f-body);text-underline-offset:.6cqw}
 .in-map-fallback{height:51cqw;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2cqw;padding:4cqw;color:var(--fg);background:radial-gradient(circle at 52% 50%,color-mix(in srgb,var(--a) 15%,var(--soft)),var(--soft));font-size:3.5cqw}
 .in-map-fallback strong{font:500 5cqw var(--f-head)}.in-map-fallback p{max-width:55cqw;opacity:.7}
+
+/* A second scene, composed for the scroll instead of recycling the opening cover. */
+.in-chapter{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:58cqw;gap:3cqw;padding:8cqw 5cqw;overflow:hidden;color:var(--fg);background:var(--soft)}
+.in-chapter::before{content:"";position:absolute;inset:0;background-image:var(--grain);opacity:.085;pointer-events:none;z-index:-1}
+.in-chapter-eyebrow{font:500 2.7cqw var(--f-caps);letter-spacing:.24em;text-transform:uppercase}
+.in-chapter-line{font:italic 400 9cqw/1.08 var(--f-head);max-width:80cqw;text-wrap:balance}
+.in-chapter-signature{font:400 3.6cqw var(--f-body);opacity:.68}
+.in-chapter-figure{position:relative;display:block;width:24cqw;height:15cqw;margin-bottom:1cqw;color:var(--a)}
+.in-chapter-figure i{position:absolute;display:block;border:.25cqw solid currentColor;opacity:.7}
+.in-chapter-figure i:nth-child(1){width:13cqw;height:13cqw;left:5.5cqw;border-radius:50%}
+.in-chapter-figure i:nth-child(2){width:8cqw;height:8cqw;left:0;top:3cqw;border-radius:50%}
+.in-chapter-figure i:nth-child(3){width:8cqw;height:8cqw;right:0;top:3cqw;border-radius:50%}
+.in-event{position:relative;overflow:hidden}
+.in-event-index{position:absolute;top:4cqw;right:5cqw;font:400 3.4cqw var(--f-caps);letter-spacing:.08em;opacity:.6}
+.in-venue-plate{position:relative;width:100%;height:34cqw;margin:3cqw auto 4cqw;display:grid;place-items:end center;color:var(--a);opacity:.67;overflow:hidden}
+.in-venue-arch{position:relative;display:block;width:41cqw;height:29cqw;border:.55cqw double currentColor;border-radius:22cqw 22cqw 0 0;background:linear-gradient(90deg,transparent 35%,color-mix(in srgb,currentColor 5%,transparent) 35% 65%,transparent 65%)}
+.in-venue-roof{position:absolute;top:7cqw;left:-7cqw;width:54cqw;height:.45cqw;background:currentColor}
+.in-venue-door{position:absolute;bottom:0;left:15cqw;width:10cqw;height:13cqw;border:.45cqw solid currentColor;border-bottom:0;border-radius:6cqw 6cqw 0 0}
+.in-venue-window{position:absolute;top:12cqw;width:5cqw;height:7cqw;border:.4cqw solid currentColor;border-radius:3cqw 3cqw 0 0}
+.in-venue-window--left{left:5cqw}.in-venue-window--right{right:5cqw}
+.in-venue-ground{position:absolute;bottom:0;width:66cqw;border-bottom:.35cqw solid currentColor}
+.in-map-wrap{position:relative}
+.in-map-panel{border-radius:0}
+.in-map-panel>a{min-height:12cqw}
+
+/* Distinct visual grammars per art direction, carried through every chapter, event and venue. */
+.inv--velvet .in-chapter{background:radial-gradient(ellipse at 50% -10%,#6e495644,transparent 72%),linear-gradient(130deg,#2b1c26,#171319);color:#e8d2b3;border-block:.3cqw solid #a88a5e}
+.inv--velvet .in-chapter::after{content:"";position:absolute;inset:2cqw;border:.2cqw solid #c1a77b66;pointer-events:none}
+.inv--velvet .in-chapter-figure i{border-radius:0;transform:rotate(45deg);width:10cqw;height:10cqw;top:2cqw}
+.inv--velvet .in-chapter-line{font-family:var(--f-head);font-size:8cqw}
+.inv--velvet .in-event{border:0;border-top:2cqw solid #9b7a5b;border-bottom:2cqw solid #9b7a5b;background-image:var(--grain),linear-gradient(150deg,#fff9ee,#ebdfcb);background-blend-mode:multiply,normal}
+.inv--velvet .in-event-index{color:#6b5344}
+.inv--rosewood .in-chapter{background:linear-gradient(90deg,#e4cfc5 0 2.3cqw,transparent 2.3cqw calc(100% - 2.3cqw),#e4cfc5 calc(100% - 2.3cqw)),var(--soft);box-shadow:inset 0 0 0 .25cqw var(--line)}
+.inv--rosewood .in-chapter-figure{transform:rotate(-13deg)}
+.inv--rosewood .in-event:nth-of-type(even){transform:rotate(.3deg)}
+.inv--rosewood .in-event:nth-of-type(odd){transform:rotate(-.35deg)}
+.inv--heritage .in-chapter,.inv--nikah-etched .in-chapter{background:var(--soft);border:.25cqw solid var(--line);outline:.15cqw solid var(--line);outline-offset:-2cqw}
+.inv--heritage .in-chapter-line,.inv--nikah-etched .in-chapter-line{font-size:8cqw}
+.inv--heritage .in-chapter-figure i{border-radius:50% 0 50% 0;transform:rotate(45deg)}
+.inv--nikah-etched .in-chapter-figure i{border-radius:0;transform:rotate(45deg)}
+.inv--nikah-etched .in-chapter-figure i:nth-child(1){border:.5cqw double currentColor}
+.inv--heritage .in-event,.inv--nikah-etched .in-event{padding-top:12cqw}
+.inv--heritage .in-event::before,.inv--nikah-etched .in-event::before{content:"";position:absolute;top:4cqw;left:10%;width:80%;height:1px;background:var(--line)}
+.inv--gilt .in-chapter{color:#e7cca0;background:radial-gradient(circle at 50% 20%,#70542c33,transparent 65%),#171410;border:.2cqw solid #9f8054;box-shadow:inset 0 0 0 1.8cqw #171410,inset 0 0 0 2cqw #7c6646}
+.inv--gilt .in-chapter-figure i{border-color:#c5aa72;border-radius:0;transform:rotate(45deg)}
+.inv--gilt .in-event-index{color:#d6b77c}
+.inv--pearl .in-chapter,.inv--embossed .in-chapter{background:radial-gradient(circle at 10% 0%,#fff9f8 0,transparent 35%),radial-gradient(circle at 100% 100%,#e2cabb66 0,transparent 45%),var(--soft);border-radius:48cqw 48cqw 1cqw 1cqw;border:.2cqw solid var(--line)}
+.inv--pearl .in-chapter-figure i,.inv--embossed .in-chapter-figure i{border-color:var(--line);box-shadow:inset 0 .35cqw .5cqw #fff,0 .35cqw .6cqw #5a493233}
+.inv--pearl .in-event,.inv--embossed .in-event{border-radius:35cqw 35cqw 0 0;padding-top:15cqw}
+.inv--velvet .in-venue-plate,.inv--gilt .in-venue-plate{color:#c8a978}
+.inv--velvet .in-map-panel{background:#efe4d1;border-color:#8f795b;color:#342c2a}
+.inv--gilt .in-map-panel{background:#211c16;border-color:#997f57;color:#e5cf9e}
+.inv--gilt .in-map-panel>a{color:#e5cf9e}
+.inv--heritage .in-venue-plate,.inv--nikah-etched .in-venue-plate{filter:sepia(.25)}
+@media(prefers-reduced-motion:no-preference){.in-chapter-figure{animation:in-chapter-breathe 9s ease-in-out infinite alternate}@keyframes in-chapter-breathe{to{transform:translateY(-.8cqw)}}}
 .in-music{position:absolute;top:3cqw;right:3cqw;z-index:8;display:flex;align-items:center;gap:1.4cqw;border-radius:99cqw;background:color-mix(in srgb,var(--soft) 91%,transparent);color:var(--fg);padding:1cqw 2.6cqw 1cqw 1cqw;box-shadow:0 1cqw 3cqw rgba(0,0,0,.13);backdrop-filter:blur(10px)}
 .in-music button{display:grid;place-items:center;width:9cqw;height:9cqw;border-radius:50%;background:var(--a);color:var(--on-a);font-size:4cqw}
 .in-music button:disabled{opacity:.5;cursor:not-allowed}
