@@ -19,6 +19,7 @@ This document distinguishes what is actually implemented from recommendations fo
 - `message_deliveries` in `005_operations.sql` stores channel, category, recipient, state, attempts, provider ID, sent and delivered timestamps.
 - `GET /api/wedding/deliveries` returns at most 250 recent records, owner-only; dashboard Sending tab displays them. A native share does not generate a delivery row.
 - Cross-tenant API service test confirms owner-only read, empty state and queued-vs-sent distinction.
+- Owner-selected `POST /api/wedding/deliveries/send` now reserves distinct email deliveries per active invitation and recipient, rechecks the link before sending, and records Resend acceptance or failure. The UI hides this action without provider keys. This is synchronous and bounded, not a background worker or a verified delivery/bounce integration.
 
 ## Next implementation slices and correctness conditions
 
