@@ -106,7 +106,7 @@ export function Studio() {
       <div className="atelier-top-actions">
         <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
         <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
-        <Link className="atelier-top-link" href={account ? "/dashboard" : "/signup?next=%2Fdashboard"}>Guest list <ArrowRight size={15}/></Link>
+        <Link className="atelier-top-link" href="/dashboard">Guest list <ArrowRight size={15}/></Link>
       </div>
     </header>
 
@@ -132,7 +132,7 @@ export function Studio() {
       <header className="atelier-inspector-head"><div><span className="studio-section-kicker">{String(steps.findIndex((s) => s.id === step)+1).padStart(2,"0")} / 04</span><h2>{activeStep.title}</h2><p>{activeStep.subtitle}</p></div></header>
       {step !== "send" && <div className="studio-subnav" role="group" aria-label="Editing section">{activeStep.panels.map((id) => { const item = tools.find((t) => t.id === id)!; return <button key={id} type="button" aria-pressed={panel === id} onClick={() => select(id)}>{item.name}</button>; })}</div>}
       <div className="atelier-inspector-scroll" key={panel}>
-        {step === "send" && <div className="studio-send"><span className="studio-send-mark"><Check size={26}/></span><h3>Your invitation, ready to share.</h3><p>Manage households, create individual invitation links and track replies from your wedding dashboard.</p><Link href={account ? "/dashboard" : "/signup?next=%2Fdashboard"}> {account ? "Manage guests & invitations" : "Save & continue to guests"} <ArrowRight size={17}/></Link><small>Guests do not need an account to reply.</small></div>}
+        {step === "send" && <div className="studio-send"><span className="studio-send-mark"><Check size={26}/></span><h3>Your invitation, ready to share.</h3><p>Manage households, create individual invitation links and track replies from your wedding dashboard.</p><Link href="/dashboard"> {account ? "Manage guests & invitations" : "Save & continue to guests"} <ArrowRight size={17}/></Link><small>Guests do not need an account to reply.</small></div>}
         {step !== "send" && panel === "story" && <StoryEditor draft={draft} patch={patch}/>}
         {step !== "send" && panel === "events" && <EventsEditor account={!!account} draft={draft} patch={patch} events={rawEvents} reload={loadEvents}/>}
         {step !== "send" && panel === "look" && <LookEditor draft={draft} patch={patch} replay={() => setView("cover")}/>}
