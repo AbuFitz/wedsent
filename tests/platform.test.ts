@@ -5,6 +5,7 @@ import { createEvent, createHousehold, deleteHousehold, importHouseholds, listEv
 import { eventCounts, exportCsv, guestView, hostRecord, respond } from "@/server/rsvp";
 import { setDeadlinePolicy } from "@/server/weddings";
 import { getDb } from "@/server/db";
+import { listDeliveries } from "@/server/deliveries";
 import { previewImport, parseCsv, csvCell } from "@/lib/csv";
 import { content, fixture, newOwner } from "./helpers";
 
@@ -45,6 +46,25 @@ describe("tenant isolation", () => {
     const b = await newOwner();
     const foreign = await createEvent(b.user.id, b.weddingId, { title: "B's event" });
     expect(await code(createHousehold(a.user.id, a.weddingId, { name: "X", eventIds: [foreign], guests: [{ name: "G" }] }))).toBe("invalid");
+  });
+});
+
+describe("invitation sending history", () => {
+  it("is private to the wedding owner and does not fabricate external-share deliveries", async () => {
+    const owner = await fixture();
+    const other = await newOwner();
+    expect(await code(listDeliveries(other.user.id, owner.weddingId))).toBe("not_found");
+    expect(await listDeliveries(owner.user.id, owner.weddingId)).toEqual([]);
+    const db = await getDb();
+    const household = (await db.query<{id:string}>(`select id from households where wedding_id=$1 limit 1`, [owner.weddingId])).rows[0];
+    await db.query(`insert into message_deliveries(wedding_id, household_id, channel, category, recipient, state)
+      values ($1,$2,'email','invitation','test@example.com','queued')`, [owner.weddingId, household.id]);
+    const result = await listDeliveries(owner.user.id, owner.weddingId);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ householdId: household.id, channel: "email", state: "queued", recipient: "test@example.com" });
+    expect(result[0].sentAt).toBeNull();
+    expect(result[0].deliveredAt).toBeNull();
+    expect(await listDeliveries(other.user.id, other.weddingId)).toEqual([]);
   });
 });
 
