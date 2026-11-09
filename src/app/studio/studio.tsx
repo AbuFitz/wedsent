@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, CalendarDays, Check, Eye, Film, ImagePlus, Layers3, ListMusic, LoaderCircle, MapPin, Maximize2, Minus, Palette, Pencil, Plus, RotateCcw, RotateCw, Search, Settings2, Sparkles, Trash2, Type, UploadCloud, Volume2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, Eye, Film, ImagePlus, Layers3, ListMusic, LoaderCircle, MapPin, Maximize2, Minus, Palette, Pencil, Plus, RotateCcw, RotateCw, Settings2, Sparkles, Trash2, Type, UploadCloud, Volume2, X } from "lucide-react";
 import { Confetti, MusicNotes, TextT, CalendarBlank, ImageSquare, PaintBrush } from "@phosphor-icons/react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
@@ -46,12 +46,9 @@ export function Studio() {
   const [mobileFull, setMobileFull] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [canvasOpen, setCanvasOpen] = useState(false);
   const [canvasScene, setCanvasScene] = useState<CanvasScene>("paper");
   const [canvasFrame, setCanvasFrame] = useState<CanvasFrame>("device");
-  const [search, setSearch] = useState("");
-  const searchInput = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState("");
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
 
@@ -73,13 +70,11 @@ export function Studio() {
   }, [ready, params, draft.design, patch]);
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen((o) => !o); }
-      if (event.key === "Escape") { setSearchOpen(false); setMobileFull(false); }
+      if (event.key === "Escape") setMobileFull(false);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
-  useEffect(() => { if (searchOpen) searchInput.current?.focus(); }, [searchOpen]);
   useEffect(() => { if (window.matchMedia("(max-width: 860px)").matches) setInspectorOpen(false); }, []);
   useEffect(() => {
     try { const prefs = JSON.parse(localStorage.getItem("wedsent-studio-canvas-v1") || "{}"); if (["paper", "gallery", "ink"].includes(prefs.scene)) setCanvasScene(prefs.scene); if (["device", "soft", "edge"].includes(prefs.frame)) setCanvasFrame(prefs.frame); } catch { /* default to paper */ }
@@ -87,9 +82,8 @@ export function Studio() {
   useEffect(() => { localStorage.setItem("wedsent-studio-canvas-v1", JSON.stringify({ scene: canvasScene, frame: canvasFrame })); }, [canvasScene, canvasFrame]);
 
   const events: InviteEvent[] = rawEvents.map((e) => ({ id: e.id, title: e.title, startsOn: e.starts_on, startsAt: e.starts_at_local, venue: e.venue, city: e.city }));
-  const select = (id: Panel) => { setPanel(id); setInspectorOpen(true); setMobileMenuOpen(false); setSearchOpen(false); setSearch(""); setMobileFull(false); setView(id === "look" || id === "photo" ? "cover" : "inside"); };
+  const select = (id: Panel) => { setPanel(id); setInspectorOpen(true); setMobileMenuOpen(false); setMobileFull(false); setView(id === "look" || id === "photo" ? "cover" : "inside"); };
   const tool = tools.find((entry) => entry.id === panel)!;
-  const actionList = tools.filter((t) => `${t.name} ${t.detail}`.toLowerCase().includes(search.toLowerCase()));
   const saveLabel = state === "saved" ? account ? "Saved to account" : "Saved on this device" : state === "saving" ? "Saving…" : state === "conflict" ? "Changed in another tab" : state === "offline" ? "Offline, not synced" : state === "failed" ? "Save failed" : "Loading…";
   const missing = [!draft.names.trim() && "Names", !draft.date && "Date", !draft.venue.trim() && !rawEvents.some((e) => e.venue) && "Venue"].filter(Boolean);
 
@@ -98,7 +92,6 @@ export function Studio() {
       <Link href="/dashboard" className="atelier-brand" aria-label="Back to wedding dashboard"><ArrowLeft size={17}/><span className="atelier-brand-word">wedsent</span><span>Studio</span></Link>
       <div className="atelier-top-middle"><span className="atelier-file">{draft.names || "Your invitation"}</span><span className="atelier-save" data-state={state}>{state === "saving" || state === "loading" ? <LoaderCircle size={13} className="atelier-spin"/> : <span className="atelier-save-dot"/>}{saveLabel}</span>{state === "conflict" && <button onClick={reload}>Reload</button>}</div>
       <div className="atelier-top-actions">
-        <button className="atelier-icon-button atelier-search-button" type="button" aria-label="Find a tool" title="Find a tool (⌘K)" onClick={() => setSearchOpen(true)}><Search size={18}/></button>
         <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
         <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
         {account && <Link className="atelier-top-link" href="/dashboard">Guests & publish <ArrowRight size={15}/></Link>}
@@ -108,7 +101,7 @@ export function Studio() {
     <nav className="atelier-dock" aria-label="Studio tools">
       <p className="atelier-dock-title">MAKE IT YOURS</p>
       {tools.map((item, index) => { const Icon = dockIcons[item.id]; return <button key={item.id} type="button" className="atelier-dock-item" aria-current={panel === item.id ? "page" : undefined} onClick={() => select(item.id)} title={item.detail}><span className="atelier-dock-icon"><Icon size={21} weight={panel === item.id ? "fill" : "regular"}/></span><span>{item.name}</span><small>{String(index + 1).padStart(2, "0")}</small></button>; })}
-      <div className="atelier-dock-bottom"><button type="button" onClick={() => setSearchOpen(true)}><Search size={17}/> Find a tool <kbd>⌘ K</kbd></button><Link href="/dashboard"><Settings2 size={17}/> Wedding dashboard</Link></div>
+      <div className="atelier-dock-bottom"><Link href="/dashboard"><Settings2 size={17}/> Wedding dashboard</Link></div>
     </nav>
 
     <main className="atelier-stage" data-scene={canvasScene} data-frame={canvasFrame} aria-label="Live invitation composition">
@@ -146,7 +139,6 @@ export function Studio() {
     {mobileMenuOpen && <div className="atelier-mobile-menu" role="dialog" aria-modal="false" aria-label="More Studio tools"><div><strong>Make it yours</strong><button type="button" aria-label="Close tools" onClick={() => setMobileMenuOpen(false)}><X size={19}/></button></div>{tools.map((item) => <button type="button" key={item.id} onClick={() => select(item.id)}><item.icon size={20}/><span><strong>{item.name}</strong><small>{item.detail}</small></span><ArrowRight size={15}/></button>)}{account && <Link href="/dashboard">Guests, replies & publish <ArrowRight size={16}/></Link>}</div>}
     {notice && <div className="atelier-toast" role="status">{notice}<button type="button" aria-label="Dismiss notification" onClick={() => setNotice("")}><X size={15}/></button></div>}
     {mobileFull && <div className="atelier-fullscreen" role="dialog" aria-modal="true" aria-label="Guest invitation preview"><div className="atelier-fullscreen-controls"><button onClick={() => setMobileFull(false)}><ArrowLeft size={17}/> Back to Studio</button><div><button type="button" onClick={() => setView("cover")}>Opening</button><button type="button" onClick={() => setView("inside")}>Inside</button></div></div><div className="atelier-fullscreen-invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")}/></div></div>}
-    {searchOpen && <div className="atelier-search-scrim" onMouseDown={(e) => { if (e.target === e.currentTarget) setSearchOpen(false); }}><section className="atelier-command" role="dialog" aria-modal="true" aria-label="Find editing tools"><div className="atelier-command-input"><Search size={20}/><input ref={searchInput} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search your Studio…" aria-label="Search Studio tools" onKeyDown={(e) => { if (e.key === "Enter" && actionList[0]) select(actionList[0].id); }}/><button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search"><X size={17}/></button></div><div className="atelier-command-results">{actionList.length ? actionList.map((item) => <button type="button" key={item.id} onClick={() => select(item.id)}><item.icon size={19}/><span><strong>{item.name}</strong><small>{item.detail}</small></span><ArrowRight size={16}/></button>) : <p>No tools found. Try “music” or “date”.</p>}</div><footer>Press Esc to close</footer></section></div>}
   </div>;
 }
 
