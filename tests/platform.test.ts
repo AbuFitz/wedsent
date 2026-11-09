@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { signIn, signUp, userFromToken } from "@/server/auth";
 import { getDraft, getPublishedBySlug, publish, saveDraft } from "@/server/weddings";
 import { createEvent, createHousehold, deleteHousehold, importHouseholds, listEvents, listHouseholds, rotateInvitation, setHouseholdEvents, updateEvent } from "@/server/guests";
@@ -6,6 +6,7 @@ import { eventCounts, exportCsv, guestView, hostRecord, respond } from "@/server
 import { setDeadlinePolicy } from "@/server/weddings";
 import { getDb } from "@/server/db";
 import { listDeliveries } from "@/server/deliveries";
+import { sendInvitationEmails } from "@/server/send-invitations";
 import { previewImport, parseCsv, csvCell } from "@/lib/csv";
 import { content, fixture, newOwner } from "./helpers";
 
@@ -65,6 +66,28 @@ describe("invitation sending history", () => {
     expect(result[0].sentAt).toBeNull();
     expect(result[0].deliveredAt).toBeNull();
     expect(await listDeliveries(other.user.id, other.weddingId)).toEqual([]);
+  });
+  it("sends explicitly selected household email once and never confuses accepted with delivered", async () => {
+    const f = await fixture();
+    const stranger = await newOwner();
+    const hid = await createHousehold(f.user.id, f.weddingId, { name: "The Alis", eventIds: [f.walima], guests: [{ name: "Nadia", email: "nadia@example.com" }] });
+    const oldKey=process.env.RESEND_API_KEY, oldFrom=process.env.RESEND_FROM_EMAIL;
+    process.env.RESEND_API_KEY="test-key"; process.env.RESEND_FROM_EMAIL="Wedsent <invites@wedsent.test>";
+    const mock=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(JSON.stringify({id:"provider-123"}),{status:200}));
+    try {
+      await expect(sendInvitationEmails(stranger.user.id,f.weddingId,[hid],"https://wedsent.test")).rejects.toMatchObject({code:"not_found"});
+      expect(mock).not.toHaveBeenCalled();
+      expect(await sendInvitationEmails(f.user.id,f.weddingId,[hid],"https://wedsent.test")).toMatchObject({accepted:1,failed:0});
+      expect(await sendInvitationEmails(f.user.id,f.weddingId,[hid],"https://wedsent.test")).toMatchObject({accepted:0,nothingNew:true});
+      expect(mock).toHaveBeenCalledTimes(1);
+      const deliveries=await listDeliveries(f.user.id,f.weddingId);
+      expect(deliveries[0]).toMatchObject({state:"sent",recipient:"nadia@example.com"});
+      expect(deliveries[0].deliveredAt).toBeNull();
+    } finally {
+      mock.mockRestore();
+      if(oldKey===undefined) delete process.env.RESEND_API_KEY; else process.env.RESEND_API_KEY=oldKey;
+      if(oldFrom===undefined) delete process.env.RESEND_FROM_EMAIL; else process.env.RESEND_FROM_EMAIL=oldFrom;
+    }
   });
 });
 
