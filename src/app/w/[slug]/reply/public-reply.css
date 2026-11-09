@@ -15,3 +15,32 @@
 .public-reply-button{display:inline-flex;justify-content:center;align-items:center;background:#111;color:#fff;padding:15px 20px;border-radius:6px;font-size:14px;font-weight:600;width:100%}
 .public-reply-button:disabled{opacity:.5}.public-reply .public-reply-error{color:#bb1834;margin:0}
 .public-reply-honey{position:absolute!important;left:-9999px;opacity:0;height:0!important}
+.public-reply{--reply-ink:#443931;--reply-stock:#f8f0e5;--reply-accent:#9b795b;--reply-border:#bdac91;--reply-display:"Cormorant Garamond Variable",Georgia,serif;background:radial-gradient(circle at top,#fff8eb,var(--reply-stock));color:var(--reply-ink)}
+.public-reply-card{position:relative;overflow:hidden;border-radius:0;border-color:var(--reply-border);background:var(--reply-stock);color:var(--reply-ink);box-shadow:0 18px 55px #2a1c151c}
+.public-reply-card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E")}
+.public-reply-card>*{position:relative}
+.public-reply-flourish{display:flex;align-items:center;justify-content:center;gap:14px;color:var(--reply-accent);font-family:var(--reply-display);font-size:24px;margin-bottom:20px}
+.public-reply-flourish span{display:block;width:45px;border-top:1px solid var(--reply-border)}
+.public-reply h1{font-family:var(--reply-display);font-size:clamp(44px,9vw,65px);font-weight:400;letter-spacing:-.025em;color:var(--reply-ink)}
+.public-reply .public-reply-eyebrow{font-family:var(--reply-display);font-size:17px;font-style:italic;color:var(--reply-accent)}
+.public-reply .public-reply-back{color:var(--reply-ink)}
+.public-reply .public-reply-button{background:var(--reply-accent);color:#fff;border-radius:0;min-height:50px}
+.public-reply .public-reply-picks button{border-color:var(--reply-border);background:transparent;color:var(--reply-ink);border-radius:0;min-height:48px}
+.public-reply .public-reply-picks button[aria-pressed=true]{background:var(--reply-accent);border-color:var(--reply-accent);color:#fff}
+.public-reply input,.public-reply select,.public-reply textarea{background:#ffffff90;border-color:var(--reply-border);border-radius:0;color:var(--reply-ink)}
+.public-reply input:focus-visible,.public-reply textarea:focus-visible,.public-reply select:focus-visible{outline-color:var(--reply-accent)}
+.public-reply--rosewood{--reply-stock:#f5e8db;--reply-ink:#51383b;--reply-accent:#844951;--reply-border:#b79584;background:#dcc7bf}
+.public-reply--rosewood .public-reply-card{box-shadow:inset 0 0 0 10px #f5e8db,inset 0 0 0 11px #b79584,0 20px 50px #55382a33}
+.public-reply--velvet{--reply-stock:#f4e9d7;--reply-ink:#3c302f;--reply-accent:#8b6a49;--reply-border:#bd9b69;background:radial-gradient(circle at top,#634354,#171319)}
+.public-reply--velvet .public-reply-card{border:6px double var(--reply-border)}
+.public-reply--gilt{--reply-stock:#242019;--reply-ink:#eed9b3;--reply-accent:#a58a5d;--reply-border:#94784e;background:#14110d}
+.public-reply--gilt .public-reply-card{box-shadow:inset 0 0 0 10px #242019,inset 0 0 0 12px var(--reply-border),0 20px 55px #0008}
+.public-reply--gilt p,.public-reply--gilt .public-reply-back,.public-reply--gilt .public-reply-eyebrow{color:var(--reply-ink)}
+.public-reply--gilt input,.public-reply--gilt select,.public-reply--gilt textarea{background:#342c22;color:var(--reply-ink)}
+.public-reply--heritage{--reply-stock:#f5ebd9;--reply-ink:#514236;--reply-accent:#75573f;--reply-border:#b4a08a;background:#e5d8c4}
+.public-reply--nikah-etched{--reply-stock:#f0eee1;--reply-ink:#37493d;--reply-accent:#597462;--reply-border:#a1afa3;background:#dce4db}
+.public-reply--heritage .public-reply-card,.public-reply--nikah-etched .public-reply-card{outline:1px solid var(--reply-border);outline-offset:-15px}
+.public-reply--embossed{--reply-stock:#faf2e6;--reply-ink:#57483a;--reply-accent:#937351;--reply-border:#cab69a;background:#e6d9c8}
+.public-reply--pearl{--reply-stock:#fff7ee;--reply-ink:#5b483b;--reply-accent:#ad876c;--reply-border:#d1b89d;background:#f0e5dd}
+.public-reply--pearl .public-reply-card,.public-reply--embossed .public-reply-card{border-radius:160px 160px 0 0;padding-top:70px}
+@media(max-width:480px){.public-reply{padding:16px 10px}.public-reply-card{padding:28px 22px}.public-reply--pearl .public-reply-card,.public-reply--embossed .public-reply-card{padding-top:55px}.public-reply h1{font-size:46px}}
