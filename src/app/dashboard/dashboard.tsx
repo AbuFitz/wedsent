@@ -235,7 +235,8 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
               <div><strong>{h.name}</strong><p className="db-muted">{h.guests.length} {h.guests.length === 1 ? "person" : "people"} · {h.lastOpenedAt ? "Opened their link" : "Link not opened yet"}</p></div>
               <div className="db-row">
                 {h.link && <button className="btn btn-light" onClick={() => { navigator.clipboard.writeText(h.link!); say("Link copied"); }}><Link2 size={16} /> Copy link</button>}
-                {h.link && <ShareInvitation url={h.link} title={h.name} privateLink label="Share / QR" />}
+                {h.link && <a className="btn btn-light" href={h.link} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/> View invite</a>}
+                {h.link && <ShareInvitation url={h.link} title={h.name} privateLink label="Send invite / QR" recipientEmail={Array.from(new Set(h.guests.map((g) => g.email).filter((email): email is string => Boolean(email)))).length === 1 ? h.guests.find((g) => g.email)?.email ?? undefined : undefined} />}
                 <button className="db-icon" title="Make a new link (the old one stops working)" aria-label="Reset link" onClick={() => confirm("Make a new link? The old one will stop working.") && act(() => call("POST", `/api/wedding/households/${h.id}/rotate`), "New link created")}><RefreshCw size={16} /></button>
                 <button className="db-icon" aria-label={`Delete ${h.name}`} onClick={() => confirm(`Delete ${h.name} and their replies?`) && act(() => call("DELETE", `/api/wedding/households/${h.id}`), "Household deleted")}><Trash2 size={16} /></button>
               </div>
