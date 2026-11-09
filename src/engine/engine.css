@@ -45,7 +45,8 @@
 .inv--velvet .in-count-segment strong{color:#e1c390}
 .inv--velvet .in-countdown--tiles .in-count-segment{background:#fcf0dd12;border-color:#e3c99c70}
 .inv--velvet .in-actions{padding:7cqw 0;background:linear-gradient(#ffffff08,transparent)}
-.inv--velvet .in-foot,.inv--velvet .in-note{color:#f8ead6}
+.inv--velvet .in-foot{color:#f8ead6}
+.inv--velvet .in-note{color:#4b3933}
 .inv--rosewood .inside{background:radial-gradient(circle at top,var(--soft),var(--bg) 60%)}
 .inv--rosewood .in-card{background:linear-gradient(135deg,var(--soft),color-mix(in srgb,var(--a) 8%,var(--soft)));border-radius:.5cqw;border:.2cqw solid var(--line);box-shadow:0 1.5cqw 3cqw #55322720,inset 0 0 0 1.2cqw var(--soft),inset 0 0 0 1.4cqw var(--line)}
 .inv--rosewood .in-rsvp{border-radius:1cqw;letter-spacing:.1em;text-transform:uppercase;font:500 3.9cqw var(--f-caps)}
