@@ -369,6 +369,29 @@
 .cv-engraved-jacket h2 i{font:italic .58em var(--f-head);margin:3cqw 0}
 .cv-engraved-rule{height:.25cqw;width:30cqw;background:var(--line)}
 .cv-engraved .cv-hit:focus-visible{outline:.8cqw solid var(--a);outline-offset:-2cqw}
+/* Illustrated letter jackets are independent objects, never the couple portrait copied onto the cover. */
+.cv-engraved-jacket{gap:4.5cqw;border-width:1.8cqw;border-style:double;border-color:color-mix(in srgb,var(--a) 64%,var(--soft));background-color:var(--soft)}
+.cv-engraved-jacket::before,.cv-engraved-jacket::after{width:14cqw;height:14cqw;border:.2cqw solid var(--line)}
+.cv-engraved-medallion{display:grid;place-items:center;position:relative;width:35cqw;height:35cqw;margin:1cqw 0 3cqw;color:var(--a);border:.2cqw solid var(--line);border-radius:50%;box-shadow:0 0 0 1cqw var(--soft),0 0 0 1.2cqw var(--line),inset 0 0 0 1.1cqw var(--soft),inset 0 0 0 1.3cqw var(--line)}
+.cv-engraved-medallion span{font:400 22cqw/1 var(--f-head);filter:drop-shadow(0 .2cqw .2cqw #5d45312b)}
+.cv-engraved-kicker{font-size:2.9cqw;letter-spacing:.19em;line-height:1.4;max-width:68cqw}
+.cv-engraved-caption{font:italic 5.2cqw/1.2 var(--f-head);opacity:.85}
+.cv-engraved-jacket h2{font-size:11.4cqw;max-width:77cqw;text-wrap:balance}
+.cv-engraved-rule{position:relative;width:38cqw;height:.2cqw}
+.cv-engraved-rule i{position:absolute;left:50%;top:50%;translate:-50% -50%;width:2cqw;height:2cqw;background:var(--line);rotate:45deg}
+.cv-engraved-action{position:absolute;bottom:7cqw;font-size:2.8cqw;letter-spacing:.2em}
+.cv-engraved-edge{position:absolute;left:50%;width:62cqw;height:20cqw;translate:-50% 0;opacity:.6;pointer-events:none;background:var(--a);mask:url('/art/orn-roundel-a.webp') center/contain no-repeat;-webkit-mask:url('/art/orn-roundel-a.webp') center/contain no-repeat}
+.cv-engraved-edge--top{top:3.5cqw}.cv-engraved-edge--bottom{bottom:3cqw;rotate:180deg;opacity:.35}
+.cv-engraved--nikah-etched .cv-engraved-jacket{border:.65cqw solid var(--line);outline:.2cqw solid var(--a);outline-offset:-3cqw;background:radial-gradient(ellipse at 50% 40%,#fffef24a,transparent 70%),var(--soft)}
+.cv-engraved--nikah-etched .cv-engraved-jacket::before,.cv-engraved--nikah-etched .cv-engraved-jacket::after{width:18cqw;height:18cqw;border:.5cqw double var(--a);transform:rotate(45deg);opacity:.55}
+.cv-engraved--nikah-etched .cv-engraved-medallion{border-radius:0;transform:rotate(45deg);width:32cqw;height:32cqw;box-shadow:0 0 0 1cqw var(--soft),0 0 0 1.2cqw var(--line),inset 0 0 0 1cqw var(--soft),inset 0 0 0 1.2cqw var(--line)}
+.cv-engraved--nikah-etched .cv-engraved-medallion span{transform:rotate(-45deg);font-family:'Amiri',Georgia,serif;font-size:19cqw}
+.cv-engraved--nikah-etched .cv-engraved-edge{width:57cqw;height:23cqw;mask-image:url('/art/orn-moresque-a.webp');-webkit-mask-image:url('/art/orn-moresque-a.webp');opacity:.26}
+.cv-engraved--nikah-etched .cv-engraved-edge--top{top:2cqw;left:18%;rotate:-28deg}
+.cv-engraved--nikah-etched .cv-engraved-edge--bottom{bottom:0;left:83%;rotate:152deg}
+.cv-engraved--heritage .cv-engraved-medallion{border-radius:50% 50% 45% 45%}
+.cv-engraved--heritage .cv-engraved-jacket h2{font-family:'EB Garamond Variable',Georgia,serif;letter-spacing:.03em}
+@media(max-height:540px){.cv-engraved-medallion{width:24cqw;height:24cqw;margin:0}.cv-engraved-medallion span{font-size:13cqw}.cv-engraved-jacket{gap:2cqw}.cv-engraved-edge{opacity:.25}}
 
 /* Paper fibres belong to the objects themselves, with soft edge relief and light variation. */
 .cv-rosewood-back,.cv-rosewood-pocket,.cv-rosewood-flap,.cv-engraved-jacket{background-blend-mode:multiply,normal}
