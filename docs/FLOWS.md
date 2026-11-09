@@ -256,3 +256,5 @@ Each packet should include:
 - Remaining blocked flows
 
 Update this file when a workflow changes **before** implementation. No agent may mark a feature complete while its mandatory flow branches are undocumented or unverified.
+**9 Nov F04 sending handoff:** After publishing and adding a household, the owner can inspect its private link, open the sharing panel, and choose native share, WhatsApp, email, SMS, copy or QR. The email channel preaddresses a recipient only when exactly one email exists in that household. The owner confirms and sends in their own app; Wedsent makes no automatic delivery claim or sent-status update. Delivery status/reminders remain a separate provider-backed F05 requirement. Sharing never changes guest allocation or publishes draft content.
+
