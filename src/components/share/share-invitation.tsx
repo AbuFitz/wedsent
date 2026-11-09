@@ -3,12 +3,12 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import QRCode from "qrcode";
-import { Check, Copy, Download, Link2, MessageCircle, QrCode, Share2, X } from "lucide-react";
+import { Check, Copy, Download, Link2, Mail, MessageCircle, QrCode, Share2, Smartphone, X } from "lucide-react";
 import "./share-invitation.css";
 
-type Props = { url: string; title: string; privateLink?: boolean; label?: string; theme?: { paper: string; ink: string; accent: string } };
+type Props = { url: string; title: string; privateLink?: boolean; label?: string; recipientEmail?: string; theme?: { paper: string; ink: string; accent: string } };
 
-export function ShareInvitation({ url, title, privateLink = false, label = "Share invitation", theme }: Props) {
+export function ShareInvitation({ url, title, privateLink = false, label = "Share invitation", recipientEmail, theme }: Props) {
   const [open, setOpen] = useState(false);
   const [png, setPng] = useState("");
   const [svg, setSvg] = useState("");
@@ -55,6 +55,9 @@ export function ShareInvitation({ url, title, privateLink = false, label = "Shar
     a.href = data; a.download = `wedsent-invitation-qr.${kind}`;
     document.body.appendChild(a); a.click(); a.remove();
   };
+  const inviteMessage = `You're invited to ${title}. Open your invitation and reply here: ${url}`;
+  const mailHref = `mailto:${encodeURIComponent(recipientEmail || "")}?subject=${encodeURIComponent(`You're invited — ${title}`)}&body=${encodeURIComponent(`${inviteMessage}\n\nWe can't wait to celebrate with you.`)}`;
+  const smsHref = `sms:?body=${encodeURIComponent(inviteMessage)}`;
   return <>
     <button className="share-entry" type="button" onClick={() => setOpen(true)}><QrCode size={17}/>{label}</button>
     {open && createPortal(<div className="share-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
@@ -70,8 +73,11 @@ export function ShareInvitation({ url, title, privateLink = false, label = "Shar
         <label className="share-link"><span>Invitation link</span><input value={url} readOnly onFocus={(e) => e.target.select()} aria-label="Invitation link"/><button type="button" aria-label="Copy invitation link" onClick={() => void copy()}><Copy size={17}/></button></label>
         <div className="share-actions">
           <button type="button" onClick={() => void nativeShare()}><Share2 size={16}/> Share with phone</button>
-          <a href={`https://wa.me/?text=${encodeURIComponent(`You're invited: ${url}`)}`} target="_blank" rel="noopener noreferrer"><MessageCircle size={16}/> WhatsApp</a>
+          <a href={`https://wa.me/?text=${encodeURIComponent(inviteMessage)}`} target="_blank" rel="noopener noreferrer"><MessageCircle size={16}/> WhatsApp</a>
+          <a href={mailHref}><Mail size={16}/> Email</a>
+          <a href={smsHref}><Smartphone size={16}/> Text message</a>
         </div>
+        <p className="share-delivery-note">Email and text open your device’s messaging app with the invitation ready. Review the recipient and press Send there. Wedsent does not yet send or track messages automatically.</p>
         <div className="share-download"><span>Download the QR code</span><button disabled={!png} type="button" onClick={() => download("png")}><Download size={15}/> PNG</button><button disabled={!svg} type="button" onClick={() => download("svg")}><Download size={15}/> SVG</button></div>
         {notice && <p className="share-feedback" role="status"><Check size={15}/>{notice}</p>}
         <footer><Link2 size={14}/>{privateLink ? "Treat this as a private link. Reset it from the guest list if shared accidentally." : "Public replies are unverified until you review them."}</footer>
