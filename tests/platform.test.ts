@@ -289,6 +289,15 @@ describe("import and export", () => {
     expect(csv.trim().split("\r\n")).toHaveLength(3);
     expect(csv).toContain("no reply");
   });
+  it("rejects oversized households atomically instead of silently dropping guests", async () => {
+    const o = await newOwner();
+    const ev = await createEvent(o.user.id, o.weddingId, { title: "Reception" });
+    const rows = Array.from({ length: 13 }, (_, i) => ({ household: "Large family", guest: `Guest ${i + 1}`, email: "", child: false }));
+    const err: any = await importHouseholds(o.user.id, o.weddingId, rows, [ev]).catch((e) => e);
+    expect(err.code).toBe("invalid");
+    expect(err.message).toMatch(/13 people/);
+    expect(await listHouseholds(o.user.id, o.weddingId, "https://example.com")).toEqual([]);
+  });
 });
 
 describe("photos and addresses", () => {
