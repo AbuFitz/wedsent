@@ -108,12 +108,14 @@ export async function importHouseholds(userId: string, weddingId: string, rows: 
   if (rows.length > 500) throw bad("Import up to 500 guests at a time.");
   const groups = new Map<string, typeof rows>();
   for (const r of rows) groups.set(r.household, [...(groups.get(r.household) ?? []), r]);
+  const oversized = [...groups].find(([, guests]) => guests.length > 12);
+  if (oversized) throw bad(`“${oversized[0]}” has ${oversized[1].length} people. A household can contain up to 12. Split this household before importing; no guests have been added.`);
   const db = await getDb();
   await assertOwner(db, userId, weddingId);
   return db.tx(async (q) => {
     let n = 0;
     for (const [name, gs] of groups) {
-      const v = parse(HouseholdInput, { name, eventIds, guests: gs.slice(0, 12).map((g) => ({ name: g.guest, email: g.email || null, child: g.child })) });
+      const v = parse(HouseholdInput, { name, eventIds, guests: gs.map((g) => ({ name: g.guest, email: g.email || null, child: g.child })) });
       await createHouseholdTx(q, weddingId, v);
       n += v.guests.length;
     }
