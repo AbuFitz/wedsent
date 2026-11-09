@@ -103,3 +103,5 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 3. **Email provider and sending domain.**
 4. **Framer**: stay in Next.js (recommended; Framer templates cannot be moved into code) or build marketing pages in Framer.
 5. Whether the first audience is explicitly UK Muslim weddings or all weddings (affects copy, templates, default events).
+**9 Nov guest sending usability slice:** Removed Studio's search icon, command palette and shortcut. Household cards now provide a direct live-link inspection action and an explicit **Send invite / QR** panel with native share, WhatsApp, email and SMS drafts, copy and QR downloads. A single household email address is prefilled when unambiguous; with multiple addresses the owner chooses the recipient in their email client. These are user-initiated handoffs, **not** automatic delivery or delivery tracking; no unearned "sent" state is shown. The share panel keeps private household links distinct from public invitations. Next production build passed locally. Browser/device and a delivered-message-to-RSVP-to-dashboard round trip are still outstanding.
+
