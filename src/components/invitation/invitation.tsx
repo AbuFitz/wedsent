@@ -170,7 +170,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
         </>)}
 
         <ThemeInterlude design={design} position="opening" />
-        <ThemeChapter design={design} names={names.a} occasion={data.occasion || "Wedding"} />
+        <ThemeChapter design={design} names={data.names} occasion={data.occasion || "Wedding"} />
 
         {evs ? evs.map((ev, i) => {
           const p = dateParts(ev.startsOn ?? "");
