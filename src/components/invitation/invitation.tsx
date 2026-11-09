@@ -170,18 +170,21 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
         </>)}
 
         <ThemeInterlude design={design} position="opening" />
+        <ThemeChapter design={design} names={names.a} occasion={data.occasion || "Wedding"} />
 
         {evs ? evs.map((ev, i) => {
           const p = dateParts(ev.startsOn ?? "");
           const t = friendlyTime(ev.startsAt ?? "");
           return (
             <motion.section key={ev.id} data-studio-edit="events" className="in-card in-event" {...reveal(2 + i)}>
+              <span className="in-event-index" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
               {i === 0 && <p className="in-section-overline">THE CELEBRATIONS</p>}
               <h3 className="in-label in-evtitle">{ev.title}</h3>
               {ev.startsOn ? (
                 <div className="in-date"><strong>{p.day}</strong><span>{p.month}<br />{p.year}</span></div>
               ) : <p className="in-sub">Date to be confirmed</p>}
               {ev.startsOn && <p className="in-sub">{p.weekday}{t && ` at ${t}`}</p>}
+              {(ev.venue || ev.city) && <VenueEmblem design={design} />}
               {(ev.venue || ev.city) && <p className="in-venue">{ev.venue || ev.city}</p>}
               {ev.venue && ev.city && <p className="in-sub">{ev.city}</p>}
               <div className="in-links">
@@ -203,6 +206,7 @@ function Inside({ data, open, rsvpHref, events, greeting, spec, palette, onEditT
 
         <motion.section data-studio-edit="details" className="in-card in-where" {...reveal(3)}>
           <h3 className="in-label">{label(data.languages?.details ?? "en", "where")}</h3>
+          {(data.venue || data.city) && <VenueEmblem design={design} />}
           <p className="in-venue">{data.venue || "Venue to be confirmed"}</p>
           {data.city && <p className="in-sub">{data.city}</p>}
           {(data.venue || data.city) && (
@@ -251,6 +255,34 @@ function ThemeInterlude({ design, position }: { design: string; position: "openi
     <span className="in-interlude-rule" />
     <span className="in-interlude-emblem">{design === "velvet" ? "✦" : design === "heritage" ? "❧" : design === "nikah-etched" ? "۞" : design === "rosewood" ? "✤" : design === "gilt" ? "◇" : "✿"}</span>
     <span className="in-interlude-rule" />
+  </div>;
+}
+
+/** Secondary editorial scene: never repeats the cover illustration or its opening gesture. */
+function ThemeChapter({ design, names, occasion }: { design: string; names: string; occasion: string }) {
+  const copy: Record<string, { eyebrow: string; line: string }> = {
+    velvet: { eyebrow: "ACT I · AN INVITATION", line: "An evening to remember" },
+    rosewood: { eyebrow: "A LETTER FROM OUR HEARTS", line: "Together, a new chapter" },
+    heritage: { eyebrow: "THE CELEBRATION", line: "A day written in history" },
+    "nikah-etched": { eyebrow: "WITH LOVE AND BLESSINGS", line: "A beautiful beginning" },
+    gilt: { eyebrow: "YOU ARE CORDIALLY INVITED", line: "A night of golden memories" },
+    pearl: { eyebrow: "A CELEBRATION OF LOVE", line: "A little moment of magic" },
+    embossed: { eyebrow: "A PERSONAL INVITATION", line: "The beginning of forever" },
+  };
+  const text = copy[design] ?? { eyebrow: occasion.toUpperCase(), line: "A day to remember" };
+  return <section className="in-chapter" aria-label="Invitation introduction">
+    <span className="in-chapter-figure" aria-hidden="true"><i /><i /><i /></span>
+    <p className="in-chapter-eyebrow">{text.eyebrow}</p>
+    <p className="in-chapter-line">{text.line}</p>
+    <p className="in-chapter-signature">{names && `with ${names}`}</p>
+  </section>;
+}
+
+/** Abstract, print-inspired architectural vignette; not a photograph of an unverified venue. */
+function VenueEmblem({ design }: { design: string }) {
+  return <div className={`in-venue-plate in-venue-plate--${design}`} aria-hidden="true">
+    <span className="in-venue-arch"><i className="in-venue-roof"/><i className="in-venue-door"/><i className="in-venue-window in-venue-window--left"/><i className="in-venue-window in-venue-window--right"/></span>
+    <span className="in-venue-ground" />
   </div>;
 }
 
