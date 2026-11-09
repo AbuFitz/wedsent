@@ -5,7 +5,7 @@ import { call, ApiError } from "@/lib/api-client";
 import "./public-reply.css";
 
 type Event = { id: string; title: string };
-export function PublicReplyForm({ slug, names, events, hasEvents }: { slug: string; names: string; events: Event[]; hasEvents: boolean }) {
+export function PublicReplyForm({ slug, names, design, events, hasEvents }: { slug: string; names: string; design: string; events: Event[]; hasEvents: boolean }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [eventId, setEventId] = useState(events[0]?.id ?? "");
@@ -22,8 +22,9 @@ export function PublicReplyForm({ slug, names, events, hasEvents }: { slug: stri
     } catch (err) { setError(err instanceof ApiError ? err.message : "Your reply could not be sent. Try again."); }
     finally { setBusy(false); }
   };
-  return <main className="public-reply">
+  return <main className={`public-reply public-reply--${/^[a-z-]+$/.test(design) ? design : "pearl"}`}>
     <section className="public-reply-card">
+      <div className="public-reply-flourish" aria-hidden="true"><span />✦<span /></div>
       <Link className="public-reply-back" href={`/w/${slug}`}>← Return to invitation</Link>
       <p className="public-reply-eyebrow">A celebration with {names}</p>
       {sent ? <><h1>Thank you for replying.</h1><p>Your response has been recorded for the couple to review. As this is a public link, your identity has not been verified.</p><Link className="public-reply-button" href={`/w/${slug}`}>Back to invitation</Link></> :
