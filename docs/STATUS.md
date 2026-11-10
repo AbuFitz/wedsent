@@ -130,3 +130,5 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 - Automated check: `npm test -- --reporter=dot` passed 57 tests across 7 files; `npm run build` passed Next.js compilation/TypeScript. Browser end-to-end attempt was blocked by this environment's Chromium `socket() failed: Operation not permitted`; **no actual mobile/browser sign-off yet**.
 - Still required: real-device review of revised Studio/nav/login; production domain and Resend sending verification; real-database guest-flow test; theme-specific artwork/motion/layout overhaul; final commerce and policy decisions.
 
+**10 Nov setup recovery follow-up:** The seven-step creation flow now keeps an in-progress snapshot in tab-scoped browser session storage (including selected events and current step), restoring it after refresh. A completed handoff to account creation or Studio removes this temporary snapshot; the established draft store remains the source for the account claim. Invalid or oversized snapshots are ignored. This reduces accidental loss during the pre-account journey; it does not replace cloud autosave, multi-device recovery or end-to-end signup tests.
+

@@ -9,6 +9,7 @@ import { Phone } from "@/components/phone";
 import { DesignCard } from "@/components/gallery/design-card";
 import { call } from "@/lib/api-client";
 import { defaults, loadDraft, saveDraft, PENDING_EVENTS_KEY, type InviteData, type InviteEvent } from "@/lib/designs";
+import { START_PROGRESS_KEY, START_STEPS, parseStartProgress, type StartStep } from "@/lib/start-progress";
 import { DESIGNS, FEATURED_DESIGNS, FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
 import "./start.css";
 
@@ -23,8 +24,8 @@ const PRESETS: { id: string; label: string; events: string[]; tags: string[]; no
   { id: "one", label: "Just one event", events: ["Celebration"], tags: ["Any wedding"], note: "A single occasion" },
   { id: "later", label: "I’ll add them later", events: [], tags: [], note: "Skip for now" },
 ];
-const STEPS = ["names", "date", "celebrate", "design", "style", "details", "preview"] as const;
-type Step = (typeof STEPS)[number];
+const STEPS = START_STEPS;
+type Step = StartStep;
 
 export function Start() {
   const router = useRouter();
@@ -41,8 +42,9 @@ export function Start() {
 
   useEffect(() => {
     const saved = loadDraft();
+    const progress = parseStartProgress(sessionStorage.getItem(START_PROGRESS_KEY));
     const fromGallery = q.get("design");
-    const base: InviteData = { ...saved, names: saved.names === defaults.names ? "" : saved.names, message: saved.message === defaults.message ? "" : saved.message };
+    const base: InviteData = progress?.draft ?? { ...saved, names: saved.names === defaults.names ? "" : saved.names, message: saved.message === defaults.message ? "" : saved.message };
     if (fromGallery && DESIGNS.some((x) => x.id === fromGallery)) {
       base.design = fromGallery as DesignId;
       base.palette = q.get("palette") ?? "";
@@ -50,8 +52,15 @@ export function Start() {
       base.intro = q.get("intro") ?? "";
     }
     setD(base);
+    if (progress) { setStep(progress.step); setPreset(progress.preset); setEvents(progress.events); setUndecided(progress.undecided); }
     setReady(true);
   }, [q]);
+
+  useEffect(() => {
+    if (!ready) return;
+    try { sessionStorage.setItem(START_PROGRESS_KEY, JSON.stringify({ step, draft: d, preset, events, undecided })); }
+    catch { /* Browser storage can be disabled or full; setup remains usable. */ }
+  }, [ready, step, d, preset, events, undecided]);
 
   const patch = (p: Partial<InviteData>) => setD((x) => ({ ...x, ...p }));
   const idx = STEPS.indexOf(step);
@@ -78,12 +87,14 @@ export function Start() {
     setBusy(true); setErr(null);
     const content = { ...d, names: names || "Our wedding", date: undecided ? "" : d.date };
     saveDraft(content);
+    const clearProgress = () => { try { sessionStorage.removeItem(START_PROGRESS_KEY); } catch { /* restricted storage */ } };
     let user: unknown = null;
     try { user = (await call("GET", "/api/me")).user; } catch { /* backend not connected */ }
     const titles = events.filter((e) => e.trim());
     if (!user) {
       try { localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(titles.map((title) => ({ title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city })))); } catch {}
       router.push("/signin?mode=up&next=%2Fstudio");
+      clearProgress();
       return;
     }
     try {
@@ -92,6 +103,7 @@ export function Start() {
       const existing = (await call("GET", "/api/wedding/events")).events;
       if (!existing.length) for (const title of titles) await call("POST", "/api/wedding/events", { title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city, visibility: "invited" });
       router.push("/studio");
+      clearProgress();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Couldn’t save. Try again.");
       setBusy(false);
