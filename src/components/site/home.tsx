@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useMotionValueEvent, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import { ArrowRight, CalendarPlus, Lock, Printer, Translate, UsersThree, PencilSimpleLine, MapPin } from "@phosphor-icons/react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
@@ -22,6 +22,7 @@ export function Home() {
       <main className="hm">
         <Hero />
         <Collection />
+        <Moments />
         <EveryWedding />
         <GuestTour />
         <Everything />
@@ -36,43 +37,45 @@ export function Home() {
 
 /* ------------------------------ Hero ------------------------------ */
 function Hero() {
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const lift = useSpring(useTransform(scrollYProgress, [0, 1], [0, -70]), { stiffness: 80, damping: 20 });
-  const sink = useSpring(useTransform(scrollYProgress, [0, 1], [0, 40]), { stiffness: 80, damping: 20 });
-  const words = ["Invitations", "that", "open", "like", "a", "moment."];
-  const z = spec("zellige"), b = spec("botanica"), m = spec("marigold");
   return (
-    <section ref={ref} className="hm-hero">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <motion.img src="/art/rose-sprig.webp" alt="" aria-hidden="true" className="hm-leaf hm-leaf--a" style={{ y: sink }} width={688} height={900} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <motion.img src="/art/peony-paxton.webp" alt="" aria-hidden="true" className="hm-leaf hm-leaf--b" style={{ y: lift }} width={790} height={900} />
+    <section className="hm-hero hm-hero-editorial">
       <div className="hm-hero-copy">
-        <h1 aria-label={words.join(" ")}>
-          {words.map((w, i) => (
-            <span className="mask" key={i} aria-hidden="true">
-              <motion.span initial={{ y: "108%" }} animate={{ y: 0 }} transition={{ delay: 0.1 + i * 0.07, duration: 0.9, ease }}>{w}&nbsp;</motion.span>
-            </span>
-          ))}
-        </h1>
+        <span className="hm-eyebrow">WEDDING INVITATIONS, REIMAGINED</span>
+        <h1>Make their first impression <em>count.</em></h1>
         <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.8, ease }}>
-          Choose a design made like real stationery, add your events, and send each family their own private link. Replies come back counted, per person and per event.
+          The first moment of your wedding deserves more than a message. Create a beautiful digital invitation that feels like you.
         </motion.p>
         <motion.div className="hm-cta" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.8, ease }}>
           <Link href="/start" className="btn btn-dark">Start your invitation <ArrowRight size={18} /></Link>
           <Link href="/designs" className="btn btn-light">Browse designs</Link>
         </motion.div>
-        <p className="hm-note">Free to try. No app or account needed for guests.</p>
+        <p className="hm-note">Free to explore. Designed for their phones, and yours.</p>
       </div>
-      <motion.div className="hm-fan" initial={{ opacity: 0, y: 60 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 1.1, ease }}>
-        <div className="hm-ph hm-ph--l"><Phone label="Zellige invitation"><Invitation data={sampleData(z)} still /></Phone></div>
-        <div className="hm-ph hm-ph--r"><Phone label="Marigold invitation"><Invitation data={sampleData(m)} still /></Phone></div>
-        <div className="hm-ph hm-ph--c"><Phone label="Botanica invitation, try opening it"><Invitation data={sampleData(b)} events={sampleEvents(b)} /></Phone></div>
-        <span className="hm-try">Try the middle one</span>
+      <motion.div className="hm-hero-photo" initial={{ opacity: 0, y: 35 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease }}>
+        {/* Original Weddsent campaign asset, digitally rendered phone scene. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/art/weddsent-digital-hero.webp" alt="A realistic iPhone showing Amina and Yusuf's digital wedding invitation on ivory stationery" width={1536} height={1024} />
+        <div className="hm-hero-photo-caption"><span>AN INVITATION WORTH OPENING</span><span>W / 001</span></div>
       </motion.div>
     </section>
   );
+}
+
+function Moments() {
+  return <section className="hm-moments" aria-labelledby="hm-moments-title">
+    <div className="hm-moments-photo">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/art/weddsent-hands.webp" alt="Newlyweds holding hands beside a bouquet of ivory roses, with faces outside the frame" loading="lazy" width={1024} height={1536}/>
+      <span>THE DAY IS PERSONAL. THE INVITATION SHOULD BE TOO.</span>
+    </div>
+    <div className="hm-moments-copy"><span className="hm-eyebrow">BEYOND A TEMPLATE</span><h2 id="hm-moments-title">The feeling is <em>yours.</em></h2><p>One beautiful moment can inspire an entire invitation. Start with an art-directed design, then make the details unmistakably your own.</p>
+      <div className="hm-moments-illustration">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/art/weddsent-watercolour.webp" alt="Original hand-drawn watercolour of a newlywed couple holding hands in a sunlit courtyard" loading="lazy" width={1448} height={1086}/>
+        <span>THE LITTLE DETAILS / 02</span>
+      </div>
+    </div>
+  </section>;
 }
 
 /* ---------------------------- Collection ---------------------------- */
