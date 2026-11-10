@@ -62,3 +62,11 @@
   .ft-grid{grid-template-columns:minmax(0,1fr)}.ft-wide{grid-column:auto}.ft-print{flex-direction:column}.ft-a5{flex:none;min-height:150px}
   .tr ul{justify-content:flex-start}
 }
+.sf{--sx:#222120;background:#222120;color:#bcbab4;padding:85px 4vw 30px}
+.sf-top{max-width:1800px;padding:0 0 100px;border-top:0;gap:60px;align-items:start}
+.sf-logo{font-size:clamp(74px,12vw,220px);letter-spacing:-.105em;line-height:.8;display:block;color:#fff;font-weight:600}
+.sf-top p{max-width:320px;margin-top:35px;font-size:16px;line-height:1.45}
+.sf nav{margin-top:10px;display:grid;grid-template-columns:repeat(2,max-content);gap:18px 55px;font-size:15px}
+.sf-bottom{max-width:1800px;margin:auto;display:flex;justify-content:space-between;gap:20px;border-top:1px solid #565450;padding-top:25px;font-size:10px;font-weight:650;letter-spacing:.12em}
+.sf-note{max-width:1800px;font-size:11px;color:#93918d;margin-top:28px}
+@media(max-width:650px){.sf{padding:90px 18px 25px}.sf-top{display:block;padding-bottom:70px}.sf-logo{font-size:clamp(65px,17vw,110px)}.sf-top p{margin:26px 0 40px}.sf nav{grid-template-columns:repeat(2,max-content);gap:16px 35px}.sf-bottom{font-size:9px;flex-direction:column;gap:10px}}

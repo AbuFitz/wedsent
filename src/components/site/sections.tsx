@@ -47,12 +47,13 @@ export function SiteFooter() {
   return (
     <footer className="sf">
       <div className="sf-top">
-        <div><span className="sf-logo">wedsent</span><p>Wedding invitations that open like a moment, with replies you can actually count.</p></div>
+        <div><span className="sf-logo">weddsent</span><p>Invitations worth opening. Moments worth remembering.</p></div>
         <nav aria-label="Footer">
           <Link href="/start">Start</Link><Link href="/designs">Designs</Link><Link href="/pricing">Pricing</Link><Link href="/studio">Studio</Link><Link href="/credits">Artwork credits</Link>
         </nav>
       </div>
-      <p className="sf-note">Early build. Drafts you make while signed out stay in your browser. Nothing is sent to guests for you.</p>
+      <div className="sf-bottom"><span>WEDDSENT © 2026</span><span>MADE FOR THE BEGINNING OF SOMETHING BEAUTIFUL.</span></div>
+      <p className="sf-note">Early build. Signed-out drafts stay in your browser. Invitations aren't automatically sent to guests.</p>
     </footer>
   );
 }
