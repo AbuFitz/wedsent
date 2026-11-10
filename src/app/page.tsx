@@ -1,4 +1,4 @@
-import { Home } from "@/components/site/home-editorial";
+import { Home } from "@/components/site/home-stux";
 export default function Page() {
   return <Home />;
 }

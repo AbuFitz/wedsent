@@ -49,8 +49,8 @@ export function Gallery({ initial }: { initial?: Partial<Record<Facet, string>> 
       <main className="gl">
         <header className="gl-head">
           <span className="gl-head-kicker">THE WEDDSENT COLLECTION / VOL. 01</span>
-          <h1>Find your<br /><em>kind of magic.</em></h1>
-          <div className="gl-head-bottom"><p>Art-directed invitations, made for the moment they open. Find one that feels like you, then make it yours.</p><span>EXPLORE THE COLLECTION ↓</span></div>
+          <h1>EXPLORE<br/>THE DESIGNS.</h1>
+          <div className="gl-head-bottom"><p>INDIVIDUAL WORLDS, UNFORGETTABLE FIRST IMPRESSIONS. PICK A DESIGN AND MAKE IT YOURS.</p><span>SCROLL TO EXPLORE ↓</span></div>
         </header>
 
         <div className="gl-editorial-pair"><figure><img src="/art/weddsent-veil.webp" alt="Wedding couple holding hands beneath a veil" width={1000} height={1500}/><figcaption>THE FEELING</figcaption></figure><figure><img src="/art/weddsent-digital-hero.webp" alt="Digital wedding invitation on a phone placed on fine stationery" width={1300} height={866}/><figcaption>THE INVITATION</figcaption></figure></div>

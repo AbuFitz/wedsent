@@ -86,3 +86,12 @@
 .dc-stage{background:linear-gradient(150deg,#eee9e0,#d1c9bd)}
 @media(max-width:900px){.gl{padding:120px 17px 95px}.gl-head h1{font-size:clamp(65px,13vw,112px);margin:30px 0}.gl-head-bottom{display:block;margin-bottom:38px}.gl-head-bottom p{font-size:18px;max-width:370px}.gl-head-bottom span{display:none}.gl-editorial-pair{height:500px;gap:9px}.gl-editorial-pair figure:nth-child(1){grid-column:span 1}.gl-bar{margin-top:55px}.gl-grid{gap:35px}}
 @media(max-width:500px){.gl-head h1{font-size:clamp(57px,13vw,82px)}.gl-editorial-pair{grid-template-columns:1fr 1fr;height:340px}.gl-editorial-pair figcaption{font-size:8px;left:10px;bottom:12px}}
+/* Stux collection variant: large industrial type, sharp edges, image-led project fields. */
+.gl{max-width:1900px;padding:160px 30px 145px}
+.gl-head-kicker{font-weight:800;font-size:12px;letter-spacing:.08em}.gl-head h1{font-size:clamp(85px,12vw,220px);font-weight:800;letter-spacing:-.095em;line-height:.83;margin:46px 0 65px}
+.gl-head-bottom p{font-size:clamp(19px,2vw,31px);font-weight:750;line-height:1.1;letter-spacing:-.055em;max-width:600px}.gl-head-bottom span{font-weight:800}
+.gl-editorial-pair{height:clamp(550px,65vw,1000px);gap:15px}.gl-editorial-pair figure:nth-child(1){background:#191919}.gl-editorial-pair figure:nth-child(2){background:#999}.gl-editorial-pair figcaption{font-size:12px;font-weight:800}
+.gl-bar{margin-top:115px}.gl-filter-btn,.gl-sort select,.gl-chips button{border-radius:0}.gl-count{font-weight:800}
+.gl-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 24px}.dc-stage{border-radius:0;background:linear-gradient(160deg,#a7a4a1,#dedbda);aspect-ratio:1.05;overflow:hidden}.dc-hit,.dc-open{border-radius:0}.dc-meta h3{font-weight:750;text-transform:uppercase;font-size:25px}
+@media(max-width:900px){.gl{padding:125px 17px 100px}.gl-head h1{font-size:clamp(64px,13vw,120px);margin:30px 0 40px}.gl-head-bottom p{font-size:19px}.gl-editorial-pair{height:560px}.gl-bar{margin-top:70px}.gl-grid{grid-template-columns:1fr;gap:40px}.dc-stage{aspect-ratio:1.12}}
+@media(max-width:500px){.gl-head h1{font-size:clamp(55px,13vw,86px)}.gl-editorial-pair{height:380px}.gl-editorial-pair figcaption{font-size:9px}}

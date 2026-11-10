@@ -104,3 +104,10 @@
 .s8-nav .btn,.s8-save,.s8-pick,.s8-pals button{border-radius:2px}
 .s8-nav{border-top:1px solid #e7e4df;padding-top:25px;margin-top:30px}
 @media(max-width:900px){.st8{height:100dvh;overflow:hidden}.s8-top{min-height:63px;padding:12px 17px}.s8-top-note{display:none}.s8-logo{font-size:23px}.s8-count{font-size:11px}.s8-grid{min-height:0;height:calc(100dvh - 65px);grid-template-columns:1fr;grid-template-rows:minmax(175px,41%) minmax(0,1fr);gap:0;overflow:hidden}.s8-stage{grid-row:1;height:auto;min-height:0;position:relative;top:auto;padding:16px;background:#eeece8;overflow:hidden}.s8-preview-label{top:11px;left:16px;font-size:8px}.s8-pane{grid-row:2;min-height:0;overflow-y:auto;border-radius:13px 13px 0 0;background:#fff;padding:24px 19px max(35px,env(safe-area-inset-bottom));gap:20px;box-shadow:0 -4px 24px #0000000a}.s8-intro-label{font-size:9px;margin-bottom:10px}.s8-pane h1{font-size:clamp(42px,9vw,61px)}.s8-sub{font-size:15px}.s8-nav{position:sticky;bottom:-35px;background:#fff;z-index:4;margin-top:auto;padding:14px 0 max(7px,env(safe-area-inset-bottom))}.s8-presets,.s8-openings,.s8-designs{grid-template-columns:1fr}}
+/* Stux-inspired utility finish: stark typography, square controls and signal yellow. */
+.s8-bar span{background:#ffe325}.s8-pane h1{font-weight:800;letter-spacing:-.085em;text-transform:uppercase}
+.s8-intro-label span{color:#111}.s8-stage{background:#ededed}.s8-preview-label{font-weight:800}
+.s8-presets button,.s8-openings button,.s8-types button,.s8-f input,.s8-f textarea,.s8-select,.s8-events input{border-radius:0}
+.s8-presets button[aria-pressed=true],.s8-openings button[aria-pressed=true]{background:#fffbe3;border-color:#111}
+.s8-nav .btn,.s8-save,.s8-pick,.s8-pals button{border-radius:0}
+@media(max-width:900px){.s8-pane{border-radius:0}.s8-pane h1{font-size:clamp(38px,8vw,58px)}.s8-stage{background:#ededed}}
