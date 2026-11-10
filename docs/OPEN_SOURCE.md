@@ -1,5 +1,12 @@
 # Open-source research and adoption register
 
+## 10 November account/navigation UX slice
+
+- [Next.js official authentication guide](https://nextjs.org/docs/app/guides/authentication): reuse the existing server-owned session cookie and authenticated `/api/me` boundary instead of introducing an incompatible second auth provider for a navigation-only change. The client session check is for *presentation*, never permission enforcement; protected APIs remain server-authorised.
+- [Next.js native History API integration](https://nextjs.org/docs/app/getting-started/linking-and-navigating#using-the-native-history-api): dashboard tab selection can update `?tab=` without reloading or creating a separate route for every tab. Browser Back and direct links use the same tab contract.
+- [React Effect fetching guidance](https://react.dev/reference/react/useEffect): cancel stale client-side session checks with an effect-cleanup flag to avoid updating an unmounted sign-in/nav component.
+- Reuse decision: **adapt official patterns, no third-party source copied or extra runtime dependencies added**. Added an allowlisted post-auth return path and deterministic pure guest response-summary helper, both covered by Vitest. This does not replace real-browser/session E2E verification.
+
 ## Atelier editor replacement, 8 November 2026
 
 The prior Studio presentation was removed completely. Inspiration is from mature product software rather than cloneable admin dashboards:
