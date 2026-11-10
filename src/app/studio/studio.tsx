@@ -78,6 +78,7 @@ export function Studio() {
     const chosen = params.get("design");
     if (ready && chosen && designs.some((d) => d.id === chosen) && draft.design !== chosen) patch({ design: chosen as DesignId, accent: "" });
   }, [ready, params, draft.design, patch]);
+  useEffect(() => { if (params.get("stage") === "send") setStep("send"); }, [params]);
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (event.key === "Escape") setMobileFull(false);
@@ -101,19 +102,17 @@ export function Studio() {
 
   return <div className="atelier atelier--guided" data-full={mobileFull} data-inspector={inspectorOpen} data-mode={mobileMode} data-step={step}>
     <header className="atelier-top">
-      <Link href="/dashboard" className="atelier-brand" aria-label="Back to wedding dashboard"><ArrowLeft size={17}/><span className="atelier-brand-word">wedsent</span><span>Studio</span></Link>
+      <Link href={account ? "/dashboard" : "/"} className="atelier-brand" aria-label="Wedsent"><span className="atelier-brand-word">wedsent</span><span>Studio</span></Link>
       <div className="atelier-top-middle"><span className="atelier-file">{draft.names || "Your invitation"}</span><span className="atelier-save" data-state={state}>{state === "saving" || state === "loading" ? <LoaderCircle size={13} className="atelier-spin"/> : <span className="atelier-save-dot"/>}{saveLabel}</span>{state === "conflict" && <button onClick={reload}>Reload</button>}</div>
       <div className="atelier-top-actions">
         <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
         <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
-        <Link className="atelier-top-link" href="/dashboard">Guest list <ArrowRight size={15}/></Link>
       </div>
     </header>
 
     <nav className="atelier-dock" aria-label="Create your invitation">
       <div className="studio-nav-intro"><span>YOUR WEDDING</span><strong>Make something memorable.</strong><p>Everything you need to create and send your invitation, in one place.</p></div>
-      {steps.map((item, index) => <button key={item.id} type="button" className="studio-step" aria-current={step === item.id ? "step" : undefined} onClick={() => goStep(item.id)}><span className="studio-step-number">{String(index + 1).padStart(2,"0")}</span><span className="studio-step-text"><strong>{item.title}</strong><small>{item.subtitle}</small></span><ArrowRight size={15}/></button>)}
-      <div className="studio-nav-foot"><Link href="/dashboard"><ArrowLeft size={15}/> Back to dashboard</Link></div>
+      {steps.map((item, index) => <button key={item.id} type="button" className="studio-step" aria-current={step === item.id ? "step" : undefined} onClick={() => goStep(item.id)}><span className="studio-step-number">{String(index + 1).padStart(2,"0")}</span><span className="studio-step-text"><strong>{item.title}</strong><small>{item.subtitle}</small></span></button>)}
     </nav>
 
     <main className="atelier-stage" data-scene={canvasScene} data-frame={canvasFrame} aria-label="Live invitation composition">
@@ -132,7 +131,7 @@ export function Studio() {
       <header className="atelier-inspector-head"><div><span className="studio-section-kicker">{String(steps.findIndex((s) => s.id === step)+1).padStart(2,"0")} / 04</span><h2>{activeStep.title}</h2><p>{activeStep.subtitle}</p></div></header>
       {step !== "send" && <div className="studio-subnav" role="group" aria-label="Editing section">{activeStep.panels.map((id) => { const item = tools.find((t) => t.id === id)!; return <button key={id} type="button" aria-pressed={panel === id} onClick={() => select(id)}>{item.name}</button>; })}</div>}
       <div className="atelier-inspector-scroll" key={panel}>
-        {step === "send" && <div className="studio-send"><span className="studio-send-mark"><Check size={26}/></span><h3>Your invitation, ready to share.</h3><p>Manage households, create individual invitation links and track replies from your wedding dashboard.</p><Link href="/dashboard"> {account ? "Manage guests & invitations" : "Save & continue to guests"} <ArrowRight size={17}/></Link><small>Guests do not need an account to reply.</small></div>}
+        {step === "send" && <div className="studio-send"><span className="studio-send-mark"><Check size={26}/></span><h3>{missing.length ? "Before you invite everyone…" : "Let's get your invitations out."}</h3>{missing.length ? <p>Still to add: {missing.join(", ")}. Complete these essentials before publishing. Your edits stay saved while you work.</p> : <p>Next, add your households, publish your invitation and choose how to share each personal link. Replies will appear in your dashboard.</p>}<Link href={account ? "/dashboard?tab=Guests" : "/signin?mode=up&next=%2Fstudio%3Fstage%3Dsend"}>{account ? "Manage guest list" : "Create account to continue"}<ArrowRight size={17}/></Link>{missing.length > 0 && <button type="button" className="studio-send-return" onClick={() => select(missing.includes("Venue") ? "events" : "story")}>Edit missing details <Pencil size={15}/></button>}<small>Guests can reply without signing in. Sending an invitation requires publishing it first.</small></div>}
         {step !== "send" && panel === "story" && <StoryEditor draft={draft} patch={patch}/>}
         {step !== "send" && panel === "events" && <EventsEditor account={!!account} draft={draft} patch={patch} events={rawEvents} reload={loadEvents}/>}
         {step !== "send" && panel === "look" && <LookEditor draft={draft} patch={patch} replay={() => setView("cover")}/>}

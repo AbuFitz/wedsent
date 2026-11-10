@@ -121,3 +121,12 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 - [ ] Perform real iOS Safari and Android Chrome visual/interactions QA on each invitation family and the redesigned Studio.
 - [ ] Audit the visual continuity of each invitation theme, from opening gesture through venue, timeline, countdown and RSVP, using theme-specific artwork rather than generic decorative shapes.
 
+# 10 November 2026 — creation-to-account and guest-management slice
+
+- The guided Studio no longer shows duplicated back-to-dashboard exits or a persistent guest-list shortcut. Its final step leads to the real household area, with account creation required for signed-out users.
+- The Start flow now saves its local draft and pending event titles, then prompts signed-out couples to create an account. Successful sign-up returns to Studio, which claims those pending details using the existing versioned draft and event APIs. Already-signed-in couples save directly.
+- The site navigation distinguishes signed-out **Sign in / Create invitation** from signed-in **My wedding / Open Studio** using `/api/me`. The sign-in page checks existing sessions and uses an allowlisted post-auth redirect.
+- Guest dashboard tabs have URL state (`?tab=Guests`, `?tab=Sending`). Guest-list progress is calculated per person/event, while private-link opening and verified email delivery remain distinct. Sending has explicit selection/confirmation and remains disabled without configured Resend credentials.
+- Automated check: `npm test -- --reporter=dot` passed 57 tests across 7 files; `npm run build` passed Next.js compilation/TypeScript. Browser end-to-end attempt was blocked by this environment's Chromium `socket() failed: Operation not permitted`; **no actual mobile/browser sign-off yet**.
+- Still required: real-device review of revised Studio/nav/login; production domain and Resend sending verification; real-database guest-flow test; theme-specific artwork/motion/layout overhaul; final commerce and policy decisions.
+

@@ -37,6 +37,7 @@
 .studio-send h3{font:normal 27px/1.16 Georgia,serif;letter-spacing:-.04em}.studio-send p{color:#7d8278;line-height:1.7;font-size:13px}
 .studio-send a{display:flex;align-items:center;gap:10px;padding:14px 17px;background:#252921;color:#fff;border-radius:8px;font-size:12px;font-weight:700;margin-top:10px}
 .studio-send small{font-size:11px;color:#8d9288}
+.studio-send-return{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;padding:8px 0;color:#515f4d;font-size:12px;font-weight:700}
 .atelier--guided .atelier-canvas-menu,.atelier--guided .atelier-show-panel,.atelier--guided .atelier-mobile-menu{display:none!important}
 @media(max-width:1200px) and (min-width:861px){.atelier--guided{grid-template-columns:200px minmax(0,1fr) 350px}.studio-nav-intro strong{font-size:24px}.studio-step-text small{display:none}}
 @media(max-width:860px){

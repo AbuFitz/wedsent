@@ -83,7 +83,7 @@ export function Start() {
     const titles = events.filter((e) => e.trim());
     if (!user) {
       try { localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(titles.map((title) => ({ title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city })))); } catch {}
-      router.push("/studio");
+      router.push("/signin?mode=up&next=%2Fstudio");
       return;
     }
     try {
@@ -210,8 +210,8 @@ export function Start() {
           <li><span>Design</span>{spec.name} · {paletteOf(spec, d.palette).name}</li>
         </ul>
         {err && <p className="s8-err" role="alert">{err}</p>}
-        <button className="btn btn-dark s8-save" onClick={finish} disabled={busy}>{busy ? "Saving…" : "Save and continue"} <ArrowRight size={18} /></button>
-        <p className="s8-fine">For now, your draft and event choices save on this device. No account needed to explore Studio. Nothing is sent to guests.</p>
+        <button className="btn btn-dark s8-save" onClick={finish} disabled={busy}>{busy ? "Saving…" : "Continue to your invitation"} <ArrowRight size={18} /></button>
+        <p className="s8-fine">Your choices are saved in this browser first. If you're not signed in, we'll help you create an account to keep them across devices. Nothing is sent to guests yet.</p>
       </>
     ),
   };

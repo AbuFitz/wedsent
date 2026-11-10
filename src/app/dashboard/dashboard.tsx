@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check, Copy, Download, ExternalLink, Link2, Plus, RefreshCw, Trash2, Upload } from "lucide-react";
 import { call, ApiError } from "@/lib/api-client";
 import { friendlyDate } from "@/lib/designs";
+import { guestProgress } from "@/lib/guest-progress";
 import { ShareInvitation } from "@/components/share/share-invitation";
 import "./dashboard.css";
 
@@ -34,6 +35,23 @@ export function Dashboard() {
   const [fatal, setFatal] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
+  const navigateTab = useCallback((next: Tab) => {
+    setTab(next);
+    const url = new URL(window.location.href);
+    if (next === "Overview") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", next);
+    window.history.pushState(null, "", url.pathname + url.search);
+  }, []);
+  useEffect(() => {
+    const read = () => {
+      const next = new URLSearchParams(window.location.search).get("tab");
+      setTab(tabs.find((t) => t === next) ?? "Overview");
+    };
+    read();
+    window.addEventListener("popstate", read);
+    return () => window.removeEventListener("popstate", read);
+  }, []);
+
   const say = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2600); };
 
   const load = useCallback(async () => {
@@ -60,7 +78,7 @@ export function Dashboard() {
       <header className="db-top">
         <Link href="/" className="db-logo">wedsent</Link>
         <nav className="db-tabs" aria-label="Sections">
-          {tabs.map((t) => <button key={t} aria-current={tab === t} onClick={() => { setTab(t); load(); }}>{t}</button>)}
+          {tabs.map((t) => <button key={t} aria-current={tab === t ? "page" : undefined} onClick={() => { navigateTab(t); void load(); }}>{t}</button>)}
         </nav>
         <div className="db-right">
           <Link href="/studio" className="btn btn-light db-studio">Open Studio</Link>
@@ -70,10 +88,10 @@ export function Dashboard() {
       <main className="db-main">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-            {tab === "Overview" && <Overview w={w} events={events} hh={hh} act={act} go={setTab} />}
+            {tab === "Overview" && <Overview w={w} events={events} hh={hh} act={act} go={navigateTab} />}
             {tab === "Events" && <Events events={events} act={act} />}
-            {tab === "Guests" && <Guests events={events} hh={hh} act={act} say={say} />}
-            {tab === "Sending" && <Sending households={hh} deliveries={deliveries} emailConfigured={emailConfigured} go={setTab} onSend={async (ids) => {
+            {tab === "Guests" && <Guests events={events} hh={hh} act={act} say={say} go={navigateTab} />}
+            {tab === "Sending" && <Sending households={hh} deliveries={deliveries} emailConfigured={emailConfigured} go={navigateTab} onSend={async (ids) => {
               const result = await call<{accepted:number; failed:number; nothingNew:boolean}>("POST", "/api/wedding/deliveries/send", { householdIds: ids });
               await load(); say(result.nothingNew ? "These invitations were already queued or sent." : `${result.accepted} accepted by email provider${result.failed ? `, ${result.failed} failed` : ""}`);
             }}/>} 
@@ -91,6 +109,7 @@ function Sending({ households, deliveries, emailConfigured, go, onSend }: { hous
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const eligible = households.filter((h) => h.link && h.guests.some((g) => g.email));
+  const awaiting = households.filter((h) => guestProgress(h.guests).awaiting > 0);
   const submit = async () => {
     if (!selected.length || !window.confirm(`Email invitations to ${selected.length} selected household(s)?`)) return;
     setBusy(true); setError("");
@@ -103,14 +122,14 @@ function Sending({ households, deliveries, emailConfigured, go, onSend }: { hous
     <p className="db-muted">Share a personal link with each household, or use the public invitation for open sharing. Only messages sent through a connected provider can have verified delivery status.</p>
     <section className="db-card">
       <h2>Personal invitations</h2>
-      <p className="db-muted">{households.length} {households.length === 1 ? "household" : "households"} ready to invite. Their links are unique and can be reset if forwarded accidentally.</p>
+      <p className="db-muted">{households.length} {households.length === 1 ? "household" : "households"} on your guest list · {awaiting.length} awaiting at least one reply. Each household has its own link, which can be reset if forwarded accidentally.</p>
       <div className="db-row"><button type="button" className="btn btn-dark" onClick={() => go("Guests")}>Manage and share guest links</button></div>
     </section>
     <section className="db-card db-form">
       <h2>Automated email invitations</h2>
       {!emailConfigured ? <p className="db-banner">Email sending isn't connected yet. Use the personal links in Guests until Wedsent's verified sending domain and provider keys are configured.</p> : <>
         <p className="db-muted">Select the households you want to email. Each email contains that household's private invitation link. Repeating a send won't duplicate the invitation for the same active link.</p>
-        {eligible.length === 0 ? <p className="db-empty">Add an email address to a household first.</p> : <fieldset><legend>Choose recipients</legend><div className="db-chips">{eligible.map((h) => <label key={h.id} className="db-chip"><input type="checkbox" checked={selected.includes(h.id)} onChange={(e) => setSelected((s) => e.target.checked ? [...s,h.id] : s.filter((id)=>id!==h.id))}/>{h.name}</label>)}</div></fieldset>}
+        {eligible.length === 0 ? <p className="db-empty">Add an email address to a household first.</p> : <fieldset><legend>Choose recipients</legend><div className="db-select-row"><span>{selected.length} of {eligible.length} households selected</span><button type="button" onClick={() => setSelected(selected.length === eligible.length ? [] : eligible.map((h) => h.id))}>{selected.length === eligible.length ? "Clear selection" : "Select all"}</button></div><div className="db-chips">{eligible.map((h) => <label key={h.id} className="db-chip"><input type="checkbox" checked={selected.includes(h.id)} onChange={(e) => setSelected((s) => e.target.checked ? [...s,h.id] : s.filter((id)=>id!==h.id))}/>{h.name}</label>)}</div></fieldset>}
         {error && <p role="alert" className="db-banner">{error}</p>}
         <button className="btn btn-dark" type="button" disabled={!selected.length || busy} onClick={() => void submit()}>{busy ? "Sending…" : `Email ${selected.length} selected household${selected.length === 1 ? "" : "s"}`}</button>
       </>}
@@ -218,7 +237,7 @@ function Events({ events, act }: { events: Event[]; act: any }) {
 }
 
 /* ------------------------------- Guests ------------------------------- */
-function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; act: any; say: (m: string) => void }) {
+function Guests({ events, hh, act, say, go }: { events: Event[]; hh: Household[]; act: any; say: (m: string) => void; go: (tab: Tab) => void }) {
   const [name, setName] = useState("");
   const [lines, setLines] = useState("");
   const [sel, setSel] = useState<string[]>([]);
@@ -233,6 +252,7 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
     setName(""); setLines("");
   };
   const shown = hh.filter((h) => !q || (h.name + h.guests.map((g) => g.name).join(" ")).toLowerCase().includes(q.toLowerCase()));
+  const progress = guestProgress(hh.flatMap((h) => h.guests));
 
   const onFile = async (f: File | undefined) => {
     if (!f) return;
@@ -243,8 +263,11 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
   return (
     <div className="db-stack">
       <h1 className="db-h">Guests</h1>
+      <p className="db-muted">One private link per household. Record attendance separately for each person and celebration.</p>
+      <div className="db-guest-stats" aria-label="Guest response summary"><span>{hh.length} households</span><span>{hh.reduce((sum,h)=>sum+h.guests.length,0)} people</span><span data-kind="complete">{progress.replied} event replies</span><span data-kind="waiting">{progress.awaiting} awaiting</span></div>
+      <div className="db-row"><button className="btn btn-light" type="button" onClick={() => document.getElementById("db-add-household")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Plus size={16}/> Add people</button><button className="btn btn-light" type="button" onClick={() => go("Sending")}>Send invitations <ExternalLink size={15}/></button></div>
       {events.length === 0 && <p className="db-banner">Add an event first, so you can choose who’s invited to what.</p>}
-      <form className="db-card db-form" onSubmit={add}>
+      <form id="db-add-household" className="db-card db-form" onSubmit={add}>
         <h2>Add a household</h2>
         <p className="db-muted">A household shares one link. Put each person on a new line (optionally “Name, email” and “(child)”).</p>
         <label><span>Household name <i>optional</i></span><input value={name} maxLength={120} onChange={(e) => setName(e.target.value)} placeholder="The Khans" /></label>
@@ -279,7 +302,7 @@ function Guests({ events, hh, act, say }: { events: Event[]; hh: Household[]; ac
         {shown.map((h) => (
           <li key={h.id} className="db-card">
             <div className="db-hh-top">
-              <div><strong>{h.name}</strong><p className="db-muted">{h.guests.length} {h.guests.length === 1 ? "person" : "people"} · {h.lastOpenedAt ? "Opened their link" : "Link not opened yet"}</p></div>
+              <div><strong>{h.name}</strong><p className="db-muted">{h.guests.length} {h.guests.length === 1 ? "person" : "people"} · {h.lastOpenedAt ? "Invitation opened" : "Not opened or not yet shared"}</p><div className="db-guest-stats">{(() => { const s=guestProgress(h.guests); return <><span data-kind={s.awaiting===0 && s.invited>0?"complete":"waiting"}>{s.replied}/{s.invited} event replies</span><span>{s.attending} attending</span><span>{s.declined} declined</span>{s.awaiting>0 && <span>{s.awaiting} awaiting</span>}</>; })()}</div></div>
               <div className="db-row">
                 {h.link && <button className="btn btn-light" onClick={() => { navigator.clipboard.writeText(h.link!); say("Link copied"); }}><Link2 size={16} /> Copy link</button>}
                 {h.link && <a className="btn btn-light" href={h.link} target="_blank" rel="noopener noreferrer"><ExternalLink size={16}/> View invite</a>}

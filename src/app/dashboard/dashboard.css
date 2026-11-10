@@ -4,7 +4,7 @@
 .db-logo{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.03em}
 .db-tabs{display:flex;gap:4px;margin:0 auto;background:#E9E9E5;border-radius:99px;padding:4px;overflow-x:auto;scrollbar-width:none}
 .db-tabs button{border:0;background:none;padding:8px 18px;border-radius:99px;font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap;transition:background .2s,color .2s}
-.db-tabs button[aria-current=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.db-tabs button[aria-current=page]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .db-right{display:flex;align-items:center;gap:12px}
 .db-studio{min-height:40px;padding:0 16px;font-size:14px}
 .db-out{background:none;border:0;font-size:14px;font-weight:600;color:var(--muted)}
@@ -55,6 +55,8 @@
 .db-status[data-s=attending]{background:#DDF3E9;color:#0B5F49}.db-status[data-s=declined]{background:#FBE3E0;color:#8C1D18}
 .db-status select{border:0;background:rgba(255,255,255,.7);border-radius:99px;font-size:13px;font-weight:600;padding:4px 6px;color:inherit;max-width:110px}
 .db-search{margin-top:4px}
+.db-guest-stats{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:7px}.db-guest-stats span{display:inline-flex;align-items:center;border-radius:5px;padding:5px 8px;background:#f1f2ee;font-size:11px;font-weight:650;color:#596157}.db-guest-stats span[data-kind=complete]{background:#e5f2e8;color:#265d41}.db-guest-stats span[data-kind=waiting]{background:#fff1dd;color:#865c23}
+.db-select-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}.db-select-row span{font-size:12px;color:var(--muted)}.db-select-row button{border:0;background:none;color:var(--ink);text-decoration:underline;text-underline-offset:3px;font-size:12px;font-weight:700;padding:7px}
 .db-counts{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .db-bar{display:flex;height:14px;border-radius:99px;overflow:hidden;background:#EEEEEA;gap:2px}
 .db-bar span{min-width:0;transition:flex .5s var(--ease)}.db-bar [data-k=yes]{background:#0F7B5F}.db-bar [data-k=no]{background:#D3382B}.db-bar [data-k=wait]{background:#D9D9D3}

@@ -19,6 +19,8 @@
 
 ## F01 — discover and publish
 
+**10 November account handoff revision:** Signed-out creation ends at the personalised review, then saves the browser draft/events and routes to **Create account** with a same-site return target of `/studio`. Successful sign-up must land in Studio so `useStudioDraft` can claim that pending draft and ceremonies before guest management. Signed-in creators save directly to their wedding and remain in Studio. Main-site navigation checks the session and shows **Sign in / Create invitation** for visitors or **My wedding / Open Studio** for existing owners. `/signin` must send already-authenticated people to their intended same-origin destination, never ask them to enter credentials again. Auth failure and backend outage must not erase browser drafts. Never accept external `next` redirect URLs.
+
 ```mermaid
 flowchart TD
  A["Browse live gallery"] --> B["Choose design"]
@@ -68,6 +70,8 @@ stateDiagram-v2
 Design switching must preserve ceremony/guest data. Template-specific styling may reset only with explicit notice. Published invitations never expose partial edits. Test long names, no image, RTL, mixed language, older iPhones, music muted and reduced motion. Autosave status must reflect server acknowledgement.
 
 ## F03 — ceremonies and household guest model
+
+**10 November Studio-to-guests continuation (F02 → F03/F05):** The Studio's fourth step is a handoff, not a simulated sender. Choosing **Manage guests** opens the real authenticated Guests view, while **Send invitations** opens the Sending view. The dashboard keeps the selected tab in the query string so browser Back/reload and shared owner navigation return to the intended task. Household status is computed from the real guest/event responses and separately reports link-open evidence and verified provider deliveries; native WhatsApp/SMS sharing never marks a message delivered. Empty guest lists lead to the actual household form, not an empty status page. Missing design essentials must not be described as ready to send.
 
 ```mermaid
 flowchart TD
