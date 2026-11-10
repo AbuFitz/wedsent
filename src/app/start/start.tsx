@@ -231,7 +231,8 @@ export function Start() {
   return (
     <main className="st8">
       <header className="s8-top">
-        <Link href="/" className="s8-logo">wedsent</Link>
+        <Link href="/" className="s8-logo">weddsent</Link>
+        <span className="s8-top-note">YOUR INVITATION BEGINS HERE</span>
         <span className="s8-count" aria-live="polite">Step {idx + 1} of {STEPS.length}</span>
         <Link href="/designs" className="s8-skip">Browse designs</Link>
       </header>
@@ -239,6 +240,7 @@ export function Start() {
 
       <div className="s8-grid">
         <section className="s8-pane">
+          <p className="s8-intro-label">THE MAKING OF SOMETHING BEAUTIFUL <span>✳</span></p>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={step} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.4, ease }}>
               {body[step]}
@@ -254,6 +256,7 @@ export function Start() {
         </section>
 
         <aside className="s8-stage" aria-label="Live preview">
+          <span className="s8-preview-label">A LITTLE PREVIEW OF THE BIG DAY</span>
           <div className="s8-phone">
             <Phone label="Your invitation">
               <Invitation key={`${spec.id}-${d.palette}-${d.type}-${d.opening}-${step === "design" ? "c" : "i"}`} data={shown} events={evs} open={inside && step !== "style" ? true : open} onOpenChange={setOpen} />

@@ -68,3 +68,21 @@
 .dc-stage:has(.dc-hit:hover) .dc-ph--front{transform:translate(1cqw,-2cqw) rotate(2deg)}
 .dc-hit{border-radius:5px}.dc-open{border-radius:5px}.dc-meta h3{font-size:23px;letter-spacing:-.055em}
 @media(max-width:900px){.gl{padding-top:115px}.gl-head h1{font-size:clamp(57px,12vw,90px)}.gl-bar{margin-top:35px}.gl-grid{gap:35px}}
+/* The collection is an exhibition, followed by working designs and filters. */
+.gl{max-width:1700px;padding:165px 4vw 140px}
+.gl-head-kicker{font-size:11px;font-weight:700;letter-spacing:.15em}
+.gl-head h1{font-size:clamp(85px,11vw,190px);line-height:.85;letter-spacing:-.095em;margin:38px 0 45px;max-width:none}
+.gl-head h1 em{font-family:var(--serif);font-weight:400;letter-spacing:-.04em}
+.gl-head-bottom{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:70px}
+.gl-head-bottom p{font-size:clamp(17px,1.6vw,25px);letter-spacing:-.035em;line-height:1.4;max-width:530px;margin:0}
+.gl-head-bottom span{font-size:10px;font-weight:700;letter-spacing:.15em}
+.gl-editorial-pair{display:grid;grid-template-columns:.8fr 1.2fr;gap:18px;height:clamp(450px,58vw,790px)}
+.gl-editorial-pair figure{position:relative;overflow:hidden;margin:0;background:#ddd}
+.gl-editorial-pair img{width:100%;height:100%;object-fit:cover}.gl-editorial-pair figure:nth-child(2) img{object-position:50%}
+.gl-editorial-pair figcaption{position:absolute;left:22px;bottom:22px;font-size:11px;font-weight:700;letter-spacing:.15em;color:#fff;text-shadow:0 1px 6px #0007}
+.gl-bar{margin-top:100px}.gl-head h1{font-family:var(--display)}
+.gl-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,310px),1fr));gap:65px 25px}
+.gl-count{font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.dc-stage{background:linear-gradient(150deg,#eee9e0,#d1c9bd)}
+@media(max-width:900px){.gl{padding:120px 17px 95px}.gl-head h1{font-size:clamp(65px,13vw,112px);margin:30px 0}.gl-head-bottom{display:block;margin-bottom:38px}.gl-head-bottom p{font-size:18px;max-width:370px}.gl-head-bottom span{display:none}.gl-editorial-pair{height:500px;gap:9px}.gl-editorial-pair figure:nth-child(1){grid-column:span 1}.gl-bar{margin-top:55px}.gl-grid{gap:35px}}
+@media(max-width:500px){.gl-head h1{font-size:clamp(57px,13vw,82px)}.gl-editorial-pair{grid-template-columns:1fr 1fr;height:340px}.gl-editorial-pair figcaption{font-size:8px;left:10px;bottom:12px}}
