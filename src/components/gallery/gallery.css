@@ -55,3 +55,16 @@
 .dc-open{z-index:4}
 @media(prefers-reduced-motion:reduce){.dc-stage,.dc-ph{transition:none!important}}
 @media(max-width:900px){.gl-body{grid-template-columns:minmax(0,1fr)}.gl-side{display:none}.gl-filter-btn{display:inline-flex}.gl-sort{margin-left:0}.gl-grid{grid-template-columns:minmax(0,1fr)}.gl{padding-top:96px}}
+/* Gallery reset: curated digital invitation objects, not imitation paper suites. */
+.gl{max-width:1440px;padding-top:155px;background:#fff}
+.gl-head h1{font-family:var(--display);font-size:clamp(65px,8vw,135px);font-weight:650;letter-spacing:-.1em;line-height:.97;max-width:10em}
+.gl-head p{font-size:17px;margin-top:32px}
+.gl-bar{margin-top:70px}.gl-sort select,.gl-filter-btn{border-radius:5px}.gl-chips button{border-radius:5px}
+.gl-grid{gap:65px 23px}.dc-stage{border-radius:5px;background:linear-gradient(145deg,#f0efed,#dcdad7);aspect-ratio:4/5;box-shadow:none;perspective:none}
+.dc-stage::before{background:linear-gradient(180deg,#ffffff77,transparent)}.dc-stage::after{display:none}
+.dc-ph{aspect-ratio:390/830;width:51cqw;border:1cqw solid #222;border-radius:7cqw;box-shadow:0 5cqw 8cqw -3cqw #0005;transform:none}
+.dc-ph--back{left:8cqw;top:13cqw;rotate:-7deg}.dc-ph--front{right:7cqw;top:18cqw;rotate:6deg}
+.dc-stage:has(.dc-hit:hover) .dc-ph--back{transform:translate(-1cqw,-2cqw) rotate(-2deg)}
+.dc-stage:has(.dc-hit:hover) .dc-ph--front{transform:translate(1cqw,-2cqw) rotate(2deg)}
+.dc-hit{border-radius:5px}.dc-open{border-radius:5px}.dc-meta h3{font-size:23px;letter-spacing:-.055em}
+@media(max-width:900px){.gl{padding-top:115px}.gl-head h1{font-size:clamp(57px,12vw,90px)}.gl-bar{margin-top:35px}.gl-grid{gap:35px}}

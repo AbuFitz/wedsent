@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { Nav } from "@/components/site/nav";
-import { Phone } from "@/components/phone";
-import { Invitation } from "@/components/invitation/invitation";
-import { defaults } from "@/lib/designs";
 import "./pricing.css";
 
 export const metadata: Metadata = { title: "Pricing | Wedsent", description: "One price per wedding. Pay once, no subscription. Provisional price shown; checkout is not live yet." };
@@ -30,26 +27,24 @@ const faqs = [
 ];
 
 export default function Pricing() {
-  const phone = (design: "botanica" | "zellige" | "marigold", names: string) => (
-    <Phone label={`${design} invitation`}><Invitation data={{ ...defaults, design, names, accent: "", palette: "" }} still /></Phone>
-  );
   return (
     <>
       <Nav />
       <main className="pp">
-        <section className="pp-hero">
+        <section className="pp-hero pp-hero-editorial">
           <div className="pp-copy">
-            <h1>One price for<br />the whole day.</h1>
+            <span className="pp-editorial-eyebrow">ONE INVITATION. YOUR WHOLE CELEBRATION.</span>
+            <h1>All the feeling.<br />One simple price.</h1>
             <p>Design the invitation, give every household their own link, and watch the replies come in. Pay once, per wedding. No subscription.</p>
             <div className="pp-cta">
               <Link href="/studio" className="btn btn-dark">Start designing <ArrowRight size={18} /></Link>
               <Link href="/#designs" className="btn btn-light">See the designs</Link>
             </div>
           </div>
-          <div className="pp-fan" aria-hidden="true">
-            <div className="pp-ph pp-ph--l">{phone("zellige", "Aisha & Yusuf")}</div>
-            <div className="pp-ph pp-ph--r">{phone("marigold", "Priya & Arjun")}</div>
-            <div className="pp-ph pp-ph--c">{phone("botanica", "Eleanor & James")}</div>
+          <div className="pp-editorial-image">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/art/weddsent-handheld.webp" width={900} height={1200} alt="A digital wedding invitation viewed on an iPhone at an outdoor celebration"/>
+            <span>MADE FOR THE SCREEN THEY'LL OPEN IT ON.</span>
           </div>
         </section>
 

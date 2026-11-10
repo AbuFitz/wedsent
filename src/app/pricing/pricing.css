@@ -80,3 +80,20 @@
   .pp-ticket-main{border-right:0;border-bottom:2px dashed #E3DDD4}
   .pp-steps{grid-template-columns:1fr}
 }
+/* Pricing inherits the white-first editorial product identity. */
+.pp-hero{max-width:1440px;padding-top:175px;padding-bottom:100px;min-height:760px}
+.pp-hero h1{font-family:var(--display);font-weight:650;font-size:clamp(65px,7vw,125px);letter-spacing:-.095em;line-height:.98}
+.pp-copy>p{line-height:1.6}.pp-cta .btn{border-radius:5px}
+.pp-ticket-wrap{max-width:1180px}.pp-ticket{border-radius:5px;border:1px solid #ddd;box-shadow:none}.pp-ticket-main{border-right:1px solid #ddd}.pp-badge{border-radius:4px;background:#eee;color:#333}
+.pp-price{font-family:var(--display);font-weight:650;letter-spacing:-.1em}.pp-go{border-radius:5px}.pp-story>h2,.pp-faq h2{letter-spacing:-.075em}
+.pp-demo{border:1px solid #e5e5e5;border-radius:5px;background:#fafafa}.pp-demo--send{background:#f3f3f3}.pp-end{background:#171717;border-radius:0}.pp-foot{background:#171717;border-color:#333}
+@media(max-width:900px){.pp-hero{padding-top:135px;min-height:0}.pp-hero h1{font-size:clamp(57px,11vw,90px)}.pp-ticket-main{border-right:0;border-bottom:1px solid #ddd}}
+.pp-hero-editorial{display:flex;flex-direction:column;align-items:center;gap:0;max-width:none;text-align:center;padding:160px 4vw 110px;min-height:0}
+.pp-editorial-eyebrow{font-size:10px;letter-spacing:.15em;font-weight:700}
+.pp-hero-editorial h1{font-size:clamp(75px,9.5vw,165px);letter-spacing:-.11em;max-width:1200px;margin:28px 0}
+.pp-hero-editorial .pp-copy>p{max-width:540px;margin:25px auto 0}.pp-hero-editorial .pp-cta{justify-content:center}
+.pp-editorial-image{position:relative;width:min(100%,1200px);height:490px;overflow:hidden;background:#eee;margin-top:80px}
+.pp-editorial-image img{width:100%;height:100%;object-fit:cover;object-position:center 48%}
+.pp-editorial-image span{position:absolute;bottom:20px;left:23px;color:#fff;text-shadow:0 1px 10px #0009;font-size:10px;font-weight:700;letter-spacing:.1em}
+@media(max-width:900px){.pp-hero-editorial{padding:130px 18px 75px}.pp-hero-editorial h1{font-size:clamp(60px,11.8vw,100px)}.pp-editorial-image{height:440px;margin-top:60px}}
+@media(max-width:650px){.pp-hero-editorial{text-align:left;align-items:stretch}.pp-hero-editorial h1{font-size:clamp(55px,12vw,80px)}.pp-hero-editorial .pp-copy>p{margin:20px 0 0;font-size:15px}.pp-hero-editorial .pp-cta{justify-content:flex-start}.pp-editorial-image{height:500px}.pp-editorial-image img{object-position:center}}

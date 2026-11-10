@@ -22,9 +22,10 @@ export function Home() {
       <main className="hm">
         <Hero />
         <Collection />
-        <Moments />
+        <Atmosphere />
         <EveryWedding />
         <GuestTour />
+        <Moments />
         <Everything />
         <PriceTeaser />
         <Faq />
@@ -38,28 +39,31 @@ export function Home() {
 /* ------------------------------ Hero ------------------------------ */
 function Hero() {
   return (
-    <section className="hm-hero hm-hero-editorial">
-      <div className="hm-hero-copy">
-        <span className="hm-eyebrow">WEDDING INVITATIONS, REIMAGINED</span>
-        <h1>Make their first impression <em>count.</em></h1>
-        <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.8, ease }}>
-          The first moment of your wedding deserves more than a message. Create a beautiful digital invitation that feels like you.
-        </motion.p>
-        <motion.div className="hm-cta" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.8, ease }}>
-          <Link href="/start" className="btn btn-dark">Start your invitation <ArrowRight size={18} /></Link>
-          <Link href="/designs" className="btn btn-light">Browse designs</Link>
-        </motion.div>
-        <p className="hm-note">Free to explore. Designed for their phones, and yours.</p>
+    <section className="hm-new-hero">
+      <div className="hm-hero-identity"><span>WEDDSENT® / DIGITAL INVITATIONS</span><span>THE ART OF BEING INVITED</span></div>
+      <div className="hm-hero-heading"><motion.h1 initial={{opacity:0,y:45}} animate={{opacity:1,y:0}} transition={{duration:1,ease}}>Not just an invite.<br/><em>An entrance.</em></motion.h1><p>One unforgettable first impression. A beautifully personal invitation, made to open on every phone.</p></div>
+      <div className="hm-hero-collage">
+        <motion.figure className="hm-collage-veil" initial={{opacity:0,y:85,rotate:-5}} animate={{opacity:1,y:0,rotate:-5}} transition={{delay:.3,duration:1,ease}}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}<img src="/art/weddsent-veil.webp" alt="A close-cropped fashion wedding scene of a couple holding hands beneath a flowing veil" width={1000} height={1500}/><figcaption>FEEL SOMETHING FIRST.</figcaption>
+        </motion.figure>
+        <motion.figure className="hm-collage-phone" initial={{opacity:0,y:100,rotate:4}} animate={{opacity:1,y:0,rotate:4}} transition={{delay:.48,duration:1,ease}}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}<img src="/art/weddsent-digital-hero.webp" alt="Digital wedding invitation displayed on a realistic iPhone resting on embossed ivory paper" width={1300} height={866}/>
+        </motion.figure>
+        <motion.figure className="hm-collage-hands" initial={{opacity:0,y:95,rotate:7}} animate={{opacity:1,y:0,rotate:7}} transition={{delay:.65,duration:1,ease}}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}<img src="/art/weddsent-hands.webp" alt="Newlyweds holding hands with white roses" width={850} height={1275}/>
+        </motion.figure>
+        <div className="hm-collage-action"><Link href="/start">Create yours <ArrowRight size={20}/></Link><Link href="/designs">Explore the designs ↗</Link></div>
       </div>
-      <motion.div className="hm-hero-photo" initial={{ opacity: 0, y: 35 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease }}>
-        {/* Original Weddsent campaign asset, digitally rendered phone scene. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/art/weddsent-digital-hero.webp" alt="A realistic iPhone showing Amina and Yusuf's digital wedding invitation on ivory stationery" width={1536} height={1024} />
-        <div className="hm-hero-photo-caption"><span>AN INVITATION WORTH OPENING</span><span>W / 001</span></div>
-      </motion.div>
+      <div className="hm-hero-foot"><span>01 / THE INVITATION IS THE BEGINNING</span><span>SCROLL TO EXPLORE ↓</span></div>
     </section>
   );
 }
+
+function Atmosphere(){return <section className="hm-atmosphere">
+  {/* eslint-disable-next-line @next/next/no-img-element */}<img src="/art/weddsent-evening.webp" alt="Candlelit wedding celebration dinner in an old stone courtyard at twilight" loading="lazy" width={1500} height={1000}/>
+  <div className="hm-atmosphere-copy"><span>THE FEELING, BEFORE THE DAY</span><h2>Every great celebration has a beginning.</h2><p>Let yours feel like something worth opening.</p></div>
+  <div className="hm-atmosphere-number">W / 002</div>
+</section>}
 
 function Moments() {
   return <section className="hm-moments" aria-labelledby="hm-moments-title">

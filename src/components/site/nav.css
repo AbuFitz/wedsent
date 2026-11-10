@@ -11,10 +11,3 @@
 .nav-account--loading{width:81px;min-height:38px;border-color:transparent;background:transparent}
 @media(max-width:650px){.nav-link{display:none}.nav-pill{padding:5px 5px 5px 13px;gap:5px;width:min(100%,430px);justify-content:space-between}.nav-logo{font-size:18px;margin-right:auto}.nav-account{min-height:36px;padding:9px 12px;font-size:12px}.nav-cta{margin-left:0;padding:11px 13px;font-size:12px;white-space:nowrap}}
 @media(max-width:365px){.nav-pill{padding-left:10px;gap:4px}.nav-logo{font-size:16px}.nav-account{font-size:11px;padding:9px 9px}.nav-cta{font-size:11px;padding:11px 10px}}
-/* Framed editorial navigation, inset on desktop and mobile. */
-.nav{top:16px;padding:0 3vw}
-.nav-pill{width:100%;max-width:1380px;border-radius:12px;background:#fffffff2;border:1px solid #e2e2e2;min-height:68px;padding:7px 9px 7px 24px;box-shadow:0 10px 36px #00000012}
-.nav-logo{font-size:25px;letter-spacing:-.085em;margin-right:auto}
-.nav-link{font-size:13px}.nav-cta{border-radius:7px;padding:13px 20px}
-.nav-account{border-radius:7px;background:#fff;border-color:transparent}
-@media(max-width:650px){.nav{top:10px;padding:0 11px}.nav-pill{width:100%;min-height:61px;padding:5px 6px 5px 13px;border-radius:10px}.nav-logo{font-size:20px}.nav-account{font-size:12px;min-height:38px;padding:8px}.nav-cta{border-radius:6px;padding:11px 12px;font-size:11px}}
