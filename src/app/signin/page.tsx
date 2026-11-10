@@ -44,7 +44,7 @@ function Form() {
   return (
     <main className="si">
       <div className="si-top"><Link href="/" className="si-logo">wedsent</Link><Link href="/designs" className="si-explore">Explore invitations</Link></div>
-      <div className="si-layout"><aside className="si-story" aria-label="Welcome to Wedsent"><span>AN INVITATION WORTH OPENING</span><h2>One lovely beginning. Everything in its place.</h2><p>Choose your design. Make it personal. Share with your people and keep their replies together.</p><div className="si-paper" aria-hidden="true"><div className="si-paper-kicker">TOGETHER WITH THEIR FAMILIES</div><strong>The celebration<br/>begins here.</strong><span>EST. IN LOVE</span></div></aside>
+      <div className="si-layout"><aside className="si-story" aria-label="Welcome to Wedsent"><span>AN INVITATION WORTH OPENING</span><h2>One lovely beginning. Everything in its place.</h2><p>Choose your design. Make it personal. Share with your people and keep their replies together.</p></aside>
       <form className="si-card" onSubmit={submit} noValidate>
         <span className="si-kicker">{mode === "up" ? "YOUR NEXT CHAPTER" : "GOOD TO HAVE YOU BACK"}</span>
         <h1>{mode === "up" ? "Keep your invitation." : "Welcome back."}</h1>

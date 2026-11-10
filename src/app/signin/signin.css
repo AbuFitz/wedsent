@@ -2,14 +2,11 @@
 .si-top{display:flex;align-items:center;justify-content:space-between;width:min(1100px,100%)}
 .si-explore{font-size:13px;color:#60655c;text-decoration:none;border-bottom:1px solid #969b93;padding-bottom:4px}
 .si-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,430px);align-items:center;gap:clamp(35px,7vw,100px);width:min(1100px,100%);margin:auto 0}
-.si-story{position:relative;align-self:stretch;min-height:570px;background:#374337;color:#f5efe3;padding:clamp(30px,5vw,62px);display:flex;flex-direction:column;overflow:hidden}
-.si-story>span,.si-kicker{font-size:10px;letter-spacing:.14em;font-weight:750;color:#b4c0ad}
-.si-story h2{font:normal clamp(39px,5vw,65px)/.99 Georgia,serif;letter-spacing:-.065em;max-width:500px;margin:32px 0 16px}
-.si-story>p{max-width:350px;font-size:13px;line-height:1.7;color:#c5cfc0}
-.si-paper{position:relative;align-self:center;margin:auto 0 0;width:min(300px,85%);aspect-ratio:3/3.8;background:#ece8d9;color:#394536;box-shadow:0 16px 55px #111e142a,0 0 0 8px #e4e0d0 inset;padding:32px 20px;display:flex;align-items:center;justify-content:space-around;flex-direction:column;text-align:center;transform:rotate(-4deg);border:1px solid #bfc2b1}
-.si-paper:before{content:"";position:absolute;inset:14px;border:1px solid #9daa94;pointer-events:none}
-.si-paper-kicker,.si-paper>span{font-size:9px;letter-spacing:.16em;line-height:1.6}
-.si-paper strong{font:italic 36px/1 Georgia,serif;letter-spacing:-.035em}
+.si-story{position:relative;isolation:isolate;align-self:stretch;min-height:570px;background:#1b1b1b url('/signin-masjid-wedding.webp') center 58%/cover no-repeat;color:#fff;padding:clamp(30px,5vw,62px);display:flex;flex-direction:column;overflow:hidden}
+.si-story:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.48) 0%,rgba(0,0,0,.28) 47%,transparent 82%);pointer-events:none}
+.si-story>span,.si-kicker{font-size:10px;letter-spacing:.14em;font-weight:750;color:#d7d7d5}
+.si-story h2{font:normal clamp(39px,5vw,65px)/.99 Georgia,serif;letter-spacing:-.065em;max-width:500px;margin:32px 0 16px;text-wrap:balance;text-shadow:0 2px 18px #0006}
+.si-story>p{max-width:350px;font-size:13px;line-height:1.7;color:#f0f0ef;text-shadow:0 1px 8px #0009}
 .si-kicker{color:#7b877a;display:block;margin-bottom:10px}
 .si-logo{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.03em}
 .si-card{width:100%;max-width:430px;display:flex;flex-direction:column;gap:18px;padding:20px 0}
@@ -25,4 +22,4 @@
 .si-switch{font-size:14px;color:var(--muted)}
 .si-switch button{background:none;border:0;padding:0;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 .si-note{max-width:420px;font-size:12.5px;color:var(--muted);text-align:center}
-@media(max-width:800px){.si{justify-content:flex-start;min-height:100dvh;padding:22px 20px 30px;gap:18px}.si-layout{display:flex;flex-direction:column;gap:0;margin:35px 0 0}.si-story{display:none}.si-card{padding:0}.si-note{margin-top:auto;line-height:1.5}.si-card h1{font-size:38px}}
+@media(max-width:800px){.si{justify-content:flex-start;min-height:100dvh;padding:22px 20px 30px;gap:18px}.si-layout{display:flex;flex-direction:column;gap:26px;margin:14px 0 0}.si-story{display:flex;width:100%;min-height:240px;padding:24px;background-position:center 48%}.si-story h2{font-size:clamp(31px,8vw,45px);max-width:370px;margin:22px 0 0}.si-story>p{display:none}.si-card{padding:0}.si-note{margin-top:auto;line-height:1.5}.si-card h1{font-size:38px}}
