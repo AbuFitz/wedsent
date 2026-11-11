@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ASSETS } from "@/engine/assets";
 import { FONT_PACKS } from "@/engine/registry";
 import { Nav } from "@/components/site/nav";
-import "./credits.css";
 
 export const metadata: Metadata = { title: "Artwork credits | Wedsent", description: "Where Wedsent's artwork, fonts and icons come from, and their licences." };
 
@@ -21,11 +20,11 @@ export default function Page() {
   return (
     <>
       <Nav />
-      <main className="cr">
-        <h1>Artwork credits</h1>
-        <p className="cr-lead">Wedsent’s botanical illustrations and ornament are public-domain or CC0 plates held by museums and libraries, cut out and recoloured for use in invitations. The licence shown is what Wikimedia Commons records for each file. We link every source so you can check it yourself.</p>
+      <main className="ws-page ws-credits"><div className="ws-wrap">
+        <header className="ws-page-head"><h1 className="ws-h1">Artwork credits</h1></header>
+        <p className="ws-lead">Wedsent’s botanical illustrations and ornament are public-domain or CC0 plates held by museums and libraries, cut out and recoloured for use in invitations. The licence shown is what Wikimedia Commons records for each file. We link every source so you can check it yourself.</p>
         <h2>Illustrations and ornament</h2>
-        <ul className="cr-list">
+        <ul >
           {rows.map((a) => (
             <li key={a.id}>
               <strong>{a.title.replace(/\.(jpe?g|png|webp)$/i, "")}</strong>
@@ -35,11 +34,11 @@ export default function Page() {
           ))}
         </ul>
         <h2>Fonts</h2>
-        <p className="cr-lead">All typefaces are licensed under the SIL Open Font License 1.1 and self-hosted: {Array.from(new Set(FONT_PACKS.flatMap((f) => [f.head, f.script, f.body].filter(Boolean) as string[]).map((s) => s.split(",")[0].replace(/["']|\sVariable/g, "")))).sort().join(", ")}, plus Amiri, Noto Naskh Arabic, Tiro Devanagari Hindi, Instrument Serif, Geist, Bricolage Grotesque and Rethink Sans.</p>
+        <p className="ws-lead">All typefaces are licensed under the SIL Open Font License 1.1 and self-hosted: {Array.from(new Set(FONT_PACKS.flatMap((f) => [f.head, f.script, f.body].filter(Boolean) as string[]).map((s) => s.split(",")[0].replace(/["']|\sVariable/g, "")))).sort().join(", ")}, plus Amiri, Noto Naskh Arabic, Tiro Devanagari Hindi, Instrument Serif, Geist, Bricolage Grotesque and Rethink Sans.</p>
         <h2>Software</h2>
-        <ul className="cr-list">{OTHER.map(([n, l, u]) => <li key={n}><strong>{n}</strong><span>{l}</span><a href={u} target="_blank" rel="noreferrer">Project</a></li>)}</ul>
-        <p className="cr-lead"><Link href="/">Back to Wedsent</Link></p>
-      </main>
+        <ul >{OTHER.map(([n, l, u]) => <li key={n}><strong>{n}</strong><span>{l}</span><a href={u} target="_blank" rel="noreferrer">Project</a></li>)}</ul>
+        <p className="ws-lead"><Link href="/">Back to Wedsent</Link></p>
+      </div></main>
     </>
   );
 }

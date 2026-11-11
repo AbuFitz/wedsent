@@ -15,11 +15,11 @@ export type ExperienceRecommendation = {
 export function recommendExperience(occasion: string, mood: Mood, audio: AudioPreference): ExperienceRecommendation {
   const celebration = /mehndi|haldi|sangeet/i.test(occasion);
   const rules: Record<Mood, Omit<ExperienceRecommendation, "audioHint">> = {
-    minimal: { design: "linen", opening: "focus", title: "Quietly modern", reason: "Precise typography and a gentle reveal." },
-    romantic: { design: "arch", opening: "veil", title: "Softly romantic", reason: "A photograph-led invitation with a delicate unveiling." },
-    grand: { design: "gallery", opening: "doors", title: "A grand entrance", reason: "A dramatic entrance with an editorial invitation." },
-    heritage: { design: "zellige", opening: "lift", title: "Considered heritage", reason: "Decorative geometry balanced with classic stationery." },
-    celebration: { design: "marigold", opening: "bloom", title: "A joyful entrance", reason: "Warm colour and an expressive opening." },
+    minimal: { design: "linen", opening: "script", title: "Quietly modern", reason: "Precise typography and a gentle reveal." },
+    romantic: { design: "pearl", opening: "doors", title: "Softly romantic", reason: "A photograph-led invitation with a delicate unveiling." },
+    grand: { design: "gilt", opening: "ignite", title: "A grand entrance", reason: "A dramatic entrance with an editorial invitation." },
+    heritage: { design: "zellige", opening: "bloom", title: "Considered heritage", reason: "Decorative geometry balanced with classic stationery." },
+    celebration: { design: "marigold", opening: "petals", title: "A joyful entrance", reason: "Warm colour and an expressive opening." },
   };
   const selected = celebration && mood === "romantic" ? rules.celebration : rules[mood];
   const audioHints: Record<AudioPreference, string> = {

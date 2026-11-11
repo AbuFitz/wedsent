@@ -1,5 +1,5 @@
-import { EditionHome } from "@/components/site/edition-home";
+import { Home } from "@/components/site/home";
 
 export default function Page() {
-  return <EditionHome />;
+  return <Home />;
 }

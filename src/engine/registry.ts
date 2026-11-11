@@ -3,9 +3,10 @@
  * palettes + type pairing. Content (names, events...) is separate and survives switching designs.
  * Pure TypeScript, safe to import on the server (validation) and the client (rendering).
  */
-export type OpeningKind = "lift" | "bloom" | "veil" | "focus" | "doors" | "curtain";
-export type ArtKind = "none" | "plates" | "photo" | "ornament";
-export type Shape = "Portrait" | "Arch" | "Frame" | "Full bleed" | "Minimal";
+/** How an invitation opens. `veil`, `focus` and `curtain` are legacy values kept so old drafts still load; they render as `script`/`bloom`. */
+export type OpeningKind = "lift" | "doors" | "bloom" | "ignite" | "script" | "kinetic" | "grow" | "petals" | "veil" | "focus" | "curtain";
+export type ArtKind = "none" | "plates" | "photo" | "ornament" | "pearl" | "foil";
+export type Shape = "Portrait" | "Arch" | "Frame" | "Full bleed" | "Minimal" | "Gatefold";
 
 export type Palette = {
   id: string; name: string;
@@ -68,197 +69,103 @@ export type DesignSpec = {
   site: { bg: string; ink: string };  // marketing-page tone for this design
 };
 
-export const DESIGN_IDS = ["pearl", "embossed", "gilt", "rosewood", "velvet", "heritage", "nikah-etched", "atelier", "vellum", "nocturne", "postmark", "botanica", "arch", "zellige", "marigold", "gallery", "linen"] as const;
+export const DESIGN_IDS = ["vellum", "gilt", "pearl", "botanica", "marigold", "zellige", "gallery", "linen"] as const;
 export type DesignId = (typeof DESIGN_IDS)[number];
-/** The original set remains renderable for existing invitations, but is not offered to new couples. */
-/** Old schemes remain readable for previously saved invitations, but the public gallery is rebuilt. */
-export const FEATURED_DESIGN_IDS: readonly DesignId[] = ["pearl", "embossed", "rosewood", "velvet", "heritage", "nikah-etched", "gilt"];
+export const FEATURED_DESIGN_IDS: readonly DesignId[] = DESIGN_IDS;
+
+/** Designs from earlier versions resolve to the nearest current design so saved drafts and published weddings still render. */
+export const LEGACY_DESIGN: Record<string, DesignId> = {
+  embossed: "vellum", rosewood: "pearl", velvet: "gilt", heritage: "zellige", "nikah-etched": "zellige", atelier: "vellum",
+  nocturne: "gilt", postmark: "linen", arch: "pearl", zest: "linen", mono: "gallery",
+};
+export const normalizeDesignId = (id: unknown): DesignId => (DESIGN_IDS as readonly string[]).includes(id as string) ? (id as DesignId) : LEGACY_DESIGN[id as string] ?? "pearl";
 
 const pal = (id: string, name: string, accent: string, rest: Partial<Palette> = {}): Palette => ({ id, name, accent, ...rest });
 
 export const OPENINGS: Record<OpeningKind, { label: string; hint: string }> = {
-  lift: { label: "Swipe to open", hint: "The cover lifts away like a sheet of paper" },
-  bloom: { label: "Tap to open", hint: "The invitation opens outward from where you touch" },
-  veil: { label: "Tap to open", hint: "The cover softly clears to reveal the invitation" },
-  focus: { label: "Reveal the moment", hint: "Typography moves into focus as the invitation is revealed" },
-  doors: { label: "Open the doors", hint: "A pair of hinged panels opens to reveal the occasion" },
-  curtain: { label: "Draw the curtain", hint: "Soft fabric folds pull away from the invitation" },
+  lift: { label: "Swipe up to open", hint: "The cover lifts away like a sheet of paper, following your thumb" },
+  doors: { label: "Tap to open", hint: "A folded card opens from the middle, like a gatefold invitation" },
+  bloom: { label: "Tap to open", hint: "The invitation opens outward from exactly where you touch" },
+  ignite: { label: "Tap to open", hint: "A line of foil draws the frame, then the names light up" },
+  script: { label: "Tap to open", hint: "The names are written out in ink, then the card turns" },
+  kinetic: { label: "Tap to open", hint: "Type rises into place over your photograph" },
+  grow: { label: "Tap to open", hint: "Botanical plates grow in from the edges around the names" },
+  petals: { label: "Tap to open", hint: "Petals fall and settle, then the invitation opens" },
+  veil: { label: "Tap to open", hint: "The cover softly clears" },
+  focus: { label: "Tap to open", hint: "Typography moves into focus" },
+  curtain: { label: "Tap to open", hint: "The cover parts" },
 };
 
+/** Which openings a couple can pick in the Studio (legacy ones are not offered). */
+export const OPENING_CHOICES: OpeningKind[] = ["lift", "doors", "bloom", "ignite", "script", "kinetic", "grow", "petals"];
+
+const D = (d: Omit<DesignSpec, "layout" | "opening"> & { opening: { kind: OpeningKind } }): DesignSpec => ({ ...d, layout: "stationery", opening: { kind: d.opening.kind, ...OPENINGS[d.opening.kind] } });
+
 export const DESIGNS: DesignSpec[] = [
-  {
-    id: "pearl", name: "Pearl Garden", family: "Pearlescent botanical", blurb: "A luminous rose-and-gold keepsake. Lift the floral seal and two mother-of-pearl panels part to reveal your invitation.",
-    styles: ["Floral & Botanical", "Romantic", "Classic & Traditional", "Luxury"], colours: ["Pastel", "Ivory & Gold", "Neutral Tones"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Walima", "Garden", "Civil"],
-    opening: { kind: "doors", label: "Tap the seal to open", hint: "An embossed floral envelope opens from the centre" }, layout: "stationery", fonts: "pinyon", art: "none", intro: "families", sample: { names: "Alba & Felipe", occasion: "Wedding" },
-    site: { bg: "#E7E2D8", ink: "#50463D" }, palettes: [
-      pal("blush", "Rose pearl", "#A58164", { bg: "#E9E0D6", soft: "#F8EFE4", fg: "#4C4035", line: "#BE9D70" }),
-      pal("sage", "Sage pearl", "#778477", { bg: "#DCE0D7", soft: "#F5F1E8", fg: "#3D4C42", line: "#B59B6B" }),
-      pal("champagne", "Champagne", "#987A53", { bg: "#E8E0D1", soft: "#FBF4E7", fg: "#514337", line: "#B69863" }),
-      pal("lavender", "Lavender pearl", "#8B7A91", { bg: "#E5DFE8", soft: "#F8F1F1", fg: "#534655", line: "#B5A1B9" }),
-    ],
-  },
-  {
-    id: "embossed", name: "Sculpted Ivory", family: "Blind emboss", blurb: "A tactile cotton-paper invitation with ivory roses sculpted in relief and a softly raised foil impression.",
-    styles: ["Luxury", "Floral & Botanical", "Classic & Traditional"], colours: ["Neutral Tones", "Ivory & Gold"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Civil", "Church"],
-    opening: { kind: "lift", label: "Lift the sleeve", hint: "An ivory paper sleeve lifts away from the invitation" }, layout: "stationery", fonts: "classic", art: "none", intro: "families", sample: { names: "Amelia & Daniel", occasion: "Wedding" },
-    site: { bg: "#DCD2C2", ink: "#514532" }, palettes: [
-      pal("ivory", "Warm ivory", "#80613B", { bg: "#E4DCCF", soft: "#F3E8D6", fg: "#514334", line: "#C4AD86" }),
-      pal("rose", "Rose champagne", "#855E58", { bg: "#E6D8D1", soft: "#F7EAE2", fg: "#59483D", line: "#C9A693" }),
-      pal("sage", "Sage gold", "#59694D", { bg: "#DCE0D2", soft: "#F0EDDF", fg: "#465040", line: "#B8AE8D" }),
-      pal("stone", "Stone linen", "#655B50", { bg: "#DCDAD4", soft: "#F1EEE7", fg: "#46423C", line: "#BAB0A0" }),
-    ],
-  },
-  {
-    id: "gilt", name: "Gilded Night", family: "Hot foil", blurb: "Midnight velvet-black stock, dimensional antique-gold florals and a dramatic ceremonial reveal.",
-    styles: ["Luxury", "Art Deco", "Elegant & Formal"], colours: ["Metallic", "Black & White", "Jewel"], shape: "Portrait", cultures: ["Any wedding", "Walima", "Reception", "Evening"],
-    opening: { kind: "doors", label: "Open the invitation", hint: "Two gilded panels unfold in a quiet ceremony" }, layout: "stationery", fonts: "deco", art: "none", intro: "pleasure", sample: { names: "Nadia & Karim", occasion: "Walima" },
-    site: { bg: "#181512", ink: "#E6C889" }, palettes: [
-      pal("onyx", "Onyx foil", "#D4B66F", { bg: "#171410", soft: "#191512", fg: "#F2DEB1", line: "#AD8648" }),
-      pal("aubergine", "Aubergine foil", "#D8BC86", { bg: "#2D2028", soft: "#261B22", fg: "#F3E1C4", line: "#AF8D67" }),
-      pal("forest", "Forest foil", "#D8C28B", { bg: "#1A2722", soft: "#15221C", fg: "#F0E3C6", line: "#A99D6F" }),
-      pal("navy", "Navy foil", "#D7C799", { bg: "#19202C", soft: "#161B25", fg: "#E8E1CD", line: "#A9A080" }),
-    ],
-  },
-  {
-    id: "rosewood", name: "Rosewood Letter", family: "Sealed envelope", blurb: "A rose-coloured cotton-paper envelope, sculpted wax seal and letterpress invitation with bronze botanical detailing.",
-    styles: ["Luxury", "Romantic", "Floral & Botanical"], colours: ["Pastel", "Earthy", "Neutral Tones"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Civil", "Garden"],
-    opening: { kind: "doors", label: "Break the wax seal", hint: "The embossed seal lifts and a folded envelope reveals the invitation" }, layout: "stationery", fonts: "garamond", art: "none", intro: "families", sample: { names: "Layla & Omar", occasion: "Wedding" },
-    site: { bg: "#DAC8BE", ink: "#5F3637" }, palettes: [
-      pal("rose", "Rosewood", "#793C43", { bg: "#E8D9D2", soft: "#F4E8DC", fg: "#4E3335", line: "#AD8275" }),
-      pal("wine", "Burgundy", "#6A2835", { bg: "#E6D7D3", soft: "#F6EADF", fg: "#503035", line: "#B58D7E" }),
-      pal("moss", "Moss envelope", "#51614D", { bg: "#DCE0D5", soft: "#F3EDE1", fg: "#384138", line: "#B4A28B" }),
-      pal("clay", "Warm clay", "#81533D", { bg: "#E9D9CE", soft: "#FAF0E4", fg: "#513D33", line: "#BE9984" }),
-    ],
-  },
-  {
-    id: "velvet", name: "Velvet Theatre", family: "Ceremonial curtain", blurb: "Realistic velvet folds draw apart to reveal an ivory invitation stamped with raised gold ornament.",
-    styles: ["Luxury", "Elegant & Formal", "Art Deco"], colours: ["Jewel", "Ivory & Gold", "Metallic"], shape: "Portrait", cultures: ["Any wedding", "Walima", "Reception", "Evening"],
-    opening: { kind: "curtain", label: "Draw the velvet curtains", hint: "Two heavy fabric panels part under soft theatre lighting" }, layout: "stationery", fonts: "italiana", art: "none", intro: "pleasure", sample: { names: "Selina & Idris", occasion: "Wedding" },
-    site: { bg: "#2F202E", ink: "#E8D2AA" }, palettes: [
-      pal("plum", "Aubergine velvet", "#6B4058", { bg: "#E7DCD2", soft: "#F7EEDD", fg: "#382E2D", line: "#A68C65" }),
-      pal("wine", "Wine velvet", "#713744", { bg: "#E6D8D4", soft: "#F6EEE4", fg: "#3D3030", line: "#AE8E68" }),
-      pal("forest", "Forest velvet", "#3D624E", { bg: "#DBE0D6", soft: "#F4EDE0", fg: "#393C32", line: "#9E946D" }),
-      pal("navy", "Midnight velvet", "#365672", { bg: "#D9DFE4", soft: "#F6EDE1", fg: "#323640", line: "#B59A75" }),
-    ],
-  },
-  {
-    id: "heritage", name: "The Heritage Portrait", family: "Victorian engraving", blurb: "A finely etched garden portrait inspired by antique illustrated wedding stationery, with personalised live typography beneath the artwork.",
-    styles: ["Classic & Traditional", "Illustrated", "Luxury"], colours: ["Earthy", "Neutral Tones", "Pastel"], shape: "Portrait", cultures: ["Any wedding", "Civil", "Garden", "Church"],
-    opening: { kind: "focus", ...OPENINGS.focus }, layout: "stationery", fonts: "garamond", art: "none", intro: "families", sample: { names: "Eleanor & James", occasion: "Wedding" },
-    site: { bg: "#EBE2D3", ink: "#5A493D" }, palettes: [
-      pal("sepia", "Antique copper", "#77533E", { bg: "#F1E5D2", soft: "#FCF4E7", fg: "#44362C", line: "#B7A18A" }),
-      pal("sage", "Estate sage", "#596B5B", { bg: "#E4E8DE", soft: "#F7F6EE", fg: "#35453A", line: "#AEBBA9" }),
-      pal("slate", "Blue grey", "#52667B", { bg: "#E2E8E9", soft: "#F6F6F1", fg: "#344552", line: "#ABBDCA" }),
-      pal("wine", "Vintage claret", "#794D5A", { bg: "#E9DEE1", soft: "#FCF3EE", fg: "#51343D", line: "#C3A4A9" }),
-    ],
-  },
-  {
-    id: "nikah-etched", name: "The Garden Nikah", family: "Botanical portrait engraving", blurb: "A respectful bridal portrait featuring a modest hijab and detailed garden etching, created for couples who want representation in their invitation artwork.",
-    styles: ["Illustrated", "Floral & Botanical", "Classic & Traditional"], colours: ["Earthy", "Neutral Tones", "Pastel"], shape: "Portrait", cultures: ["Nikah", "Walima", "Any wedding"],
-    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "garamond", art: "none", intro: "families", sample: { names: "Amina & Yusuf", occasion: "Nikah" },
-    site: { bg: "#E5E7D9", ink: "#4A5E49" }, palettes: [
-      pal("sage", "Botanical sage", "#506B52", { bg: "#E6E9DF", soft: "#F8F7ED", fg: "#334837", line: "#A8B79E" }),
-      pal("olive", "Antique olive", "#696A46", { bg: "#E9E8DA", soft: "#FAF7E9", fg: "#424635", line: "#BABC9C" }),
-      pal("clay", "Terracotta", "#925B47", { bg: "#EEE1D8", soft: "#FCF5E9", fg: "#553F33", line: "#D0AF9E" }),
-      pal("indigo", "Deep indigo", "#515D7C", { bg: "#E0E4EC", soft: "#F9F7EF", fg: "#363F56", line: "#ACB5C7" }),
-    ],
-  },
-  {
-    id: "atelier", name: "Atelier Press", family: "Letterpress", blurb: "A warm cotton-paper keepsake with blind-pressed borders, restrained ink and sculpted lettering.",
-    styles: ["Letterpress", "Classic & Traditional", "Simple & Minimalist"], colours: ["Neutral Tones", "Earthy"], shape: "Portrait", cultures: ["Any wedding", "Nikah", "Civil", "Church"],
-    opening: { kind: "lift", ...OPENINGS.lift }, layout: "stationery", fonts: "editorial2", art: "none", intro: "families", sample: { names: "Mariam & Adam", occasion: "Wedding" },
-    site: { bg: "#E8E1D5", ink: "#312B26" }, palettes: [
-      pal("ivory", "Cotton ivory", "#6B6052", { bg: "#E9E2D5", soft: "#FAF7EE", fg: "#302D29", line: "#CEC4B5" }),
-      pal("sage", "Olive ink", "#51624A", { bg: "#DDE1D6", soft: "#F3F2E8", fg: "#344035", line: "#BBC7B4" }),
-      pal("rose", "Dusty rose", "#945B61", { bg: "#EBDCDC", soft: "#FBF4EF", fg: "#593A3B", line: "#D5BDBB" }),
-      pal("slate", "Slate impression", "#525C65", { bg: "#DBE0E2", soft: "#F4F5F2", fg: "#303941", line: "#BFC6C8" }),
-    ],
-  },
-  {
-    id: "vellum", name: "Vellum Study", family: "Layered paper", blurb: "A translucent invitation sleeve reveals a portrait beneath, as though unwrapping fine stationery.",
-    styles: ["Modern", "Photography", "Romantic"], colours: ["Pastel", "Neutral Tones"], shape: "Arch", cultures: ["Any wedding", "Civil", "Garden"],
-    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "italiana", art: "photo", intro: "none", sample: { names: "Sofia & Elias", occasion: "Wedding" },
-    site: { bg: "#E9DDD8", ink: "#4D3735" }, palettes: [
-      pal("blush", "Rose vellum", "#95686C", { bg: "#E9DDD8", soft: "#F7F0EB", fg: "#4D3735", line: "#CEB3AF" }),
-      pal("stone", "Stone vellum", "#776B5D", { bg: "#DCD9D2", soft: "#F1EEE7", fg: "#443F3A", line: "#C7BDB2" }),
-      pal("mist", "Blue mist", "#567585", { bg: "#DCE5E6", soft: "#F3F6F3", fg: "#30454B", line: "#B5CFD1" }),
-      pal("olive", "Soft olive", "#566C55", { bg: "#DCE3D8", soft: "#F3F5EB", fg: "#354536", line: "#BBC9B7" }),
-    ],
-  },
-  {
-    id: "nocturne", name: "Nocturne", family: "Evening foil", blurb: "Inky stock, a reflective metallic monogram and disciplined black-tie typography.",
-    styles: ["Elegant & Formal", "Art Deco", "Bold & Typographic"], colours: ["Black & White", "Metallic", "Jewel"], shape: "Frame", cultures: ["Any wedding", "Reception", "Walima", "Evening"],
-    opening: { kind: "doors", ...OPENINGS.doors }, layout: "stationery", fonts: "deco", art: "none", intro: "none", sample: { names: "Nadia & Karim", occasion: "Walima" },
-    site: { bg: "#1B2423", ink: "#D4C19A" }, palettes: [
-      pal("onyx", "Onyx & champagne", "#D6BD83", { bg: "#131B19", soft: "#18211E", fg: "#F4E9D4", line: "#9F8C65" }),
-      pal("plum", "Midnight plum", "#D5B3B9", { bg: "#2A1F2A", soft: "#322632", fg: "#F8E8E9", line: "#B792A3" }),
-      pal("navy", "Navy & platinum", "#C4CDD3", { bg: "#121F2C", soft: "#172637", fg: "#F0F3F4", line: "#8FA2AD" }),
-      pal("forest", "Forest & brass", "#C5AF79", { bg: "#112A24", soft: "#17342C", fg: "#F4ECDC", line: "#8F845F" }),
-    ],
-  },
-  {
-    id: "postmark", name: "Postmark", family: "Destination", blurb: "A nostalgic destination-wedding postcard with a landscape window, serif address and a stamped date.",
-    styles: ["Editorial", "Photography", "Destination"], colours: ["Earthy", "Neutral Tones", "Bright"], shape: "Full bleed", cultures: ["Any wedding", "Destination", "Civil"],
-    opening: { kind: "focus", ...OPENINGS.focus }, layout: "stationery", fonts: "garamond", art: "photo", intro: "none", sample: { names: "Leila & Luca", occasion: "Wedding" },
-    site: { bg: "#DAD2BE", ink: "#383B32" }, palettes: [
-      pal("sand", "Sun-faded sand", "#8F6C4C", { bg: "#DDD3BD", soft: "#F7F0DE", fg: "#3D3A31", line: "#C6B89B" }),
-      pal("sea", "Sea glass", "#3E7777", { bg: "#D9E5DD", soft: "#F5F2E6", fg: "#2B4D4C", line: "#A7C4BE" }),
-      pal("terracotta", "Terracotta", "#A85E46", { bg: "#E9D8C8", soft: "#FBF2E7", fg: "#5C4037", line: "#D6B7A2" }),
-      pal("cobalt", "Faded cobalt", "#355F85", { bg: "#D7DFE4", soft: "#F5F4E9", fg: "#2C4557", line: "#B5C8D4" }),
-    ],
-  },
-  {
-    id: "gallery", name: "Gallery", family: "Editorial", blurb: "Your photograph, full bleed, with your names set large like a magazine cover.",
-    styles: ["Full Bleed Photo", "Modern", "Elegant & Formal"], colours: ["Neutral Tones", "Black & White", "Earthy"], shape: "Full bleed", cultures: ["Any wedding", "Civil", "Evening", "Nikah"],
-    opening: { kind: "lift", ...OPENINGS.lift }, layout: "stationery", fonts: "editorial2", art: "photo", intro: "none", sample: { names: "Hannah & James", occasion: "Wedding" },
-    site: { bg: "#E9E4DB", ink: "#1D1A15" },
+  D({
+    id: "pearl", name: "Pearl", family: "Pearlescent", blurb: "Iridescent pearl stock, a quiet embossed monogram, and a folded card that opens from the middle.",
+    styles: ["Elegant & Formal", "Simple & Minimalist", "Modern"], colours: ["Pastel", "Ivory & Gold", "Neutral Tones"], shape: "Gatefold", cultures: ["Any wedding", "Nikah", "Church", "Civil"],
+    opening: { kind: "doors" }, fonts: "classic", art: "pearl", intro: "none", sample: { names: "Emily & James", occasion: "Wedding" },
+    site: { bg: "#E9E4EE", ink: "#2B2433" },
     palettes: [
-      pal("ink", "Ink", "#1D1A15", { bg: "#F4F1EA", fg: "#1D1A15", soft: "#FBF9F4", line: "#CFC8B8" }),
-      pal("sand", "Sand", "#8A6E4B", { bg: "#EFE6D8", fg: "#2D2318", soft: "#F8F2E8", line: "#CDBB9F" }),
-      pal("sage", "Sage", "#4F6B57", { bg: "#E8EDE4", fg: "#1F2D24", soft: "#F4F7F1", line: "#BFCDBB" }),
-      pal("rose", "Rose", "#9A4A57", { bg: "#F5E9E6", fg: "#3A1E24", soft: "#FBF4F2", line: "#DDBFC0" }),
+      pal("pearl", "Pearl", "#8A7A93", { bg: "#EFEAF0", fg: "#2F2837", soft: "#F8F5F9", line: "#CFC3D6" }),
+      pal("blush", "Blush pearl", "#A9707A", { bg: "#F4E8E8", fg: "#3A2328", soft: "#FBF4F4", line: "#DDBFC2" }),
+      pal("mist", "Sea mist", "#4F6F78", { bg: "#E6EEEE", fg: "#1F3236", soft: "#F4F8F8", line: "#BCD0D2" }),
+      pal("champagne", "Champagne", "#A18454", { bg: "#F1EADB", fg: "#3A2F1C", soft: "#FAF6EC", line: "#D8C9A5" }),
     ],
-  },
-  {
-    id: "linen", name: "Linen", family: "Minimal", blurb: "Almost nothing but type: thin rules, generous space and a single quiet accent.",
-    styles: ["Simple & Minimalist", "Modern", "Calligraphy"], colours: ["Neutral Tones", "Black & White"], shape: "Minimal", cultures: ["Any wedding", "Civil", "Church"],
-    opening: { kind: "focus", ...OPENINGS.focus }, layout: "stationery", fonts: "didone", art: "none", intro: "none", sample: { names: "Clara & Theo", occasion: "Wedding" },
-    site: { bg: "#F1EFEA", ink: "#1B1B19" },
+  }),
+  D({
+    id: "vellum", name: "Vellum", family: "Letterpress", blurb: "A translucent vellum sheet over a letterpress card. Lift it with your thumb.",
+    styles: ["Simple & Minimalist", "Classic & Traditional", "Calligraphy"], colours: ["Neutral Tones", "Earthy"], shape: "Portrait", cultures: ["Any wedding", "Church", "Garden", "Civil"],
+    opening: { kind: "lift" }, fonts: "pinyon", art: "none", intro: "families", sample: { names: "Clara & Theo", occasion: "Wedding" },
+    site: { bg: "#EDEAE3", ink: "#25231F" },
     palettes: [
-      pal("bone", "Bone", "#1B1B19", { bg: "#F6F4EF", fg: "#1B1B19", soft: "#FBFAF7", line: "#D8D4CA" }),
-      pal("slate", "Slate", "#3E4A57", { bg: "#EDEFF1", fg: "#1E252C", soft: "#F7F8F9", line: "#C5CBD1" }),
-      pal("clay", "Clay", "#8C4A35", { bg: "#F3EBE4", fg: "#3A2218", soft: "#FAF5F1", line: "#DCC9BC" }),
-      pal("moss", "Moss", "#55623F", { bg: "#EEF0E7", fg: "#242B18", soft: "#F7F8F2", line: "#CDD3BC" }),
+      pal("ivory", "Ivory", "#6E5B3F", { bg: "#F3EFE6", fg: "#2A241B", soft: "#FAF8F2", line: "#D9D0BE" }),
+      pal("slate", "Slate", "#455566", { bg: "#E9ECEF", fg: "#1E2630", soft: "#F6F7F9", line: "#C5CDD5" }),
+      pal("sage", "Sage", "#587060", { bg: "#E8ECE6", fg: "#1F2D24", soft: "#F5F7F3", line: "#C3CDBE" }),
+      pal("rose", "Dusty rose", "#9A5E66", { bg: "#F2E8E6", fg: "#3A2326", soft: "#FAF4F3", line: "#DDC4C3" }),
     ],
-  },
-  {
-    id: "botanica", name: "Botanica", family: "Botanical", blurb: "Antique botanical plates around formal calligraphy on warm paper.",
-    styles: ["Floral & Botanical", "Calligraphy", "Classic & Traditional"], colours: ["Earthy", "Neutral Tones", "Pastel"], shape: "Portrait", cultures: ["Any wedding", "Church", "Garden"],
-    opening: { kind: "veil", ...OPENINGS.veil }, layout: "stationery", fonts: "pinyon", art: "plates", intro: "families", sample: { names: "Eleanor & James", occasion: "Wedding" },
+  }),
+  D({
+    id: "gilt", name: "Gilt", family: "Foil", blurb: "Black card, gold foil. A line of foil draws the frame and the names light up.",
+    styles: ["Elegant & Formal", "Glam", "Modern"], colours: ["Black & White", "Metallic", "Jewel"], shape: "Frame", cultures: ["Any wedding", "Evening", "Nikah", "Walima"],
+    opening: { kind: "ignite" }, fonts: "didone", art: "foil", intro: "none", sample: { names: "Layla & Omar", occasion: "Wedding" },
+    site: { bg: "#111111", ink: "#F1E7C8" },
+    palettes: [
+      pal("noir", "Noir & gold", "#D2AE62", { bg: "#111010", fg: "#F2EAD6", soft: "#1A1817", line: "#B8944A" }),
+      pal("midnight", "Midnight & silver", "#C5CCD8", { bg: "#0E1420", fg: "#EEF1F6", soft: "#151D2D", line: "#9AA6BC" }),
+      pal("bordeaux", "Bordeaux & gold", "#D6B46C", { bg: "#2A0F18", fg: "#F6E9D2", soft: "#371621", line: "#C29B55" }),
+      pal("forest", "Forest & gold", "#CDB06A", { bg: "#0E2019", fg: "#F0E7CE", soft: "#152C23", line: "#B89B58" }),
+    ],
+  }),
+  D({
+    id: "botanica", name: "Botanica", family: "Botanical", blurb: "Antique botanical plates grow in around formal calligraphy on warm cotton paper.",
+    styles: ["Floral & Botanical", "Calligraphy", "Classic & Traditional"], colours: ["Earthy", "Pastel", "Neutral Tones"], shape: "Portrait", cultures: ["Any wedding", "Church", "Garden"],
+    opening: { kind: "grow" }, fonts: "pinyon", art: "plates", intro: "families", sample: { names: "Eleanor & James", occasion: "Wedding" },
     site: { bg: "#E8E1D3", ink: "#2A2F26" },
     palettes: [
-      pal("rose", "Pink peony", "#A8566A", { bg: "#F7F1E6", fg: "#3B2A2A", soft: "#FBF7EF", line: "#D9C7B8", art: ["peony-pink", "rose-wild"] }),
-      pal("crimson", "Crimson", "#8E2B42", { bg: "#F5EEE3", fg: "#3A1D24", soft: "#FAF5EC", line: "#D6C2B2", art: ["peony-crimson", "rose-red"] }),
-      pal("blush", "Blush rose", "#9E5F5B", { bg: "#F8F0E8", fg: "#40292A", soft: "#FCF7F1", line: "#DDC8BB", art: ["peony-paxton", "rose-sprig"] }),
-      pal("olive", "Olive & cream", "#6E7A44", { bg: "#F5F1E4", fg: "#2F3320", soft: "#FAF7EC", line: "#D3CDAE", art: ["olive-b", "rose-sprig"] }),
+      pal("rose", "Pink peony", "#A8566A", { bg: "#F5EFE4", fg: "#3B2A2A", soft: "#FBF7EF", line: "#D9C7B8", art: ["peony-pink", "rose-wild"] }),
+      pal("crimson", "Crimson", "#8E2B42", { bg: "#F3ECE0", fg: "#3A1D24", soft: "#FAF5EC", line: "#D6C2B2", art: ["peony-crimson", "rose-red"] }),
+      pal("blush", "Blush rose", "#9E5F5B", { bg: "#F6EEE6", fg: "#40292A", soft: "#FCF7F1", line: "#DDC8BB", art: ["peony-paxton", "rose-sprig"] }),
+      pal("olive", "Olive & cream", "#6E7A44", { bg: "#F3EFE1", fg: "#2F3320", soft: "#FAF7EC", line: "#D3CDAE", art: ["olive-b", "rose-sprig"] }),
     ],
-  },
-  {
-    id: "arch", name: "Arch", family: "Contemporary romantic", blurb: "Your photograph in a tall arched window, edged in fine gold line.",
-    styles: ["Modern", "Elegant & Formal", "Simple & Minimalist"], colours: ["Earthy", "Pastel", "Ivory & Gold"], shape: "Arch", cultures: ["Any wedding", "Nikah", "Civil", "Church"],
-    opening: { kind: "bloom", ...OPENINGS.bloom }, layout: "stationery", fonts: "classic", art: "photo", intro: "none", sample: { names: "Amara & Daniel", occasion: "Wedding" },
-    site: { bg: "#EBD9CC", ink: "#3B2218" },
+  }),
+  D({
+    id: "marigold", name: "Marigold", family: "Celebration", blurb: "Saffron, magenta and real marigold plates for mehndi, haldi and sangeet. Petals fall, then it opens.",
+    styles: ["Maximalism", "Bold & Typographic", "Hand Drawn"], colours: ["Bright", "Jewel"], shape: "Portrait", cultures: ["Mehndi", "Haldi", "Sangeet", "Shaadi", "Dholki"],
+    opening: { kind: "petals" }, fonts: "display", art: "plates", intro: "shubh", sample: { names: "Priya & Arjun", occasion: "Mehndi" },
+    site: { bg: "#F2B33D", ink: "#33102B" },
     palettes: [
-      pal("terracotta", "Terracotta", "#A85A40", { bg: "#EBD3C5", fg: "#4A271B", soft: "#FAF1EA", line: "#C9A24B", art: ["peony-pink", "rose-sprig"] }),
-      pal("sage", "Sage", "#577660", { bg: "#D9E3D3", fg: "#26382B", soft: "#F6F8F1", line: "#C9A24B", art: ["peony-paxton", "olive-b"] }),
-      pal("midnight", "Midnight", "#243B5E", { bg: "#D3DAE8", fg: "#16243C", soft: "#F5F7FB", line: "#C9A24B", art: ["peony-crimson", "rose-sprig"] }),
-      pal("plum", "Plum", "#6D3D57", { bg: "#E8D6DF", fg: "#3A1E2D", soft: "#FBF4F7", line: "#C9A24B", art: ["peony-pink", "rose-red"] }),
+      pal("saffron", "Saffron & magenta", "#A81F55", { bg: "#FBE3A1", fg: "#33102B", soft: "#FFF2CC", line: "#E5A93C", art: ["marigold-african", "marigold-orange"] }),
+      pal("rani", "Rani pink", "#B7255C", { bg: "#FCDDE7", fg: "#44112B", soft: "#FFF0F4", line: "#EFA3BD", art: ["marigold-orange", "marigold-french"] }),
+      pal("peacock", "Peacock", "#0F5C5A", { bg: "#D5EEE8", fg: "#0A2E2D", soft: "#ECF8F5", line: "#8CC7BE", art: ["marigold-french", "marigold-african"] }),
+      pal("coral", "Coral & teal", "#B3432A", { bg: "#FFE3D4", fg: "#3C1B12", soft: "#FFF3EC", line: "#F0B49C", art: ["marigold-orange", "marigold-african"] }),
     ],
-  },
-  {
+  }),
+  D({
     id: "zellige", name: "Zellige", family: "Heritage", blurb: "Gold geometry from historic ornament plates, with room for an opening line in your language.",
     styles: ["Classic & Traditional", "Glam", "Maximalism"], colours: ["Jewel", "Ivory & Gold", "Metallic"], shape: "Frame", cultures: ["Nikah", "Walima", "Arabic", "Persian", "Turkish", "Moroccan"],
-    opening: { kind: "lift", ...OPENINGS.lift }, layout: "stationery", fonts: "classic", art: "ornament", intro: "bismillah", sample: { names: "Aisha & Yusuf", occasion: "Nikah" },
+    opening: { kind: "bloom" }, fonts: "classic", art: "ornament", intro: "bismillah", sample: { names: "Aisha & Yusuf", occasion: "Nikah" },
     site: { bg: "#0F3D33", ink: "#F3E7C4" },
     palettes: [
       pal("emerald", "Emerald & gold", "#C9A24B", { bg: "#0F3D33", fg: "#F3E7C4", soft: "#14493D", line: "#B8923F", art: ["orn-moresque-b", "orn-tile-a"] }),
@@ -266,24 +173,36 @@ export const DESIGNS: DesignSpec[] = [
       pal("midnight", "Midnight & silver", "#C8CED8", { bg: "#101A33", fg: "#EEF1F6", soft: "#16234A", line: "#9AA5BC", art: ["orn-moresque-b", "orn-tile-a"] }),
       pal("ivory", "Ivory & emerald", "#1F5C4D", { bg: "#F6F0E1", fg: "#16372E", soft: "#FBF7EC", line: "#C9A24B", art: ["orn-moresque-b", "orn-tile-a"] }),
     ],
-  },
-  {
-    id: "marigold", name: "Marigold", family: "Celebration", blurb: "Warm saffron, magenta and real marigold plates for mehndi, haldi and sangeet.",
-    styles: ["Maximalism", "Bold & Typographic", "Hand Drawn"], colours: ["Bright", "Jewel"], shape: "Portrait", cultures: ["Mehndi", "Haldi", "Sangeet", "Shaadi", "Dholki"],
-    opening: { kind: "bloom", ...OPENINGS.bloom }, layout: "stationery", fonts: "display", art: "plates", intro: "shubh", sample: { names: "Priya & Arjun", occasion: "Mehndi" },
-    site: { bg: "#F6B93B", ink: "#3A1030" },
+  }),
+  D({
+    id: "gallery", name: "Gallery", family: "Editorial", blurb: "Your photograph, full bleed, with your names set large like a magazine cover. Type rises into place.",
+    styles: ["Full Bleed Photo", "Modern", "Elegant & Formal"], colours: ["Neutral Tones", "Black & White", "Earthy"], shape: "Full bleed", cultures: ["Any wedding", "Civil", "Evening", "Nikah"],
+    opening: { kind: "kinetic" }, fonts: "editorial2", art: "photo", intro: "none", sample: { names: "Hannah & James", occasion: "Wedding" },
+    site: { bg: "#E9E4DB", ink: "#1D1A15" },
     palettes: [
-      pal("saffron", "Saffron & magenta", "#B0245B", { bg: "#FBE4A6", fg: "#3A1030", soft: "#FFF3CF", line: "#E5A93C", art: ["marigold-african", "marigold-orange"] }),
-      pal("rani", "Rani pink", "#C42B64", { bg: "#FDE1EA", fg: "#4A1230", soft: "#FFF1F5", line: "#F0A6C0", art: ["marigold-orange", "marigold-french"] }),
-      pal("peacock", "Peacock", "#0F5C5A", { bg: "#D8EFEA", fg: "#0A2E2D", soft: "#EEF9F6", line: "#8CC7BE", art: ["marigold-french", "marigold-african"] }),
-      pal("coral", "Coral & teal", "#B9482A", { bg: "#FFE5D8", fg: "#3C1B12", soft: "#FFF3EC", line: "#F0B49C", art: ["marigold-orange", "marigold-african"] }),
+      pal("ink", "Ink", "#1D1A15", { bg: "#F4F1EA", fg: "#1D1A15", soft: "#FBF9F4", line: "#CFC8B8" }),
+      pal("sand", "Sand", "#7A5F3E", { bg: "#EFE6D8", fg: "#2D2318", soft: "#F8F2E8", line: "#CDBB9F" }),
+      pal("sage", "Sage", "#4F6B57", { bg: "#E8EDE4", fg: "#1F2D24", soft: "#F4F7F1", line: "#BFCDBB" }),
+      pal("rose", "Rose", "#9A4A57", { bg: "#F5E9E6", fg: "#3A1E24", soft: "#FBF4F2", line: "#DDBFC0" }),
     ],
-  },
+  }),
+  D({
+    id: "linen", name: "Linen", family: "Minimal", blurb: "Woven linen and almost nothing else. The names are written out in ink.",
+    styles: ["Simple & Minimalist", "Modern", "Calligraphy"], colours: ["Neutral Tones", "Black & White"], shape: "Minimal", cultures: ["Any wedding", "Civil", "Church"],
+    opening: { kind: "script" }, fonts: "vibes", art: "none", intro: "none", sample: { names: "Maya & Theo", occasion: "Wedding" },
+    site: { bg: "#EFEBE3", ink: "#1B1B19" },
+    palettes: [
+      pal("oat", "Oat", "#3B3A36", { bg: "#EFEBE2", fg: "#232220", soft: "#F7F4EE", line: "#D4CEC0" }),
+      pal("stone", "Stone", "#4B5560", { bg: "#E8EAEC", fg: "#1E252C", soft: "#F5F6F7", line: "#C5CBD1" }),
+      pal("clay", "Clay", "#8C4A35", { bg: "#EEE4DB", fg: "#3A2218", soft: "#F8F2EC", line: "#D8C5B6" }),
+      pal("moss", "Moss", "#55623F", { bg: "#E9ECE0", fg: "#242B18", soft: "#F5F7EF", line: "#CDD3BC" }),
+    ],
+  }),
 ];
 
-export const specById = (id: string): DesignSpec => DESIGNS.find((d) => d.id === id) ?? DESIGNS[0];
+export const specById = (id: string): DesignSpec => DESIGNS.find((d) => d.id === normalizeDesignId(id)) ?? DESIGNS[0];
 export const paletteOf = (spec: DesignSpec, id?: string) => spec.palettes.find((p) => p.id === id) ?? spec.palettes[0];
-export const FEATURED_DESIGNS = DESIGNS.filter((d) => FEATURED_DESIGN_IDS.includes(d.id));
+export const FEATURED_DESIGNS = DESIGNS;
 
 /** Filter facets for the gallery (mirrors how Evite groups designs: style, colour, shape, plus culture and opening). */
 export const FACETS = {

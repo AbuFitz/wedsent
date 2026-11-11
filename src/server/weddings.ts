@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DESIGN_IDS } from "@/engine/registry";
+import { DESIGN_IDS, LEGACY_DESIGN } from "@/engine/registry";
 import { getDb, type Q } from "./db";
 import { AppError, bad, conflict, forbidden, notFound } from "./errors";
 import { audit } from "./audit";
@@ -22,7 +22,7 @@ export const ContentSchema = z.object({
     fx: z.number().min(0).max(100),
     fy: z.number().min(0).max(100),
   }).nullable().default(null),
-  design: z.enum(DESIGN_IDS),
+  design: z.preprocess((v) => LEGACY_DESIGN[v as string] ?? v, z.enum(DESIGN_IDS)),
   palette: z.string().max(30).default(""),
   type: z.string().max(30).default(""),
   intro: z.string().max(120).default(""),

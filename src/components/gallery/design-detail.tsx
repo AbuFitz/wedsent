@@ -8,7 +8,6 @@ import { Phone } from "@/components/phone";
 import { FONT_PACKS, INTRO_PRESETS, paletteOf, specById, type DesignId } from "@/engine/registry";
 import { OPENING_ICON } from "./design-card";
 import { sampleData, sampleEvents } from "./samples";
-import "./detail.css";
 
 export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }) {
   const spec = specById(id);
@@ -28,30 +27,28 @@ export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }
   return (
     <>
       <Nav />
-      <main className="ed-detail"><div className="dd ed-width">
-        <Link href="/designs" className="dd-back"><ArrowLeft size={16} /> All designs</Link>
-        <div className="dd-grid">
-          <div className="dd-stage" style={{ ["--stage" as string]: paletteOf(spec, pal).bg ?? spec.site.bg }}>
-            <div className="dd-phone"><Phone label={`${spec.name} live preview`}>{!full && phone}</Phone></div>
-            <div className="dd-tools">
-              <div className="dd-seg" role="group" aria-label="Preview">
-                <button type="button" aria-pressed={!open} onClick={() => setOpen(false)}>Cover</button>
-                <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
-              </div>
-              <button type="button" className="dd-ghost" onClick={() => setOpen(false)} disabled={!open}><ArrowCounterClockwise size={15} /> Replay opening</button>
-              <button type="button" className="dd-ghost" onClick={() => { setFull(true); dialog.current?.showModal(); }}>Full screen</button>
+      <main className="ws-page"><div className="ws-wrap">
+        <Link href="/designs" className="ws-back"><ArrowLeft size={16} /> All designs</Link>
+        <div className="ws-detail">
+          <div className="ws-detail-stage" style={{ ["--stage" as string]: paletteOf(spec, pal).bg ?? spec.site.bg }}>
+            <div className="ws-detail-phone"><Phone label={`${spec.name} live preview`}>{!full && phone}</Phone></div>
+            <div className="ws-tools">
+              <button type="button" aria-pressed={!open} onClick={() => setOpen(false)}>Cover</button>
+              <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
+              <button type="button" onClick={() => setOpen(false)} disabled={!open}><ArrowCounterClockwise size={15} /> Replay opening</button>
+              <button type="button" onClick={() => { setFull(true); dialog.current?.showModal(); }}>Full screen</button>
             </div>
           </div>
 
-          <div className="dd-info">
-            <p className="dd-kicker">{spec.family} · {spec.shape}</p>
-            <h1>{spec.name}</h1>
-            <p className="dd-blurb">{spec.blurb}</p>
+          <div className="ws-detail-info">
+            <p className="ws-eyebrow">{spec.family} · {spec.shape}</p>
+            <h1 className="ws-h1">{spec.name}</h1>
+            <p className="ws-lead">{spec.blurb}</p>
 
-            <div className="dd-open"><Icon size={22} weight="duotone" /><div><strong>{spec.opening.label}</strong><span>{spec.opening.hint}</span></div></div>
+            <div className="ws-opn"><Icon size={22} weight="duotone" /><div><strong>{spec.opening.label}</strong><span>{spec.opening.hint}</span></div></div>
 
-            <section><h2>Colours</h2>
-              <div className="dd-pals">{spec.palettes.map((p) => (
+            <section className="ws-sect"><h2>Colours</h2>
+              <div className="ws-swatches">{spec.palettes.map((p) => (
                 <button key={p.id} type="button" aria-pressed={pal === p.id} onClick={() => setPal(p.id)}>
                   <i style={{ background: p.accent, boxShadow: p.bg ? `inset 0 0 0 6px ${p.bg}` : undefined }} />{p.name}
                 </button>
@@ -60,8 +57,8 @@ export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }
 
             {stationery && (
               <>
-                <section><h2>Lettering</h2>
-                  <div className="dd-types">
+                <section className="ws-sect"><h2>Lettering</h2>
+                  <div className="ws-types">
                     <button type="button" aria-pressed={type === ""} onClick={() => setType("")}><span>Designer’s choice</span></button>
                     {FONT_PACKS.filter((f) => f.script || ["classic", "didone", "deco", "italiana", "garamond"].includes(f.id)).map((f) => (
                       <button key={f.id} type="button" aria-pressed={type === f.id} onClick={() => setType(f.id)} title={f.note}>
@@ -70,8 +67,8 @@ export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }
                     ))}
                   </div>
                 </section>
-                <section><h2>Opening line <small>optional</small></h2>
-                  <select className="dd-select" value={intro} onChange={(e) => setIntro(e.target.value)} aria-label="Opening line">
+                <section className="ws-sect"><h2>Opening line <small>optional</small></h2>
+                  <select className="ws-select" value={intro} onChange={(e) => setIntro(e.target.value)} aria-label="Opening line">
                     <option value="">Designer’s choice</option>
                     {Array.from(new Set(INTRO_PRESETS.map((i) => i.group))).map((g) => (
                       <optgroup key={g} label={g}>{INTRO_PRESETS.filter((i) => i.group === g).map((i) => <option key={i.id} value={i.id === "none" ? "none" : i.text}>{i.label}</option>)}</optgroup>
@@ -81,22 +78,22 @@ export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }
               </>
             )}
 
-            <section><h2>Often chosen for</h2>
-              <div className="dd-tags">{spec.cultures.map((c) => <Link key={c} href={`/designs?culture=${encodeURIComponent(c)}`}>{c}</Link>)}</div>
+            <section className="ws-sect"><h2>Often chosen for</h2>
+              <div className="ws-tags">{spec.cultures.map((c) => <Link key={c} href={`/designs?culture=${encodeURIComponent(c)}`}>{c}</Link>)}</div>
             </section>
 
-            <div className="dd-cta">
-              <Link href={start} className="ed-button ed-button--primary">Start with {spec.name} <ArrowRight size={18} /></Link>
-              <Link href="/designs" className="ed-button ed-button--secondary">Compare designs</Link>
+            <div className="ws-cta-row">
+              <Link href={start} className="ws-pill ws-pill--dark ws-pill--lg">Start with {spec.name} <ArrowRight size={18} /></Link>
+              <Link href="/designs" className="ws-pill ws-pill--line ws-pill--lg">Compare designs</Link>
             </div>
 
           </div>
         </div>
       </div></main>
       <SiteFooter />
-      <dialog className="dd-full" ref={dialog} onClose={() => setFull(false)} aria-label={`${spec.name} full screen preview`} style={{ ["--stage" as string]: paletteOf(spec, pal).bg ?? spec.site.bg }}>
-        <button type="button" className="dd-x" onClick={() => dialog.current?.close()} aria-label="Close preview"><X size={22} /></button>
-        {full && <div className="dd-full-in">{phone}</div>}
+      <dialog className="ws-full" ref={dialog} onClose={() => setFull(false)} aria-label={`${spec.name} full screen preview`} style={{ ["--stage" as string]: paletteOf(spec, pal).bg ?? spec.site.bg }}>
+        <button type="button" className="ws-x" onClick={() => dialog.current?.close()} aria-label="Close preview"><X size={22} /></button>
+        {full && <div className="ws-full-in">{phone}</div>}
       </dialog>
     </>
   );

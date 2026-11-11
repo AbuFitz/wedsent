@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { colord, extend } from "colord";
 import a11y from "colord/plugins/a11y";
 import { ASSETS } from "@/engine/assets";
-import { DESIGNS, DESIGN_IDS, FEATURED_DESIGNS, FONT_PACKS, INTRO_PRESETS, FACETS, specById } from "@/engine/registry";
+import { DESIGNS, DESIGN_IDS, FEATURED_DESIGNS, FONT_PACKS, INTRO_PRESETS, FACETS, OPENING_CHOICES, specById } from "@/engine/registry";
 import { ContentSchema } from "@/server/weddings";
 import { onColor, defaults } from "@/lib/designs";
 import { label } from "@/components/invitation/widgets";
@@ -16,7 +16,7 @@ describe("design engine registry", () => {
     for (const d of DESIGNS) {
       expect(d.palettes.length, d.id).toBeGreaterThanOrEqual(4);
       expect(new Set(d.palettes.map((p) => p.id)).size, d.id).toBe(d.palettes.length);
-      expect(["lift", "bloom", "veil", "focus", "doors", "curtain"]).toContain(d.opening.kind);
+      expect(OPENING_CHOICES).toContain(d.opening.kind);
     }
   });
   it("every referenced artwork file, font pack and intro preset exists", () => {

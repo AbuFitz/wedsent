@@ -1,7 +1,0 @@
-.cr{max-width:860px;margin:0 auto;padding:120px clamp(16px,3vw,32px) 100px}
-.cr h1{font-family:var(--serif);font-weight:400;font-size:clamp(48px,7vw,88px);letter-spacing:-.02em;line-height:.95}
-.cr h2{font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:-.03em;margin:48px 0 12px}
-.cr-lead{color:var(--muted);max-width:42em;margin:18px 0}
-.cr-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.cr-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px;align-items:baseline}
-.cr-list span{color:var(--muted);font-size:13px}.cr-list a{text-decoration:underline;text-underline-offset:3px;font-weight:600}

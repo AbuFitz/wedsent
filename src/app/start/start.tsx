@@ -3,15 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Plus, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
+import { OPENING_NAME } from "@/components/gallery/design-card";
 import { Wordmark } from "@/components/site/nav";
 import { call } from "@/lib/api-client";
 import { DRAFT_KEY, defaults, friendlyDate, loadDraft, saveDraft, PENDING_EVENTS_KEY, type InviteData, type InviteEvent } from "@/lib/designs";
 import { START_PROGRESS_KEY, parseStartProgress } from "@/lib/start-progress";
 import { DESIGN_IDS, FEATURED_DESIGNS, paletteOf, specById, type DesignId } from "@/engine/registry";
-import "./start.css";
+import "@/components/site/site.css";
 
 const steps = ["Details", "Design", "Review"];
 const stepKeys = ["names", "design", "preview"] as const;
@@ -145,65 +146,72 @@ export function Start() {
   }
 
   const shown = { ...draft, names: draft.names.trim() || "Your names" };
+  const stage = `color-mix(in srgb, ${paletteOf(spec, draft.palette).bg ?? spec.site.bg} 55%, #e9e4db)`;
   return (
-    <main className="ed-start">
-      <header className="ed-start-header ed-width"><Wordmark /><Link className="ed-text-link" href="/designs">Browse designs</Link></header>
-      <div className="ed-start-grid ed-width" data-preview={mobilePreview}>
-        <section className="ed-start-editor">
-          <ol className="ed-start-steps" aria-label="Invitation setup progress">
-            {steps.map((name, index) => <li key={name} aria-current={step === index ? "step" : undefined}><span>{index < step ? <Check size={13} /> : index + 1}</span>{name}</li>)}
-          </ol>
-          {!ready ? <p className="ed-start-state" role="status">Loading your draft…</p> : (
-            <form onSubmit={submit} key={step}>
-              {step === 0 && <>
-                <h1>Your wedding details</h1>
-                <label className="ed-field">Names<input dir="auto" name="names" required value={draft.names} onChange={(event) => update({ names: event.target.value })} placeholder="Amina & Yusuf" maxLength={60} /></label>
-                <div className="ed-field-pair">
-                  <label className="ed-field">Wedding date <span>Optional</span><input type="date" value={draft.date} onChange={(event) => update({ date: event.target.value })} /></label>
-                  <label className="ed-field">Venue <span>Optional</span><input dir="auto" value={draft.venue} onChange={(event) => update({ venue: event.target.value })} maxLength={80} /></label>
-                </div>
-                <fieldset className="ed-start-events"><legend>Events <span>Optional</span></legend>
-                  {accountEvents.length > 0 ? <p>Edit your existing events in Studio.</p> : <>
-                    {titles.map((title, index) => <div key={index}><input aria-label={`Event ${index + 1}`} dir="auto" value={title} placeholder={index === 0 ? "e.g. Ceremony or Nikah" : "e.g. Reception or Walima"} maxLength={80} onChange={(event) => setTitles(titles.map((value, position) => position === index ? event.target.value : value))} /><button type="button" aria-label={`Remove event ${index + 1}`} onClick={() => setTitles(titles.filter((_, position) => position !== index))}><X size={17} /></button></div>)}
-                    {titles.length < 8 && <button className="ed-start-add" type="button" onClick={() => setTitles([...titles, ""])}><Plus size={16} /> Add an event</button>}
-                  </>}
-                </fieldset>
-              </>}
-              {step === 1 && <>
-                <h1>Choose your design</h1>
-                <fieldset className="ed-start-designs"><legend>Designs</legend>
-                  {designs.map((design) => (
-                    <label key={design.id}><input type="radio" name="design" checked={design.id === draft.design} onChange={() => { update({ design: design.id, palette: "", type: "", intro: "", opening: "", accent: "" }); setView("cover"); }} /><span>{design.name}</span></label>
-                  ))}
-                </fieldset>
-                <fieldset className="ed-start-colours"><legend>Colours</legend>
-                  {spec.palettes.map((colour) => <label key={colour.id}><input type="radio" name="palette" checked={paletteOf(spec, draft.palette).id === colour.id} onChange={() => update({ palette: colour.id, accent: "" })} /><span style={{ background: colour.bg ?? colour.accent, boxShadow: `inset 0 0 0 4px ${colour.accent}` }} />{colour.name}</label>)}
-                </fieldset>
-              </>}
-              {step === 2 && <>
-                <h1>Review your invitation</h1>
-                <dl className="ed-start-summary">
-                  <div><dt>Names</dt><dd dir="auto">{draft.names || "To add"}</dd></div>
-                  <div><dt>Date</dt><dd>{draft.date ? friendlyDate(draft.date) : "To be confirmed"}</dd></div>
-                  <div><dt>Design</dt><dd>{spec.name}</dd></div>
-                  {previewEvents.length > 0 && <div><dt>Events</dt><dd>{previewEvents.map((item) => item.title).join(", ")}</dd></div>}
-                </dl>
-                <p>{accountDraft ? "Continue to Studio to add the finishing details." : "Create an account to save this draft and continue in Studio."}</p>
-              </>}
-              {(error || loadError) && <p className="ed-start-error" role="alert">{error || loadError}</p>}
-              <div className="ed-start-actions">
-                {step > 0 && <button type="button" className="ed-button ed-button--secondary" onClick={() => navigate(step - 1)} disabled={busy}><ArrowLeft size={16} /> Back</button>}
-                <button className="ed-button ed-button--primary" type="submit" disabled={busy}>{busy ? "Saving…" : step === 2 ? accountDraft ? "Continue to Studio" : "Create an account" : step === 1 ? "Review invitation" : "Choose a design"} <ArrowRight size={17} /></button>
+    <main className="ws-start" data-preview={mobilePreview}>
+      <div className="ws-start-main">
+        <div className="ws-start-top"><Wordmark /><Link className="ws-link" href="/designs">Browse designs</Link></div>
+        <ol className="ws-prog" aria-label="Invitation setup progress">
+          {steps.map((name, index) => <li key={name} data-done={index < step} aria-current={step === index ? "step" : undefined}>{name}</li>)}
+        </ol>
+        {!ready ? <p className="ws-sub" role="status">Loading your draft…</p> : (
+          <form className="ws-start-form" onSubmit={submit} key={step}>
+            {step === 0 && <>
+              <h1>Who is getting married?</h1>
+              <label className="ws-field"><span>Names</span><input className="ws-bignames" dir="auto" name="names" required autoFocus value={draft.names} onChange={(event) => update({ names: event.target.value })} placeholder="Amina & Yusuf" maxLength={60} /></label>
+              <div className="ws-two">
+                <label className="ws-field"><span>Wedding date <em>Optional</em></span><input type="date" value={draft.date} onChange={(event) => update({ date: event.target.value })} /></label>
+                <label className="ws-field"><span>Venue <em>Optional</em></span><input dir="auto" value={draft.venue} onChange={(event) => update({ venue: event.target.value })} maxLength={80} placeholder="The Glasshouse" /></label>
               </div>
-            </form>
-          )}
-          <button className="ed-start-toggle ed-text-link" type="button" onClick={() => setMobilePreview(!mobilePreview)} aria-expanded={mobilePreview} aria-controls="start-preview">{mobilePreview ? "Back to setup" : "Show invitation preview"}</button>
-        </section>
-        <aside className="ed-start-stage" id="start-preview" aria-label="Live invitation preview">
-          <div className="ed-start-stage-top"><strong>Live preview</strong><div role="group" aria-label="Preview view"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Cover</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div></div>
-          <Phone label="Your invitation"><Invitation key={draft.design} data={shown} events={previewEvents} open={view === "inside"} onOpenChange={(open) => setView(open ? "inside" : "cover")} /></Phone>
-        </aside>
+              <fieldset className="ws-evs"><legend>Celebrations <span>Optional. Add more than one if you are having more than one.</span></legend>
+                {accountEvents.length > 0 ? <p className="ws-sub">Edit your existing events in Studio.</p> : <>
+                  {titles.map((title, index) => <div className="ws-evs-row" key={index}><input className="ws-input" aria-label={`Event ${index + 1}`} dir="auto" value={title} placeholder={index === 0 ? "e.g. Ceremony or Nikah" : "e.g. Reception or Walima"} maxLength={80} onChange={(event) => setTitles(titles.map((value, position) => position === index ? event.target.value : value))} /><button type="button" className="ws-chipbtn" aria-label={`Remove event ${index + 1}`} onClick={() => setTitles(titles.filter((_, position) => position !== index))}><X size={16} /></button></div>)}
+                  {titles.length < 8 && <button className="ws-add" type="button" onClick={() => setTitles([...titles, ""])}><Plus size={16} /> Add a celebration</button>}
+                </>}
+              </fieldset>
+            </>}
+            {step === 1 && <>
+              <h1>Choose how it looks and opens.</h1>
+              <fieldset style={{ border: 0, padding: 0, margin: 0 }}><legend className="sr-only">Designs</legend>
+                <div className="ws-picker">
+                  {designs.map((design) => (
+                    <button type="button" className="ws-pick" key={design.id} aria-pressed={design.id === draft.design} onClick={() => { update({ design: design.id, palette: "", type: "", intro: "", opening: "", accent: "" }); setView("cover"); }}>
+                      <span className="ws-pick-shot" inert aria-hidden="true"><Invitation data={{ ...shown, design: design.id, palette: "", type: "", intro: "", opening: "", accent: "" }} still /></span>
+                      <span>{design.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              <div className="ws-field"><span>Colour</span>
+                <div className="ws-colors" role="group" aria-label="Colours">
+                  {spec.palettes.map((colour) => <button type="button" key={colour.id} aria-label={colour.name} aria-pressed={paletteOf(spec, draft.palette).id === colour.id && !draft.accent} style={{ background: colour.bg ?? colour.accent, boxShadow: `inset 0 0 0 6px ${colour.bg ?? "#fff"}, inset 0 0 0 22px ${colour.accent}` }} onClick={() => update({ palette: colour.id, accent: "" })} />)}
+                </div>
+              </div>
+            </>}
+            {step === 2 && <>
+              <h1>Looks right?</h1>
+              <dl className="ws-summary">
+                <div><dt>Names</dt><dd dir="auto">{draft.names || "To add"}</dd></div>
+                <div><dt>Date</dt><dd>{draft.date ? friendlyDate(draft.date) : "To be confirmed"}</dd></div>
+                <div><dt>Design</dt><dd>{spec.name} · {OPENING_NAME[spec.opening.kind]}</dd></div>
+                {previewEvents.length > 0 && <div><dt>Celebrations</dt><dd>{previewEvents.map((item) => item.title).join(", ")}</dd></div>}
+              </dl>
+              <p className="ws-sub">{accountDraft ? "Continue to Studio to add the finishing details." : "Create an account to save this draft and continue in Studio. Nothing is charged."}</p>
+            </>}
+            {(error || loadError) && <p className="ws-err" role="alert">{error || loadError}</p>}
+            <div className="ws-actions">
+              {step > 0 && <button type="button" className="ws-pill ws-pill--line ws-pill--lg" onClick={() => navigate(step - 1)} disabled={busy}><ArrowLeft size={16} /> Back</button>}
+              <button className="ws-pill ws-pill--dark ws-pill--lg" type="submit" disabled={busy}>{busy ? "Saving…" : step === 2 ? accountDraft ? "Continue to Studio" : "Create an account" : step === 1 ? "Review" : "Choose a design"} <ArrowRight size={17} /></button>
+            </div>
+          </form>
+        )}
+        <button className="ws-pill ws-pill--line ws-showprev" type="button" onClick={() => setMobilePreview(!mobilePreview)} aria-expanded={mobilePreview} aria-controls="start-preview">Show preview</button>
       </div>
+      <aside className="ws-start-stage" id="start-preview" aria-label="Live invitation preview" style={{ ["--stage" as string]: stage }}>
+        {mobilePreview && <button type="button" className="ws-x" onClick={() => setMobilePreview(false)} aria-label="Back to setup"><X size={20} /></button>}
+        <div className="ws-start-phone"><Phone label="Your invitation"><Invitation key={draft.design} data={shown} events={previewEvents} open={view === "inside"} onOpenChange={(open) => setView(open ? "inside" : "cover")} /></Phone></div>
+        <div className="ws-toggle" role="group" aria-label="Preview view"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Cover</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div>
+      </aside>
     </main>
   );
 }

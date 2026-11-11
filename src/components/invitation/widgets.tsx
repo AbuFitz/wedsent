@@ -30,19 +30,15 @@ export function CountdownWidget({ date, time, config, lang, design }: { date: st
   if (!config.enabled || !date) return null;
   const title = config.label.trim() || label(lang, "countdown");
   const tone = config.accent || "var(--a)";
-  const world = design === "velvet" || design === "gilt" || design === "nocturne" ? "theatre"
-    : design === "heritage" || design === "nikah-etched" || design === "rosewood" ? "engraved"
-    : design === "pearl" || design === "embossed" || design === "botanica" ? "botanical"
-    : design === "gallery" || design === "postmark" || design === "atelier" ? "editorial" : "classic";
-  const segments = now ? [{ n: now.days, key: "days" }, { n: now.hours, key: "hours" }, { n: now.minutes, key: "minutes" }] as const : null;
+  const max = { days: 100, hours: 24, minutes: 60 } as const;
+  const segments = (now ? [{ n: now.days, key: "days" }, { n: now.hours, key: "hours" }, { n: now.minutes, key: "minutes" }] : [{ n: 0, key: "days" }, { n: 0, key: "hours" }, { n: 0, key: "minutes" }]) as { n: number; key: keyof typeof max }[];
   return (
-    <section className={`in-countdown in-countdown--${config.style} in-countdown--${world}`} style={{ "--count-tone": tone } as CSSProperties} aria-label={title} dir={lang === "ar" ? "rtl" : undefined} lang={lang}>
-      <div className="in-count-ornament" aria-hidden="true"><span /><i>{world === "theatre" ? "✦" : world === "engraved" ? "❦" : world === "botanical" ? "✿" : world === "editorial" ? "·" : "◇"}</i><span /></div>
+    <section className={`in-countdown in-countdown--${config.style}`} data-design={design} style={{ "--count-tone": tone } as CSSProperties} aria-label={title} dir={lang === "ar" ? "rtl" : undefined} lang={lang}>
       <p className="in-count-title">{title}</p>
       {now?.done ? <p className="in-count-done">{label(lang, "soon")}</p> : (
-        <div className="in-count-segments">
-          {(segments ?? [{ n: 0, key: "days" }, { n: 0, key: "hours" }, { n: 0, key: "minutes" }] as const).map((segment) => (
-            <div className="in-count-segment" key={segment.key}>
+        <div className="in-count-segments" role="timer">
+          {segments.map((segment) => (
+            <div className="in-count-segment" key={segment.key} style={{ "--p": Math.min(1, segment.n / max[segment.key]) } as CSSProperties}>
               <strong>{new Intl.NumberFormat(lang, { minimumIntegerDigits: 2, useGrouping: false }).format(segment.n)}</strong>
               <span>{label(lang, segment.key)}</span>
             </div>

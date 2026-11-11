@@ -3,10 +3,10 @@ import Link from "next/link";
 import { ArrowLeft, Printer } from "lucide-react";
 import { accentFor, dateParts, friendlyTime, onColor } from "@/lib/designs";
 import { useDraft } from "@/lib/use-draft";
-import { StationeryCard } from "@/engine/stationery";
+import { Face } from "@/invite/face";
+import "@/invite/invite.css";
 import { fontPackById, paletteOf, specById } from "@/engine/registry";
 import type { CSSProperties } from "react";
-import "@/engine/engine.css";
 import "./print.css";
 
 export default function PrintPreview() {
@@ -25,7 +25,7 @@ export default function PrintPreview() {
         <button type="button" onClick={() => window.print()}><Printer size={16} /> Print or save as PDF</button>
       </header>
       <div className="pr-stage" aria-label="Matching invitation stationery suite">
-        <article className="pr-sheet pr-sheet--front" aria-label="Printed invitation front"><StationeryCard data={draft} spec={spec} palette={palette}/></article>
+        <article className="pr-sheet pr-sheet--front" aria-label="Printed invitation front"><div className="inv" style={{ position: "absolute", inset: 0 }}><Face data={draft} spec={spec} palette={palette} fill/></div></article>
         <article className={`pr-sheet pr-sheet--insert pr-sheet--${draft.design}`} aria-label="Printed wedding details insert">
           <div className="pr-insert-inner">
             <span className="pr-insert-kicker">THE CELEBRATION</span>

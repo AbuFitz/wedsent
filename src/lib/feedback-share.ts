@@ -1,5 +1,5 @@
 import { defaults, type InviteData, type InviteEvent } from "@/lib/designs";
-import { DESIGN_IDS } from "@/engine/registry";
+import { DESIGN_IDS, normalizeDesignId } from "@/engine/registry";
 
 export type FeedbackShare = { data: InviteData; events: InviteEvent[] };
 
@@ -20,7 +20,7 @@ export function readFeedbackLink(hash: string): FeedbackShare | null {
     const raw = atob(hash.replace(/-/g, "+").replace(/_/g, "/"));
     const decoded = new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(raw, (c) => c.charCodeAt(0)));
     const candidate = JSON.parse(decoded);
-    if (candidate.v !== 1 || !candidate.data || !DESIGN_IDS.includes(candidate.data.design)) return null;
+    if (candidate.v !== 1 || !candidate.data || !DESIGN_IDS.includes(normalizeDesignId(candidate.data.design))) return null;
     const values = candidate.data;
     if (typeof values.names !== "string" || values.names.length > 60 || typeof values.message !== "string" || values.message.length > 300) return null;
     const data: InviteData = { ...defaults, ...values, photo: null, music: values.music?.src?.startsWith("/library/") ? values.music : null };
