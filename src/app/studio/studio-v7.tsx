@@ -2,30 +2,93 @@
 import {Suspense,useEffect,useState} from "react";
 import {useSearchParams} from "next/navigation";
 import Link from "next/link";
-import {ArrowLeft,ArrowRight,ArrowUpRight,Check,ChevronDown,Eye,Monitor,Smartphone,Undo2} from "lucide-react";
+import {ArrowUpRight,Check,Eye} from "lucide-react";
 import {InviteExperience} from "@/components/invite-experience";
 import {type InviteData,type DesignId,defaults,designs} from "@/lib/designs";
 
 const KEY="wedsent-preview-draft-v1";
-const steps=[{label:"Design",title:"Choose your look",hint:"Start with a design you love. You can change it later without losing your details."},{label:"Names",title:"Who’s celebrating?",hint:"Make it personal. Your invitation updates as you type."},{label:"Event",title:"Tell us about the day",hint:"Choose a starting point. Different ceremonies and guest groups come later."},{label:"Details",title:"When and where?",hint:"Don't know every detail yet? You can always return to this."},{label:"Personalise",title:"Make it your own",hint:"A few thoughtful adjustments, without spending hours designing."},{label:"Review",title:"Ready for a first look?",hint:"Open the same experience your guests will see."}];
-const looks:{id:DesignId;name:string;desc:string}[]=[{id:"sway",name:"Line",desc:"Clean and understated"},{id:"noor",name:"Frame",desc:"Contemporary and bold"},{id:"afterglow",name:"Muse",desc:"Expressive and playful"}];
-function Studio(){const params=useSearchParams();const [draft,setDraft]=useState<InviteData>(defaults);const [step,setStep]=useState(0);const [loaded,setLoaded]=useState(false);const [status,setStatus]=useState("Opening draft");const [previewMode,setPreviewMode]=useState(false);const [mobilePreview,setMobilePreview]=useState(false);
- useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){setDraft({...defaults,...JSON.parse(raw)});}else{const design=params.get("design");if(designs.some(d=>d.id===design))setDraft({...defaults,design:design as DesignId});}}catch{}setLoaded(true)},[params]);
- useEffect(()=>{if(!loaded)return;setStatus("Saving…");const timer=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(draft));setStatus("Saved on this device")}catch{setStatus("Unable to save")}},300);return()=>clearTimeout(timer)},[draft,loaded]);
- const set=(value:Partial<InviteData>)=>setDraft(d=>({...d,...value}));
- const next=()=>setStep(s=>Math.min(s+1,steps.length-1));const back=()=>setStep(s=>Math.max(s-1,0));
- return <main className="w7-app"><header className="w7-app-top"><Link href="/" className="w7-app-brand">wedsent<span> / studio</span></Link><div className="w7-top-center">YOUR INVITATION <span>·</span> DRAFT</div><div className="w7-top-actions"><span className="w7-saved"><Check size={14}/>{status}</span><Link href="/invite" target="_blank">Guest preview <ArrowUpRight size={16}/></Link></div></header>
-   <div className="w7-workspace"><section className="w7-editor"><div className="w7-progress"><span>CREATE YOUR INVITATION</span><span>0{step+1} / 0{steps.length}</span><div className="w7-progress-track"><span style={{width:`${(step+1)/steps.length*100}%`}}/></div></div>
-     <div className="w7-editor-body"><div className="w7-step-nav">{steps.map((s,i)=><button type="button" key={s.label} className={i===step?"active":""} onClick={()=>setStep(i)} aria-current={i===step?"step":undefined}>{s.label}</button>)}</div><div className="w7-form-content"><div className="w7-step-eyebrow">STEP 0{step+1}</div><h1>{steps[step].title}</h1><p className="w7-form-hint">{steps[step].hint}</p>
-       {step===0&&<div className="w7-design-grid">{looks.map(l=><button className={draft.design===l.id?"selected":""} type="button" key={l.id} onClick={()=>set({design:l.id,accent:""})} aria-pressed={draft.design===l.id}><div className={`w7-design-poster w7-poster-${l.id}`}><span>{l.name.toUpperCase()}</span><strong>A & Y</strong><small>12.06.27</small></div><div className="w7-design-meta"><span><b>{l.name}</b><small>{l.desc}</small></span>{draft.design===l.id?<Check size={16}/>:null}</div></button>)}</div>}
-       {step===1&&<div className="w7-fields"><label htmlFor="w7-names">Couple's names</label><input id="w7-names" value={draft.names} maxLength={90} placeholder="e.g. Amina & Yusuf" onChange={e=>set({names:e.target.value})}/><p>Write the names exactly how you'd like guests to see them.</p></div>}
-       {step===2&&<div className="w7-fields"><label>What's the occasion?</label><div className="w7-occasion-grid">{["Wedding","Nikah","Walima","Mehndi","Reception","Civil ceremony"].map(v=><button type="button" className={draft.ceremony===v?"selected":""} key={v} onClick={()=>set({ceremony:v})}>{v}{draft.ceremony===v&&<Check size={15}/>}</button>)}</div><label htmlFor="w7-occasion">Custom event title</label><input id="w7-occasion" value={draft.ceremony} onChange={e=>set({ceremony:e.target.value})} maxLength={60}/><p>Multiple events and separate guest access are planned for a later release.</p></div>}
-       {step===3&&<div className="w7-fields"><label htmlFor="w7-date">Date</label><input type="date" id="w7-date" value={draft.date} onChange={e=>set({date:e.target.value})}/><label htmlFor="w7-venue">Venue</label><input id="w7-venue" value={draft.venue} maxLength={90} onChange={e=>set({venue:e.target.value})} placeholder="Venue name"/><label htmlFor="w7-city">City or location</label><input id="w7-city" value={draft.city} maxLength={90} onChange={e=>set({city:e.target.value})} placeholder="City, country"/></div>}
-       {step===4&&<div className="w7-fields"><label>Colour accent</label><div className="w7-colours">{["","#181818","#2c45b8","#8b423e","#377e69","#8064b2"].map((v,i)=><button type="button" key={i} onClick={()=>set({accent:v})} className={draft.accent===v?"selected":""} style={{background:v||"linear-gradient(135deg,#ddd 50%,#333 50%)"}} aria-label={v?`Use colour ${v}`:"Original palette"} aria-pressed={draft.accent===v}/>)}</div><label htmlFor="w7-message">A message to your guests</label><textarea rows={5} id="w7-message" maxLength={350} value={draft.message} onChange={e=>set({message:e.target.value})}/><p>Music and additional motion styles will be available after the design engine is completed.</p></div>}
-       {step===5&&<div className="w7-review"><div><span>DESIGN</span><strong>{looks.find(l=>l.id===draft.design)?.name}</strong><button onClick={()=>setStep(0)}>Edit</button></div><div><span>NAMES</span><strong>{draft.names||"Not added"}</strong><button onClick={()=>setStep(1)}>Edit</button></div><div><span>EVENT</span><strong>{draft.ceremony||"Not added"}</strong><button onClick={()=>setStep(2)}>Edit</button></div><div><span>WHEN & WHERE</span><strong>{draft.venue||"Venue not added"}</strong><button onClick={()=>setStep(3)}>Edit</button></div><p className="w7-preview-warning">Early preview: your draft is saved in this browser only. Accounts, publishing and real guest responses are not available yet.</p><div className="w7-review-links"><Link href="/invite" target="_blank" className="w7-launch">Open guest preview <ArrowUpRight size={18}/></Link><Link href="/invite/print" target="_blank" className="w7-print-link">Print preview <ArrowUpRight size={18}/></Link></div></div>}
-       </div></div><div className="w7-editor-footer"><button disabled={step===0} onClick={back} className="w7-back"><ArrowLeft size={17}/> Back</button>{step<5?<button className="w7-next" onClick={next}>Continue <ArrowRight size={18}/></button>:<button className="w7-next" onClick={()=>setStep(0)}>Explore designs <ArrowRight size={18}/></button>}</div></section>
-     <aside className={`w7-preview ${mobilePreview?"is-visible":""}`}><div className="w7-preview-top"><div><strong>LIVE PREVIEW</strong><small>UPDATES AS YOU EDIT</small></div><button type="button" onClick={()=>setPreviewMode(!previewMode)}><Eye size={16}/> {previewMode?"Editing view":"Guest view"}</button></div><div className="w7-preview-stage"><div className="w7-device"><InviteExperience data={draft} embedded preview={!previewMode}/></div></div><div className="w7-preview-bottom"><span>YOUR INVITATION</span><span>{looks.find(l=>l.id===draft.design)?.name} / MOBILE</span></div></aside>
-   </div><button className="w7-mobile-toggle" type="button" onClick={()=>setMobilePreview(!mobilePreview)}>{mobilePreview?"Back to editing":"View invitation"} <Eye size={18}/></button>
- </main>;
+const looks:{id:DesignId;name:string;kind:string;desc:string}[]=[
+  {id:"sway",name:"Postmark",kind:"poster",desc:"Graphic / warm"},
+  {id:"noor",name:"The Vow",kind:"paper",desc:"Quiet / editorial"},
+  {id:"afterglow",name:"After Dark",kind:"midnight",desc:"Cinematic / modern"}
+];
+
+function Studio(){
+  const params=useSearchParams();
+  const [draft,setDraft]=useState<InviteData>(defaults);
+  const [loaded,setLoaded]=useState(false);
+  const [status,setStatus]=useState("Opening draft");
+  const [mobilePreview,setMobilePreview]=useState(false);
+
+  useEffect(()=>{try{
+    const raw=localStorage.getItem(KEY);
+    if(raw)setDraft({...defaults,...JSON.parse(raw)});
+    else {
+      const design=params.get("design");
+      if(designs.some(d=>d.id===design))setDraft({...defaults,design:design as DesignId});
+    }
+  }catch{} setLoaded(true)},[params]);
+
+  useEffect(()=>{if(!loaded)return;setStatus("Saving…");const timer=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(draft));setStatus("Saved on this device")}catch{setStatus("Unable to save")}},250);return()=>clearTimeout(timer)},[draft,loaded]);
+
+  const set=(v:Partial<InviteData>)=>setDraft(d=>({...d,...v}));
+  const current=looks.find(l=>l.id===draft.design)??looks[0];
+
+  return <main className="wd-studio">
+    <header className="wd-studio-top">
+      <Link href="/" className="wd-studio-brand">weddsent <span>Studio</span></Link>
+      <div className="wd-studio-status"><span><Check size={13}/> {status}</span><Link href="/invite" target="_blank">Guest preview <ArrowUpRight size={15}/></Link></div>
+    </header>
+
+    <div className="wd-studio-layout">
+      <section className="wd-editor">
+        <div className="wd-editor-intro"><span className="wd-mono">Your invitation</span><h1>Make it feel<br/><em>like yours.</em></h1><p>Edit the essentials here. The invitation updates beside you — no endless back-and-forth wizard.</p></div>
+
+        <div className="wd-editor-section">
+          <div className="wd-editor-section-title"><strong>Choose a design</strong><span>01</span></div>
+          <div className="wd-look-grid">{looks.map(l=><button className={`wd-look ${draft.design===l.id?"is-active":""}`} key={l.id} onClick={()=>set({design:l.id,accent:""})}>
+            <div className={`wd-look-art ${l.kind}`}><span>THE WEDDING OF</span><strong>A & Y</strong><small>12 · 06 · 27</small></div>
+            <div className="wd-look-meta"><span><b>{l.name}</b><small>{l.desc}</small></span>{draft.design===l.id?<Check size={14}/>:null}</div>
+          </button>)}</div>
+        </div>
+
+        <div className="wd-editor-section">
+          <div className="wd-editor-section-title"><strong>The day</strong><span>02</span></div>
+          <div className="wd-field-grid">
+            <label className="wd-field full"><span>Couple's names</span><input value={draft.names} onChange={e=>set({names:e.target.value})} placeholder="Amina & Yusuf" maxLength={90}/></label>
+            <label className="wd-field"><span>Date</span><input type="date" value={draft.date} onChange={e=>set({date:e.target.value})}/></label>
+            <label className="wd-field"><span>Event title</span><input value={draft.ceremony} onChange={e=>set({ceremony:e.target.value})} maxLength={60}/></label>
+            <label className="wd-field"><span>Venue</span><input value={draft.venue} onChange={e=>set({venue:e.target.value})} placeholder="Venue name" maxLength={90}/></label>
+            <label className="wd-field"><span>City / location</span><input value={draft.city} onChange={e=>set({city:e.target.value})} placeholder="London, England" maxLength={90}/></label>
+          </div>
+          <p className="wd-helper">You can keep details simple now. Multi-event wedding setup is part of the wider product flow and is still being built.</p>
+        </div>
+
+        <div className="wd-editor-section">
+          <div className="wd-editor-section-title"><strong>Occasion</strong><span>03</span></div>
+          <div className="wd-occasion-row">{["Wedding","Nikah","Walima","Mehndi","Reception","Civil ceremony"].map(v=><button className={draft.ceremony===v?"is-active":""} onClick={()=>set({ceremony:v})} key={v}>{v}</button>)}</div>
+        </div>
+
+        <div className="wd-editor-section">
+          <div className="wd-editor-section-title"><strong>Personalise</strong><span>04</span></div>
+          <label className="wd-field full"><span>Message to your guests</span><textarea value={draft.message} onChange={e=>set({message:e.target.value})} maxLength={350}/></label>
+          <div style={{marginTop:18}}><span style={{display:"block",fontSize:10,fontWeight:700,marginBottom:9}}>Colour accent</span><div className="wd-colours">{["","#181818","#2f49d0","#662b35","#377e69","#a77a55"].map((v,i)=><button key={i} className={draft.accent===v?"is-active":""} onClick={()=>set({accent:v})} style={{background:v||"linear-gradient(135deg,#eee 50%,#222 50%)"}} aria-label={v||"Original palette"}/>)}</div></div>
+        </div>
+
+        <div className="wd-editor-actions">
+          <Link href="/invite" target="_blank" className="wd-btn-dark">Open guest preview <ArrowUpRight size={16}/></Link>
+          <Link href="/invite/print" target="_blank" className="wd-btn-light">Print preview <ArrowUpRight size={16}/></Link>
+        </div>
+        <p className="wd-helper" style={{marginTop:16}}>Early preview: drafts are stored only in this browser. Accounts, publishing, payments and real responses are not live yet.</p>
+      </section>
+
+      <aside className={`wd-preview ${mobilePreview?"is-visible":""}`}>
+        <div className="wd-preview-head"><span>Live invitation</span><span>{current.name}</span></div>
+        <div className="wd-preview-stage"><div className="wd-preview-device"><InviteExperience data={draft} embedded preview/></div></div>
+        <div className="wd-preview-foot"><span>Updates as you type</span><span>Mobile</span></div>
+      </aside>
+    </div>
+    <button className="wd-mobile-preview-toggle" onClick={()=>setMobilePreview(!mobilePreview)}>{mobilePreview?"Back to editing":"View invitation"} <Eye size={17}/></button>
+  </main>
 }
-export default function StudioV7(){return <Suspense fallback={<div className="w7-loading">Opening your Studio…</div>}><Studio/></Suspense>}
+export default function StudioV7(){return <Suspense fallback={<div className="wd-studio">Opening Studio…</div>}><Studio/></Suspense>}
