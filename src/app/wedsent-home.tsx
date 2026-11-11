@@ -2,26 +2,164 @@
 
 import {useState} from "react";
 import Link from "next/link";
-import {ArrowDownRight,ArrowLeft,ArrowRight,ArrowUpRight,ChevronDown,X} from "lucide-react";
+import {ArrowDown,ArrowLeft,ArrowRight,ArrowUpRight,Check,Menu,X} from "lucide-react";
 
-type Art="electric"|"editorial"|"night";
-const designs:{id:Art;name:string;category:string;names:string;date:string;tagline:string}[]=[
-  {id:"electric",name:"The Current",category:"Graphic / Expressive",names:"Amina & Yusuf",date:"SATURDAY, 12 JUNE 2027",tagline:"For a love that doesn't do ordinary."},
-  {id:"editorial",name:"Soft Focus",category:"Minimal / Editorial",names:"Noor & Adam",date:"18 SEPTEMBER 2027",tagline:"A little space for a big feeling."},
-  {id:"night",name:"After Hours",category:"Cinematic / Modern",names:"Leila & Sami",date:"02 OCTOBER 2027",tagline:"An evening worth dressing up for."}
-];
-function Invitation({design,opened,onOpen}:{design:typeof designs[number];opened:boolean;onOpen:()=>void}){
-  return <div className={`ws-invite ws-${design.id} ${opened?"is-open":""}`}><div className="ws-invite-grain" aria-hidden="true"/><div className="ws-invite-heading"><span>THE WEDDING OF</span><span>W / 27</span></div><div className="ws-invite-art" aria-hidden="true"><i/><i/><i/></div><div className="ws-invite-main"><small>YOU'RE INVITED</small><strong>{design.names.split(" & ")[0]}<em>&</em>{design.names.split(" & ")[1]}</strong><p>{design.tagline}</p></div><div className="ws-invite-foot"><span>{design.date}</span><button type="button" onClick={onOpen} aria-expanded={opened}>{opened?"CLOSE":"OPEN"}<ArrowDownRight size={16}/></button></div>{opened&&<div className="ws-invite-reveal"><span>YOU'RE INVITED TO CELEBRATE</span><h3>It wouldn’t be the same without you.</h3><p>Join us for the ceremony, good company and a night to remember.</p><div>12 JUN 2027 <span>THE GLASSHOUSE, LONDON</span></div><small>RSVP — DEMO VIEW</small></div>}</div>
+const showcase = [
+  {id:"poster",name:"Postmark",mood:"Graphic / warm",names:"Amina & Yusuf",date:"12 · 06 · 27"},
+  {id:"paper",name:"The Vow",mood:"Quiet / editorial",names:"Noor & Adam",date:"18 · 09 · 27"},
+  {id:"midnight",name:"After Dark",mood:"Cinematic / modern",names:"Leila & Sami",date:"02 · 10 · 27"},
+] as const;
+
+function DemoInvite({kind,names,date}:{kind:string;names:string;date:string}) {
+  return <div className={`wd-demo-invite ${kind}`}>
+    <div className="top"><span>THE WEDDING OF</span><span>W / 27</span></div>
+    <div className="center"><span>TOGETHER WITH THEIR FAMILIES</span><h3>{names}</h3><p>YOU'RE INVITED TO CELEBRATE</p></div>
+    <div className="bottom"><span>{date}</span><span>LONDON</span></div>
+  </div>;
 }
-export default function Home(){const [active,setActive]=useState(0),[opened,setOpened]=useState(false),[menu,setMenu]=useState(false);const current=designs[active];const change=(n:number)=>{setActive((n+designs.length)%designs.length);setOpened(false)};
-return <main className="ws-site" id="top">
- <div className="ws-announcement"><span>THE INVITATION IS THE BEGINNING.</span><span>WELCOME TO WEDSENT ✳</span></div>
- <header className="ws-navigation"><Link href="/" className="ws-wordmark">wed<span>sent</span><b>✳</b></Link><nav className={menu?"is-visible":""}><a href="#collection" onClick={()=>setMenu(false)}>Designs</a><a href="#experience" onClick={()=>setMenu(false)}>The experience</a><a href="#how-it-works" onClick={()=>setMenu(false)}>How it works</a></nav><div className="ws-nav-actions"><Link href="/studio" className="ws-text-link">Your Studio <ArrowUpRight size={15}/></Link><Link href="/studio" className="ws-nav-cta">Make an invite <ArrowUpRight size={16}/></Link></div><button className="ws-menu" onClick={()=>setMenu(!menu)} aria-label="Toggle menu">{menu?<X/>:<>Menu <ChevronDown size={16}/></>}</button></header>
- <section className="ws-hero"><div className="ws-hero-copy"><div className="ws-overline"><span/> DIGITAL INVITATIONS, REIMAGINED</div><h1>Make it<br/><span>an occasion<i>.</i></span></h1><p>Not just a date and a place. A first impression, a little anticipation, and an invite they’ll actually want to open.</p><div className="ws-hero-actions"><Link href="/studio" className="ws-primary">Create your invitation <ArrowUpRight size={20}/></Link><a href="#collection" className="ws-secondary">Explore the designs <ArrowDownRight size={18}/></a></div><div className="ws-hero-small"><span>01 / MAKE IT YOURS</span><span>02 / SEND THE MOMENT</span><span>03 / KNOW WHO’S COMING</span></div></div><div className="ws-hero-visual"><div className="ws-hero-orbit one"/><div className="ws-hero-orbit two"/><div className="ws-hero-stage"><div className="ws-hero-card ws-card-back"><span>IT STARTS HERE</span><strong>YOU’RE<br/>INVITED.</strong><span>WEDSENT / 2027</span></div><div className="ws-hero-card ws-card-front"><span>01 / THE CURRENT</span><small>TOGETHER WITH THEIR FAMILIES</small><strong>AMINA <i>&</i><br/>YUSUF</strong><div><span>12 JUNE 2027</span><span>LONDON, UK</span></div></div></div><div className="ws-visual-stamp">A DIFFERENT KIND<br/>OF INVITATION <ArrowUpRight size={16}/></div></div></section>
- <section className="ws-intro"><span className="ws-section-num">01 / THE IDEA</span><h2>Some things deserve<br/><em>a little more feeling.</em></h2><div><p>The first glimpse of your wedding shouldn’t feel like a form. Make it personal, make it memorable, and keep the practical details beautifully simple.</p><a href="#experience">See how it feels <ArrowDownRight size={18}/></a></div></section>
- <section className="ws-collection" id="collection"><div className="ws-section-head"><div><span className="ws-section-num">02 / THE COLLECTION</span><h2>Pick a feeling.<br/><span>Make it yours.</span></h2></div><p>Different moods. Different ways to tell your story. Pick a design, then open the invitation to see it move.</p></div><div className="ws-showcase"><div className="ws-showcase-list" role="tablist" aria-label="Invitation designs">{designs.map((d,i)=><button type="button" role="tab" key={d.id} aria-selected={active===i} className={active===i?"is-active":""} onClick={()=>change(i)}><span>0{i+1}</span><strong>{d.name}</strong><small>{d.category}</small><ArrowUpRight size={20}/></button>)}<div className="ws-gallery-caption"><span>LIVE INTERACTIVE PREVIEW</span><p>These are evolving invitation concepts. Professional print artwork is still in development.</p></div></div><div className={`ws-showcase-stage stage-${current.id}`}><div className="ws-showcase-toolbar"><span>● LIVE DESIGN PREVIEW</span><span>SWITCH & EXPLORE</span></div><div className="ws-phone"><div className="ws-phone-camera"/><Invitation key={current.id} design={current} opened={opened} onOpen={()=>setOpened(!opened)}/></div><div className="ws-showcase-controls"><button onClick={()=>change(active-1)} aria-label="Previous design"><ArrowLeft size={19}/></button><span>0{active+1} <i>/</i> 0{designs.length}</span><button onClick={()=>change(active+1)} aria-label="Next design"><ArrowRight size={19}/></button></div></div></div><div className="ws-collection-foot"><span>THOUGHTFUL DESIGN. YOUR STORY.</span><Link href="/studio">Start with a design <ArrowUpRight size={18}/></Link></div></section>
- <section className="ws-experience" id="experience"><div className="ws-experience-title"><span className="ws-section-num">03 / THE EXPERIENCE</span><h2>It doesn’t stop<br/>at <em>“you’re invited.”</em></h2><p>The beautiful part is the invitation. The useful part is everything it makes easier.</p></div><div className="ws-experience-grid"><article className="ws-feature ws-feature-one"><span>01 — OPEN THE MOMENT</span><div className="ws-fold-object"><div className="ws-fold-inside">A DAY TO<br/>REMEMBER.</div><div className="ws-fold-cover">OPEN<br/>ME <ArrowUpRight size={23}/></div></div><h3>An arrival worth opening.</h3><p>Considered reveals, page turns and transitions that add anticipation without getting in the way.</p></article><article className="ws-feature ws-feature-two"><span>02 — THE IMPORTANT BITS</span><div className="ws-feature-ui"><div>YOUR GUESTS <span>●</span></div><strong>124</strong><small>ILLUSTRATIVE INVITE COUNT</small><div className="ws-ui-bars"><i/><i/><i/></div><div className="ws-ui-key">GOING <span>AWAITING</span> CAN'T MAKE IT</div></div><h3>Less chasing. More celebrating.</h3><p>Guest replies, event details and the headcount in one place. No endless message threads.</p><small>Illustrative UI. Live guest management is in development.</small></article><article className="ws-feature ws-feature-three"><span>03 — EVERY SCREEN</span><div className="ws-feature-phone"><span>THE WEDDING OF</span><strong>Our<br/>day.</strong><span>GOOD THINGS ARE COMING.</span></div><h3>Made for the small screen.</h3><p>Invitations are opened on phones. Every composition starts there, and every detail earns its space.</p></article></div></section>
- <section className="ws-process" id="how-it-works"><div className="ws-process-head"><span className="ws-section-num">04 / THE SIMPLE PART</span><h2>Big moment.<br/><span>Small setup.</span></h2><p>Creative freedom without an afternoon lost in settings.</p></div><div className="ws-process-rows"><div><span>01</span><h3>Find your look</h3><p>Start with a thoughtfully made design, not a blank canvas.</p><ArrowUpRight/></div><div><span>02</span><h3>Tell your story</h3><p>Names, dates and details. Edit while the invitation comes alive.</p><ArrowUpRight/></div><div><span>03</span><h3>Bring everyone in</h3><p>Share an invitation and keep track of replies when publishing launches.</p><ArrowUpRight/></div></div></section>
- <section className="ws-end"><div className="ws-end-art" aria-hidden="true"><span>✳</span><span>✳</span></div><span className="ws-section-num">YOUR STORY STARTS HERE</span><h2>It starts with<br/><em>an invitation.</em></h2><Link href="/studio">Make yours <ArrowUpRight size={24}/></Link><p>The creator is in early preview. Publishing and sending aren’t live yet.</p></section>
- <footer className="ws-footer"><span className="ws-wordmark">wed<span>sent</span><b>✳</b></span><p>Invitations worth opening.</p><a href="#top">Back to top ↑</a><span>© 2026 WEDSENT</span></footer>
-</main>}
+
+export default function Home(){
+  const [active,setActive]=useState(1);
+  const [menu,setMenu]=useState(false);
+  const current=showcase[active];
+  const cycle=(dir:number)=>setActive(v=>(v+dir+showcase.length)%showcase.length);
+
+  return <main className="wd-site" id="top">
+    <header className="wd-nav">
+      <Link href="/" className="wd-wordmark">wedd<i>sent</i></Link>
+      <nav className={menu?"is-open":""}>
+        <div className="wd-nav-links">
+          <a href="#designs">Designs</a><a href="#experience">Experience</a><a href="#how">How it works</a>
+        </div>
+      </nav>
+      <div className="wd-nav-actions">
+        <Link href="/studio" className="wd-nav-link">Studio</Link>
+        <Link href="/studio" className="wd-btn-dark">Create yours <ArrowUpRight size={15}/></Link>
+        <button className="wd-menu" onClick={()=>setMenu(!menu)} aria-label="Toggle menu">{menu?<X size={19}/>:<Menu size={19}/>}</button>
+      </div>
+    </header>
+
+    <section className="wd-hero">
+      <div className="wd-hero-copy">
+        <div className="wd-kicker">Digital wedding invitations</div>
+        <h1>An invitation<br/><em>worth opening.</em></h1>
+        <p>Build a beautifully designed mobile invitation, send one link, and keep the details and replies in one place.</p>
+        <div className="wd-hero-actions">
+          <Link href="/studio" className="wd-btn-dark">Create your invitation <ArrowUpRight size={16}/></Link>
+          <a href="#designs" className="wd-btn-outline">See the designs <ArrowDown size={16}/></a>
+        </div>
+        <div className="wd-hero-proof">
+          <span>Made for phones first</span><span>Multi-event weddings</span><span>Household-aware RSVP</span>
+        </div>
+      </div>
+      <div className="wd-hero-showcase" aria-label="Invitation design previews">
+        <div className="wd-stack">
+          {showcase.map(d=><div className="wd-stack-phone" key={d.id}><div className="wd-stack-screen"><DemoInvite kind={d.id} names={d.names} date={d.date}/></div></div>)}
+        </div>
+        <div className="wd-stack-caption"><span>Three directions. One product.</span><span>01—03</span></div>
+      </div>
+    </section>
+
+    <div className="wd-strip"><div className="wd-strip-track">
+      <span>Invitation design</span><b>×</b><span>Guest details</span><b>×</b><span>RSVP</span><b>×</b><span>Multiple events</span><b>×</b><span>Mobile first</span><b>×</b>
+      <span>Invitation design</span><b>×</b><span>Guest details</span><b>×</b><span>RSVP</span><b>×</b><span>Multiple events</span><b>×</b><span>Mobile first</span><b>×</b>
+    </div></div>
+
+    <section className="wd-section wd-designs" id="designs">
+      <div className="wd-section-head">
+        <span className="wd-mono">01 / Designs</span>
+        <h2>Start with a look.<br/><em>Not a blank page.</em></h2>
+        <p>Each invitation has its own composition, typography and mood. Pick one, add your details, then make it yours.</p>
+      </div>
+      <div className="wd-design-layout">
+        <div className="wd-design-index">
+          {showcase.map((d,i)=><button key={d.id} className={`wd-design-tab ${active===i?"is-active":""}`} onClick={()=>setActive(i)}>
+            <span className="wd-mono">0{i+1}</span><strong>{d.name}</strong><ArrowUpRight size={16}/><small>{d.mood}</small>
+          </button>)}
+          <p className="wd-design-index-note">These are live product directions, not stock wedding templates. The invitation system is still in early preview.</p>
+        </div>
+        <div className={`wd-design-stage is-${current.id}`}>
+          <span className="wd-design-badge">{current.name} / live preview</span>
+          <div className="wd-design-device"><DemoInvite kind={current.id} names={current.names} date={current.date}/></div>
+          <div className="wd-design-controls"><button aria-label="Previous design" onClick={()=>cycle(-1)}><ArrowLeft size={17}/></button><button aria-label="Next design" onClick={()=>cycle(1)}><ArrowRight size={17}/></button></div>
+        </div>
+      </div>
+      <Link href="/studio" className="wd-design-link">Use this as your starting point <ArrowUpRight size={16}/></Link>
+    </section>
+
+    <section className="wd-section wd-feature-story" id="experience">
+      <div className="wd-section-head">
+        <span className="wd-mono">02 / Experience</span>
+        <h2>Beautiful outside.<br/><em>Useful underneath.</em></h2>
+        <p>The invite should feel special to a guest without making the couple manage a spreadsheet in disguise.</p>
+      </div>
+      <div className="wd-feature-grid">
+        <article className="wd-feature-block">
+          <span className="wd-mono">Multiple events</span>
+          <h3>One wedding can hold <em>more than one day.</em></h3>
+          <p>Nikah, Walima, Mehndi, civil ceremony, reception — organise them as separate events without forcing the wedding into one template.</p>
+          <div className="wd-event-card">
+            <div className="wd-event-row"><span>FRI 11 JUN</span><strong>Nikah</strong><small>Family & close friends</small></div>
+            <div className="wd-event-row"><span>SAT 12 JUN</span><strong>Walima</strong><small>All invited guests</small></div>
+            <div className="wd-event-row"><span>SUN 13 JUN</span><strong>Brunch</strong><small>Optional</small></div>
+          </div>
+        </article>
+        <article className="wd-feature-block">
+          <span className="wd-mono">RSVP that understands people</span>
+          <h3>Invite households.<br/><em>Track people.</em></h3>
+          <p>A family link can still record who is actually coming, which event they can attend, plus-ones, children and notes.</p>
+          <div className="wd-rsvp-card">
+            <div className="wd-rsvp-card-head"><span>THE ADEN HOUSEHOLD</span><span>3 INVITED</span></div>
+            {["Riyana Aden","Sahra Aden","Yusuf Aden"].map((name,i)=><div className="wd-rsvp-person" key={name}><div><strong>{name}</strong><small>{i===2?"Nikah only":"Nikah + Walima"}</small></div><div className="wd-rsvp-choice"><span className={i!==2?"active":""}>{i===2?"Awaiting":"Going"}</span></div></div>)}
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section className="wd-section wd-process" id="how">
+      <div className="wd-section-head">
+        <span className="wd-mono">03 / How it works</span>
+        <h2>Keep the setup<br/><em>small.</em></h2>
+        <p>No twenty-screen onboarding flow. Start with the invitation, add what matters, create an account only when you want to keep going.</p>
+      </div>
+      <div className="wd-process-list">
+        {[
+          ["01","Choose a design","Start from a curated invitation direction rather than a generic page builder."],
+          ["02","Add your day","Names, dates, venue, events and the details your guests actually need."],
+          ["03","Make it yours","Adjust the approved palette, wording, imagery and motion without breaking the design."],
+          ["04","Preview as a guest","Open the invitation exactly as someone receiving the link would."],
+          ["05","Publish & share","Once publishing launches, keep the same invitation link even when details change."]
+        ].map(([n,t,p])=><div className="wd-process-row" key={n}><span>{n}</span><h3>{t}</h3><p>{p}</p><ArrowUpRight size={18}/></div>)}
+      </div>
+    </section>
+
+    <section className="wd-section wd-mobile-first">
+      <div className="wd-mobile-grid">
+        <div className="wd-mobile-copy">
+          <span className="wd-mono">04 / Where it gets opened</span>
+          <h2>Designed for<br/><em>the message thread.</em></h2>
+          <p>Most guests will meet your invitation from WhatsApp, SMS or email on a phone. Weddsent starts with that reality instead of shrinking a desktop wedding website down afterwards.</p>
+          <Link href="/invite" className="wd-design-link">Open the guest preview <ArrowUpRight size={16}/></Link>
+        </div>
+        <div className="wd-message-stage">
+          <div className="wd-message-bubble one">Amina & Yusuf sent an invitation ✨</div>
+          <div className="wd-message-phone"><DemoInvite kind="paper" names="Amina & Yusuf" date="12 · 06 · 27"/></div>
+          <div className="wd-message-bubble two">Tap to open →</div>
+        </div>
+      </div>
+    </section>
+
+    <section className="wd-final">
+      <span className="wd-mono">Your invitation starts here</span>
+      <h2>Make it<br/><em>yours.</em></h2>
+      <Link href="/studio" className="wd-btn-dark">Create your invitation <ArrowUpRight size={17}/></Link>
+      <p>Weddsent is currently an early product preview. Publishing, payments and live guest delivery are not yet enabled.</p>
+    </section>
+
+    <footer className="wd-footer">
+      <span className="wd-wordmark">wedd<i>sent</i></span>
+      <p>Digital wedding invitations, thoughtfully made.</p>
+      <a href="#top">Back to top ↑</a>
+    </footer>
+  </main>
+}
