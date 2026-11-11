@@ -1,4 +1,4 @@
-import { Home } from "@/components/site/home-stux";
+import { HomeReimagined } from "@/components/site/home-reimagined";
 export default function Page() {
-  return <Home />;
+  return <HomeReimagined />;
 }

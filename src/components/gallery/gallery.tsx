@@ -48,12 +48,12 @@ export function Gallery({ initial }: { initial?: Partial<Record<Facet, string>> 
       <Nav />
       <main className="gl">
         <header className="gl-head">
-          <span className="gl-head-kicker">THE WEDDSENT COLLECTION / VOL. 01</span>
-          <h1>EXPLORE<br/>THE DESIGNS.</h1>
-          <div className="gl-head-bottom"><p>INDIVIDUAL WORLDS, UNFORGETTABLE FIRST IMPRESSIONS. PICK A DESIGN AND MAKE IT YOURS.</p><span>SCROLL TO EXPLORE ↓</span></div>
+          <span className="gl-head-kicker">A COLLECTION FOR EVERY KIND OF LOVE STORY</span>
+          <h1>Find your<br/><em>first impression.</em></h1>
+          <div className="gl-head-bottom"><p>Considered invitations, each with a personality of its own. Explore how they look, how they open, and which one feels like you.</p><span>CURATED FOR YOUR CELEBRATION</span></div>
         </header>
 
-        <div className="gl-editorial-pair"><figure><img src="/art/weddsent-veil.webp" alt="Wedding couple holding hands beneath a veil" width={1000} height={1500}/><figcaption>THE FEELING</figcaption></figure><figure><img src="/art/weddsent-digital-hero.webp" alt="Digital wedding invitation on a phone placed on fine stationery" width={1300} height={866}/><figcaption>THE INVITATION</figcaption></figure></div>
+        <div className="gl-editorial-pair"><figure><img src="/art/weddsent-editorial-hands-v2.webp" alt="Couple in refined wedding attire holding hands" width={1024} height={1536}/><figcaption>BEHIND EVERY INVITATION IS A STORY</figcaption></figure><figure><img src="/art/weddsent-editorial-table-v2.webp" alt="Candlelit courtyard wedding table" width={1536} height={1024}/><figcaption>THE BEGINNING OF SOMETHING BEAUTIFUL</figcaption></figure></div>
 
         <div className="gl-bar">
           <button type="button" className="gl-filter-btn" onClick={() => setSheet(true)}><FunnelSimple size={18} /> Filters{active.length ? ` (${active.length})` : ""}</button>

@@ -95,3 +95,15 @@
 .gl-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 24px}.dc-stage{border-radius:0;background:linear-gradient(160deg,#a7a4a1,#dedbda);aspect-ratio:1.05;overflow:hidden}.dc-hit,.dc-open{border-radius:0}.dc-meta h3{font-weight:750;text-transform:uppercase;font-size:25px}
 @media(max-width:900px){.gl{padding:125px 17px 100px}.gl-head h1{font-size:clamp(64px,13vw,120px);margin:30px 0 40px}.gl-head-bottom p{font-size:19px}.gl-editorial-pair{height:560px}.gl-bar{margin-top:70px}.gl-grid{grid-template-columns:1fr;gap:40px}.dc-stage{aspect-ratio:1.12}}
 @media(max-width:500px){.gl-head h1{font-size:clamp(55px,13vw,86px)}.gl-editorial-pair{height:380px}.gl-editorial-pair figcaption{font-size:9px}}
+/* Weddsent editorial collection — rebuild, November 2026 */
+.gl{background:#f8f7f3;max-width:none;padding:178px clamp(20px,5vw,90px) 150px;color:#191917}
+.gl-head-kicker{font-family:"Geist Variable",sans-serif;font-weight:650;letter-spacing:.11em;font-size:11px}
+.gl-head h1{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(88px,10.6vw,185px);font-weight:400;letter-spacing:-.05em;line-height:.84;margin:55px 0 52px;text-transform:none}
+.gl-head h1 em{color:#979084;font-family:inherit;font-style:italic;font-weight:400;letter-spacing:-.05em}
+.gl-head-bottom{margin-bottom:75px}.gl-head-bottom p{font-size:clamp(17px,1.5vw,22px);line-height:1.5;font-weight:400;letter-spacing:-.025em;max-width:550px;color:#57564f}.gl-head-bottom span{font-size:11px;font-weight:600;letter-spacing:.08em}
+.gl-editorial-pair{height:clamp(470px,53vw,820px);grid-template-columns:.72fr 1.28fr;gap:12px}.gl-editorial-pair figure:nth-child(1) img{object-position:center 48%}.gl-editorial-pair figure:nth-child(2) img{object-position:center}.gl-editorial-pair figcaption{font-weight:650;font-size:10px;letter-spacing:.1em}
+.gl-bar{margin-top:80px;border-color:#ccc9c0}.gl-count{font-weight:600;font-size:12px;letter-spacing:.07em}.gl-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:55px 24px}
+.dc-stage{aspect-ratio:1.12;background:linear-gradient(150deg,#dedbd2,#eeeae2);border-radius:6px}.dc-hit,.dc-open{border-radius:6px}.dc-meta h3{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:34px;text-transform:none;letter-spacing:-.04em}.dc-meta p{font-size:13px}
+.gl-filter-btn,.gl-sort select,.gl-chips button{border-radius:30px}.gf summary{font-weight:560}
+@media(max-width:900px){.gl{padding:125px 20px 100px}.gl-head h1{font-size:clamp(67px,11.7vw,112px);margin:35px 0}.gl-head-bottom p{font-size:16px}.gl-editorial-pair{height:500px}.gl-grid{grid-template-columns:1fr;gap:35px}.gl-bar{margin-top:50px}}
+@media(max-width:500px){.gl-head h1{font-size:clamp(64px,12.5vw,90px)}.gl-editorial-pair{grid-template-columns:.8fr 1.2fr;height:320px}.gl-head-bottom{margin-bottom:35px}.gl-editorial-pair figcaption{font-size:8px}.dc-meta h3{font-size:28px}}

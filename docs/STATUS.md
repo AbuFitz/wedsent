@@ -140,3 +140,12 @@ Evidence: `npm test` (24 backend tests, embedded Postgres), `tests/e2e/flow.mjs`
 
 **10 Nov setup recovery follow-up:** The seven-step creation flow now keeps an in-progress snapshot in tab-scoped browser session storage (including selected events and current step), restoring it after refresh. A completed handoff to account creation or Studio removes this temporary snapshot; the established draft store remains the source for the account claim. Invalid or oversized snapshots are ignored. This reduces accidental loss during the pre-account journey; it does not replace cloud autosave, multi-device recovery or end-to-end signup tests.
 
+## 11 November 2026 — public-facing creative rebuild
+
+- Replaced the previous Stux-style homepage structure entirely with `home-reimagined.tsx` and a new responsive styling system: restrained Geist/Instrument Serif typography, framed product navigation, asymmetric editorial opening, real invitation preview and opening state, interactive five-plus-design phone exhibition, culture-neutral multi-event story, household RSVP example, creation journey, FAQ and editorial close.
+- The interactive carousel uses the actual invitation renderer and registry rather than flattened marketing screenshots; arrows, touch and keyboard update the selected design; the selected preview links to its `/designs/[id]` route. No paid Framer component source or copyrighted assets were copied.
+- Two original campaign images generated specifically for this composition are saved in `public/art/weddsent-editorial-table-v2.webp` and `weddsent-editorial-hands-v2.webp`. Original PNG sources are retained locally, but only optimized WebP assets are needed for deployment.
+- Reworked the shared nav, design collection masthead/imagery/card styling, pricing layout and white creation-form typography for the same direction. These are visual changes; existing auth/Studio and guest API contracts are intentionally preserved.
+- `npm run build` passed and `npm test` passed 59 tests across 8 files. **No live desktop/mobile browser visual approval yet**, and the simulated RSVP on the homepage intentionally saves/sends nothing. The pricing CTA remains a try-it flow; £39 and hosting period are provisional, checkout inactive.
+- Remaining: verify the exact rendered pages at 360/390/430/1440 widths, real mobile swipe/tap and long/RTL invitation fixtures; verify the production Vercel deployment and user-critique the new art direction. Further invitation-template artwork quality remains separate work.
+

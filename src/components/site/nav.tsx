@@ -5,22 +5,21 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUpRight, X } from "lucide-react";
 import { call } from "@/lib/api-client";
-import "./nav-stux.css";
+import "./nav-reimagined.css";
 
 export function Nav({studioHref="/studio"}:{studioHref?:string}){
   const [session,setSession]=useState<"loading"|"guest"|"owner">("loading");
   const [menu,setMenu]=useState(false);
   const [scrolled,setScrolled]=useState(false);
   const pathname=usePathname();
-  const onHero=pathname==="/";
   useEffect(()=>{let active=true;void call<{user:{id:string}|null}>("GET","/api/me").then(v=>{if(active)setSession(v.user?"owner":"guest")}).catch(()=>{if(active)setSession("guest")});return()=>{active=false}},[]);
   useEffect(()=>{const onScroll=()=>setScrolled(window.scrollY>Math.max(320,window.innerHeight*.7));onScroll();window.addEventListener("scroll",onScroll,{passive:true});return()=>window.removeEventListener("scroll",onScroll)},[]);
   useEffect(()=>{setMenu(false)},[pathname]);
   useEffect(()=>{if(!menu)return;const old=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.body.style.overflow=old}},[menu]);
   const createHref=session==="owner"?studioHref:"/start";
-  return <><header className={`sn ${onHero&&!scrolled&&!menu?"sn-over-image":""} ${menu?"sn-open":""}`}>
+  return <><header className={`sn ${scrolled?"sn-scrolled":""} ${menu?"sn-open":""}`}>
     <button className="sn-menu-button" aria-label={menu?"Close menu":"Open menu"} aria-expanded={menu} onClick={()=>setMenu(v=>!v)} type="button">{menu?<X size={27}/>:<span className="sn-lines"><i/><i/></span>}</button>
-    <Link href="/" className="sn-brand">WEDDSENT</Link>
+    <Link href="/" className="sn-brand">weddsent<span className="sn-brand-mark">✳</span></Link>
     <Link href={createHref} className="sn-action"><span>{session==="owner"?"OPEN STUDIO":"CREATE INVITE"}</span><b><ArrowUpRight size={23}/></b></Link>
   </header>
   <AnimatePresence>{menu&&<motion.div className="sn-overlay" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} transition={{duration:.24}}>

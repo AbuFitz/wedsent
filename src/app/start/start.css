@@ -108,6 +108,9 @@
 .s8-bar span{background:#ffe325}.s8-pane h1{font-weight:800;letter-spacing:-.085em;text-transform:uppercase}
 .s8-intro-label span{color:#111}.s8-stage{background:#ededed}.s8-preview-label{font-weight:800}
 .s8-presets button,.s8-openings button,.s8-types button,.s8-f input,.s8-f textarea,.s8-select,.s8-events input{border-radius:0}
+/* Reimagined white creation flow: editorial warmth without sacrificing form clarity. */
+.st8{background:#fff;color:#191917}.s8-bar span{background:#a29b8c}.s8-pane h1{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(60px,6.1vw,112px);font-weight:400;line-height:.9;letter-spacing:-.055em;text-transform:none}.s8-logo{font-family:"Geist Variable",sans-serif;font-weight:650;letter-spacing:-.075em}.s8-intro-label span{color:#a29b8c}.s8-intro-label{letter-spacing:.07em}.s8-stage{background:#eae9e3}.s8-preview-label{font-weight:600}.s8-presets button,.s8-openings button,.s8-types button,.s8-f input,.s8-f textarea,.s8-select,.s8-events input{border-radius:7px}.s8-nav .btn,.s8-save,.s8-pick,.s8-pals button{border-radius:30px}
+@media(max-width:900px){.s8-pane h1{font-size:clamp(47px,10.4vw,72px)}.s8-stage{background:#eae9e3}}
 .s8-presets button[aria-pressed=true],.s8-openings button[aria-pressed=true]{background:#fffbe3;border-color:#111}
 .s8-nav .btn,.s8-save,.s8-pick,.s8-pals button{border-radius:0}
 @media(max-width:900px){.s8-pane{border-radius:0}.s8-pane h1{font-size:clamp(38px,8vw,58px)}.s8-stage{background:#ededed}}
