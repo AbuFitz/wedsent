@@ -9,6 +9,7 @@ import { friendlyDate } from "@/lib/designs";
 import { guestProgress } from "@/lib/guest-progress";
 import { ShareInvitation } from "@/components/share/share-invitation";
 import "./dashboard.css";
+import { Wordmark } from "@/components/site/nav";
 
 type Event = { id: string; title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; visibility: "invited" | "everyone" };
 type Guest = { id: string; name: string; email: string | null; child: boolean; events: { eventId: string; status: string | null }[] };
@@ -76,7 +77,7 @@ export function Dashboard() {
   return (
     <div className="db">
       <header className="db-top">
-        <Link href="/" className="db-logo">wedsent</Link>
+        <Wordmark />
         <nav className="db-tabs" aria-label="Sections">
           {tabs.map((t) => <button key={t} aria-current={tab === t ? "page" : undefined} onClick={() => { navigateTab(t); void load(); }}>{t}</button>)}
         </nav>

@@ -35,7 +35,7 @@ export default function Page() {
           ))}
         </ul>
         <h2>Fonts</h2>
-        <p className="cr-lead">All typefaces are licensed under the SIL Open Font License 1.1 and self-hosted: {Array.from(new Set(FONT_PACKS.flatMap((f) => [f.head, f.script, f.body].filter(Boolean) as string[]).map((s) => s.split(",")[0].replace(/["']|\sVariable/g, "")))).sort().join(", ")}, plus Amiri, Noto Naskh Arabic, Tiro Devanagari Hindi, Instrument Serif, Geist and Bricolage Grotesque.</p>
+        <p className="cr-lead">All typefaces are licensed under the SIL Open Font License 1.1 and self-hosted: {Array.from(new Set(FONT_PACKS.flatMap((f) => [f.head, f.script, f.body].filter(Boolean) as string[]).map((s) => s.split(",")[0].replace(/["']|\sVariable/g, "")))).sort().join(", ")}, plus Amiri, Noto Naskh Arabic, Tiro Devanagari Hindi, Instrument Serif, Geist, Bricolage Grotesque and Rethink Sans.</p>
         <h2>Software</h2>
         <ul className="cr-list">{OTHER.map(([n, l, u]) => <li key={n}><strong>{n}</strong><span>{l}</span><a href={u} target="_blank" rel="noreferrer">Project</a></li>)}</ul>
         <p className="cr-lead"><Link href="/">Back to Wedsent</Link></p>

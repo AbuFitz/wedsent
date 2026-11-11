@@ -20,8 +20,8 @@ export function DesignCard({ spec, href, names }: { spec: DesignSpec; href?: str
     <article className="dc">
       <div className="dc-stage" style={{ ["--stage" as string]: bg }}>
         <Link href={to} className="dc-hit" aria-label={`Preview ${spec.name}`} />
-        <span className="dc-ph dc-ph--back"><Invitation data={{ ...sampleData(spec, pal), ...(names ? { names } : {}) }} still /></span>
-        <span className="dc-ph dc-ph--front"><Invitation data={{ ...sampleData(spec, pal), ...(names ? { names } : {}) }} events={sampleEvents(spec)} open still /></span>
+        <div className="dc-ph dc-ph--back" inert aria-hidden="true"><Invitation data={{ ...sampleData(spec, pal), ...(names ? { names } : {}) }} still /></div>
+        <div className="dc-ph dc-ph--front" inert aria-hidden="true"><Invitation data={{ ...sampleData(spec, pal), ...(names ? { names } : {}) }} events={sampleEvents(spec)} open still /></div>
         <span className="dc-open"><Icon size={14} weight="bold" /> {spec.opening.label}</span>
       </div>
       <div className="dc-meta">

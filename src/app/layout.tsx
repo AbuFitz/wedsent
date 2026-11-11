@@ -10,10 +10,10 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "Wedsent | Invitations people open",
-  description: "Design a wedding invitation that opens like a moment, not a PDF. Live phone preview, guest-ready details, RSVP flow in progress.",
+  title: "Weddsent | Digital wedding invitations",
+  description: "Create a digital wedding invitation, share it with your guests and collect replies for every celebration.",
 };
-export const viewport: Viewport = { themeColor: "#F4F4F2", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#F9F7F3", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

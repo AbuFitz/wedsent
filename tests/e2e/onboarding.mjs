@@ -1,55 +1,64 @@
-// Gallery filters + guided onboarding -> account -> events claimed in the Studio.
+// Featured designs -> a local draft -> account and event persistence in Studio.
+import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+
 const { chromium } = createRequire(import.meta.url)(process.env.PW_PATH ?? "playwright");
-const base = process.argv[2] ?? "http://localhost:3113", out = process.argv[3] ?? ".";
-const ok = (c, m) => { if (!c) { console.error("FAIL:", m); process.exitCode = 1; } else console.log("ok  :", m); };
-for (const u of ["/", "/designs", "/designs/zellige", "/start", "/signin", "/studio", "/credits", "/api/me"]) await fetch(base + u).catch(() => {});
-const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: ["--no-sandbox"] });
-const ctx = await b.newContext({ viewport: { width: 1280, height: 900 }, extraHTTPHeaders: { "x-forwarded-for": `10.3.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}` } });
-const p = await ctx.newPage();
-p.on("pageerror", (e) => console.error("pageerror", e.message.slice(0, 160)));
+const base = process.argv[2] ?? "http://localhost:3113";
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: ["--no-sandbox"] });
+try {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.goto(base);
+  await page.getByRole("button", { name: "Next design" }).click();
+  await page.getByRole("link", { name: "View design", exact: true }).click();
+  await page.getByRole("heading", { name: "Sculpted Ivory", exact: true }).waitFor();
+  await page.getByRole("button", { name: "Full screen" }).click();
+  await page.getByRole("dialog").waitFor();
+  await page.keyboard.press("Escape");
+  await page.getByRole("dialog").waitFor({ state: "hidden" });
 
-// Gallery
-await p.goto(base + "/designs"); await p.waitForTimeout(1500);
-ok((await p.locator(".dc").count()) === 7, "gallery shows all 7 designs");
-await p.locator(".gf-opt", { hasText: "Nikah" }).first().locator("input").check();
-await p.waitForTimeout(400);
-const names = await p.locator(".dc-meta h3").allInnerTexts();
-ok(names.includes("Zellige") && !names.includes("Monolith"), `culture filter narrows results (${names.join(", ")})`);
-await p.locator(".dc-meta h3 a", { hasText: "Zellige" }).click();
-await p.waitForURL(/designs\/zellige/);
-ok(await p.getByRole("heading", { name: "Zellige" }).isVisible(), "design detail page opens");
-await p.getByRole("button", { name: "Burgundy & gold" }).click(); await p.waitForTimeout(400);
-await p.screenshot({ path: `${out}/e2e-detail.png` });
+  await page.goto(base + "/designs");
+  assert.equal(await page.locator(".dc").count(), 7);
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
+  await page.getByRole("combobox", { name: "Celebration", exact: true }).selectOption("Nikah");
+  const names = await page.locator(".dc-meta h3").allInnerTexts();
+  assert(names.includes("The Garden Nikah") && names.length < 7);
+  await page.getByRole("link", { name: "The Garden Nikah", exact: true }).click();
+  await page.getByRole("link", { name: /Start with/ }).click();
 
-// Onboarding
-await p.goto(base + "/start"); await p.waitForTimeout(800);
-await p.getByLabel("Names").fill("Aisha & Yusuf");
-await p.getByRole("button", { name: "Continue" }).click();
-await p.getByLabel("Date").fill("2027-06-12"); await p.getByRole("button", { name: "Continue" }).click();
-await p.getByRole("button", { name: /Nikah & Walima/ }).click(); await p.getByRole("button", { name: "Continue" }).click();
-await p.getByRole("button", { name: "Choose Zellige" }).click(); await p.getByRole("button", { name: "Continue" }).click();
-await p.getByRole("button", { name: "Continue" }).click();
-await p.getByLabel("Venue").fill("Central Mosque"); await p.getByRole("button", { name: "See it" }).click();
-await p.getByRole("button", { name: /Continue to your invitation/ }).click();
-await p.waitForURL(/signin/);
-ok(true, "onboarding finishes at sign-in with the draft saved locally");
-const email = `ob${Date.now()}@example.com`;
-await p.getByLabel("Email").fill(email); await p.getByLabel("Password").fill("a-long-passphrase");
-await p.getByRole("button", { name: "Create my account" }).click();
-await p.waitForURL((u) => u.pathname === "/studio", { timeout: 30000 });
-await p.getByRole("button", { name: "Celebrations", exact: true }).click(); await p.waitForTimeout(1000);
-const evs = await p.locator(".atelier-event-row strong").allInnerTexts();
-ok(evs.length === 2 && evs.includes("Nikah") && evs.includes("Walima"), `events from onboarding are in the account exactly once (${evs.join(", ")})`);
-await p.getByRole("button", { name: "Words", exact: true }).click();
-ok((await p.getByLabel("Names").inputValue()) === "Aisha & Yusuf", "names carried into the Studio");
-await p.screenshot({ path: `${out}/e2e-studio.png` });
-const me = await p.evaluate(async () => (await (await fetch("/api/wedding")).json()).content);
-ok(me.design === "zellige" && me.venue === "Central Mosque", "saved draft has the chosen design and venue");
-await p.goto(base + "/signin?mode=in&next=%2Fdashboard");
-await p.waitForURL((u) => u.pathname === "/dashboard", { timeout: 30000 });
-ok(true, "already signed-in owner is redirected without entering credentials again");
-await p.goto(base + "/");
-await p.getByRole("link", { name: "Open Studio" }).waitFor();
-ok(await p.getByRole("link", { name: "My wedding" }).isVisible(), "home navigation detects existing account");
-await b.close();
+  await page.getByRole("textbox", { name: "Names", exact: true }).fill("Aisha & Yusuf");
+  await page.getByLabel("Wedding date").fill("2027-06-12");
+  await page.getByLabel("Venue").fill("Central Mosque");
+  await page.getByRole("button", { name: "Add an event" }).click();
+  await page.getByRole("textbox", { name: "Event 1" }).fill("Nikah");
+  await page.getByRole("button", { name: "Add an event" }).click();
+  await page.getByRole("textbox", { name: "Event 2" }).fill("Walima");
+  await page.getByRole("button", { name: "Choose a design" }).click();
+  await page.getByRole("radio", { name: "Rosewood Letter" }).check();
+  await page.reload();
+  await page.getByRole("heading", { name: "Choose your design" }).waitFor();
+  assert(await page.getByRole("radio", { name: "Rosewood Letter" }).isChecked());
+  await page.getByRole("button", { name: "Review invitation" }).click();
+  await page.getByText("Nikah, Walima", { exact: true }).waitFor();
+  await page.getByRole("button", { name: "Create an account" }).click();
+  await page.getByRole("heading", { name: "Create your account" }).waitFor();
+
+  await page.getByLabel("Email").fill(`onboarding-${Date.now()}@example.com`);
+  await page.getByLabel("Password").fill("test-only-long-password");
+  await page.getByRole("button", { name: "Create my account" }).click();
+  await page.waitForURL((url) => url.pathname === "/studio");
+  await page.getByRole("button", { name: "Celebrations", exact: true }).click();
+  await page.getByText("Walima", { exact: true }).first().waitFor();
+  const events = await page.locator(".atelier-event-row strong").allInnerTexts();
+  assert.deepEqual([...events].sort(), ["Nikah", "Walima"]);
+  await page.getByRole("button", { name: "Words", exact: true }).click();
+  assert.equal(await page.getByLabel("Names", { exact: true }).inputValue(), "Aisha & Yusuf");
+  await page.getByText("Saved to account", { exact: true }).waitFor();
+  const { content } = await page.evaluate(async () => (await fetch("/api/wedding")).json());
+  assert.equal(content.design, "rosewood");
+  assert.equal(content.venue, "Central Mosque");
+  await page.goto(base);
+  await page.getByRole("link", { name: "Open Studio", exact: true }).waitFor();
+  console.log("Carousel, filters, draft recovery, account handoff, and event persistence passed.");
+} finally {
+  await browser.close();
+}

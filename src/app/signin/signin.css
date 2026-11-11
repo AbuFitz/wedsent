@@ -1,25 +1,24 @@
-.si{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:27px clamp(18px,5vw,68px);background:#f3f3ef}
-.si-top{display:flex;align-items:center;justify-content:space-between;width:min(1100px,100%)}
-.si-explore{font-size:13px;color:#60655c;text-decoration:none;border-bottom:1px solid #969b93;padding-bottom:4px}
-.si-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(350px,430px);align-items:center;gap:clamp(35px,7vw,100px);width:min(1100px,100%);margin:auto 0}
-.si-story{position:relative;isolation:isolate;align-self:stretch;min-height:570px;background:#1b1b1b url('/signin-masjid-wedding.webp') center 58%/cover no-repeat;color:#fff;padding:clamp(30px,5vw,62px);display:flex;flex-direction:column;overflow:hidden}
-.si-story:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.48) 0%,rgba(0,0,0,.28) 47%,transparent 82%);pointer-events:none}
-.si-story>span,.si-kicker{font-size:10px;letter-spacing:.14em;font-weight:750;color:#d7d7d5}
-.si-story h2{font:normal clamp(39px,5vw,65px)/.99 Georgia,serif;letter-spacing:-.065em;max-width:500px;margin:32px 0 16px;text-wrap:balance;text-shadow:0 2px 18px #0006}
-.si-story>p{max-width:350px;font-size:13px;line-height:1.7;color:#f0f0ef;text-shadow:0 1px 8px #0009}
-.si-kicker{color:#7b877a;display:block;margin-bottom:10px}
-.si-logo{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.03em}
-.si-card{width:100%;max-width:430px;display:flex;flex-direction:column;gap:18px;padding:20px 0}
-.si-card h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,8vw,46px);letter-spacing:-.045em;line-height:1}
-.si-sub{color:var(--muted);margin-top:-8px}
-.si-field{display:flex;flex-direction:column;gap:7px}
-.si-field>span{font-size:13px;font-weight:600}
-.si-field small{color:var(--muted);font-size:12.5px}
-.si-field input{height:54px;border:0;border-bottom:1.5px solid #c9c9c4;background:transparent;font-size:18px;padding:0;transition:border-color .2s}
-.si-field input:focus{outline:none;border-color:var(--ink)}
-.si-err{color:#B3261E;font-size:14px;font-weight:500}
-.si-go{height:56px;width:100%;margin-top:6px}
-.si-switch{font-size:14px;color:var(--muted)}
-.si-switch button{background:none;border:0;padding:0;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
-.si-note{max-width:420px;font-size:12.5px;color:var(--muted);text-align:center}
-@media(max-width:800px){.si{justify-content:flex-start;min-height:100dvh;padding:22px 20px 30px;gap:18px}.si-layout{display:flex;flex-direction:column;gap:26px;margin:14px 0 0}.si-story{display:flex;width:100%;min-height:240px;padding:24px;background-position:center 48%}.si-story h2{font-size:clamp(31px,8vw,45px);max-width:370px;margin:22px 0 0}.si-story>p{display:none}.si-card{padding:0}.si-note{margin-top:auto;line-height:1.5}.si-card h1{font-size:38px}}
+.si { min-height: 100svh; padding: 16px 0 25px; background: var(--ed-paper); color: var(--ed-ink); }
+.si-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 16px; border: 1px solid var(--ed-line); border-radius: 8px; background: var(--ed-white); }
+.si-layout { display: grid; grid-template-columns: 1fr .92fr; align-items: stretch; gap: 15px; margin-top: 15px; }
+.si-photo { min-height: min(720px, 82svh); position: relative; overflow: hidden; border-radius: 8px; background: #3f3937; }
+.si-photo img { object-fit: cover; object-position: center 60%; }
+.si-card { min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: stretch; gap: 17px; padding: clamp(23px, 6vw, 85px); border: 1px solid var(--ed-line); border-radius: 8px; background: var(--ed-white); }
+.si-card h1 { font: 400 clamp(48px, 5.5vw, 77px) / .94 var(--ed-serif); letter-spacing: -.043em; }
+.si-sub, .si-field small, .si-switch, .si-note { color: var(--ed-muted); }
+.si-sub { margin-bottom: 5px; }
+.si-field { display: grid; gap: 5px; font-size: 14px; font-weight: 750; }
+.si-field input { min-height: 48px; min-width: 0; border: 1px solid var(--ed-line); border-radius: 6px; padding: 8px 11px; background: #fff; font-size: 16px; font-weight: 500; }
+.si-field small { font-size: 12px; font-weight: 500; }
+.si-err { color: #961c35; font-size: 14px; }
+.si-go { width: 100%; }
+.si-switch { font-size: 14px; }
+.si-switch button { background: none; border: 0; padding: 0; font-weight: 750; color: var(--ed-wine); text-decoration: underline; text-underline-offset: 3px; }
+.si-note { padding-block: 25px; }
+@media (max-width: 720px) {
+  .si { padding-top: 10px; }
+  .si-layout { grid-template-columns: 1fr; gap: 9px; margin-top: 9px; }
+  .si-photo { min-height: 170px; }
+  .si-photo img { object-position: center 56%; }
+  .si-card { padding: 24px 15px; gap: 14px; }
+}

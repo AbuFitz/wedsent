@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowCounterClockwise, X } from "@phosphor-icons/react";
-import { Nav } from "@/components/site/nav";
+import { Nav, SiteFooter } from "@/components/site/nav";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
 import { FONT_PACKS, INTRO_PRESETS, paletteOf, specById, type DesignId } from "@/engine/registry";
@@ -17,6 +17,7 @@ export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }
   const [intro, setIntro] = useState("");
   const [open, setOpen] = useState(false);
   const [full, setFull] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
   const Icon = OPENING_ICON[spec.opening.kind];
   const stationery = spec.layout === "stationery";
   const data = { ...sampleData(spec, pal), type, intro };
@@ -27,18 +28,18 @@ export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }
   return (
     <>
       <Nav />
-      <main className="dd">
+      <main className="ed-detail"><div className="dd ed-width">
         <Link href="/designs" className="dd-back"><ArrowLeft size={16} /> All designs</Link>
         <div className="dd-grid">
           <div className="dd-stage" style={{ ["--stage" as string]: paletteOf(spec, pal).bg ?? spec.site.bg }}>
-            <div className="dd-phone"><Phone label={`${spec.name} live preview`}>{phone}</Phone></div>
+            <div className="dd-phone"><Phone label={`${spec.name} live preview`}>{!full && phone}</Phone></div>
             <div className="dd-tools">
               <div className="dd-seg" role="group" aria-label="Preview">
                 <button type="button" aria-pressed={!open} onClick={() => setOpen(false)}>Cover</button>
                 <button type="button" aria-pressed={open} onClick={() => setOpen(true)}>Inside</button>
               </div>
               <button type="button" className="dd-ghost" onClick={() => setOpen(false)} disabled={!open}><ArrowCounterClockwise size={15} /> Replay opening</button>
-              <button type="button" className="dd-ghost" onClick={() => setFull(true)}>Full screen</button>
+              <button type="button" className="dd-ghost" onClick={() => { setFull(true); dialog.current?.showModal(); }}>Full screen</button>
             </div>
           </div>
 
@@ -85,20 +86,18 @@ export function DesignDetail({ id, palette }: { id: DesignId; palette?: string }
             </section>
 
             <div className="dd-cta">
-              <Link href={start} className="btn btn-dark">Start with {spec.name} <ArrowRight size={18} /></Link>
-              <Link href="/designs" className="btn btn-light">Compare designs</Link>
+              <Link href={start} className="ed-button ed-button--primary">Start with {spec.name} <ArrowRight size={18} /></Link>
+              <Link href="/designs" className="ed-button ed-button--secondary">Compare designs</Link>
             </div>
-            <p className="dd-fine">Sample names and events. Your own details replace them in the Studio.</p>
+
           </div>
         </div>
-      </main>
-
-      {full && (
-        <div className="dd-full" role="dialog" aria-modal="true" aria-label={`${spec.name} full screen preview`} style={{ ["--stage" as string]: paletteOf(spec, pal).bg ?? spec.site.bg }}>
-          <button type="button" className="dd-x" onClick={() => setFull(false)} aria-label="Close preview"><X size={22} /></button>
-          <div className="dd-full-in">{phone}</div>
-        </div>
-      )}
+      </div></main>
+      <SiteFooter />
+      <dialog className="dd-full" ref={dialog} onClose={() => setFull(false)} aria-label={`${spec.name} full screen preview`} style={{ ["--stage" as string]: paletteOf(spec, pal).bg ?? spec.site.bg }}>
+        <button type="button" className="dd-x" onClick={() => dialog.current?.close()} aria-label="Close preview"><X size={22} /></button>
+        {full && <div className="dd-full-in">{phone}</div>}
+      </dialog>
     </>
   );
 }

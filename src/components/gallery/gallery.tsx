@@ -1,93 +1,70 @@
 "use client";
-import { useMemo, useState } from "react";
-import { FunnelSimple, X } from "@phosphor-icons/react";
-import { Nav } from "@/components/site/nav";
-import { FEATURED_DESIGNS, FACETS } from "@/engine/registry";
+
+import { useState } from "react";
+import { SlidersHorizontal, X } from "lucide-react";
+import { Nav, SiteFooter } from "@/components/site/nav";
+import { FEATURED_DESIGNS, type DesignSpec } from "@/engine/registry";
 import { DesignCard, OPENING_NAME } from "./design-card";
 import "./gallery.css";
 
 type Facet = "culture" | "style" | "colour" | "shape" | "opening";
-const FACET_LABEL: Record<Facet, string> = { culture: "Celebration", style: "Style", colour: "Colour", shape: "Shape", opening: "How it opens" };
-const ORDER: Facet[] = ["culture", "style", "colour", "shape", "opening"];
+const facets: { key: Facet; label: string; values: (design: DesignSpec) => string[] }[] = [
+  { key: "style", label: "Style", values: (design) => design.styles },
+  { key: "colour", label: "Colour", values: (design) => design.colours },
+  { key: "opening", label: "Opening", values: (design) => [design.opening.kind] },
+  { key: "culture", label: "Celebration", values: (design) => design.cultures },
+  { key: "shape", label: "Shape", values: (design) => [design.shape] },
+];
+const choices = facets.map((facet) => ({ ...facet, options: [...new Set(FEATURED_DESIGNS.flatMap(facet.values))] }));
+const getLabel = (key: Facet, value: string) => key === "opening" ? OPENING_NAME[value as keyof typeof OPENING_NAME] : value;
 
 export function Gallery({ initial }: { initial?: Partial<Record<Facet, string>> }) {
-  const [sel, setSel] = useState<Record<Facet, string[]>>({ culture: initial?.culture ? [initial.culture] : [], style: [], colour: [], shape: [], opening: [] });
-  const [sheet, setSheet] = useState(false);
-  const [sort, setSort] = useState<"featured" | "az">("featured");
-  const toggle = (f: Facet, v: string) => setSel((s) => ({ ...s, [f]: s[f].includes(v) ? s[f].filter((x) => x !== v) : [...s[f], v] }));
-  const active = ORDER.flatMap((f) => sel[f].map((v) => ({ f, v })));
-
-  const list = useMemo(() => {
-    const l = FEATURED_DESIGNS.filter((d) => {
-      const has: Record<Facet, string[]> = { culture: d.cultures, style: d.styles, colour: d.colours, shape: [d.shape], opening: [d.opening.kind] };
-      return ORDER.every((f) => !sel[f].length || sel[f].some((v) => has[f].includes(v)));
-    });
-    return sort === "az" ? [...l].sort((a, b) => a.name.localeCompare(b.name)) : l;
-  }, [sel, sort]);
-
-  const Filters = (
-    <div className="gf">
-      {ORDER.map((f) => (
-        <details key={f} open={f === "culture" || sel[f].length > 0}>
-          <summary>{FACET_LABEL[f]}</summary>
-          <div className="gf-opts">
-            {FACETS[f].map((v) => (
-              <label key={v} className="gf-opt">
-                <input type="checkbox" checked={sel[f].includes(v)} onChange={() => toggle(f, v)} />
-                <span>{f === "opening" ? OPENING_NAME[v as keyof typeof OPENING_NAME] : v}</span>
-              </label>
-            ))}
-          </div>
-        </details>
-      ))}
-    </div>
-  );
+  const [filters, setFilters] = useState<Partial<Record<Facet, string>>>(initial ?? {});
+  const [expanded, setExpanded] = useState(Boolean(initial?.culture));
+  const [sort, setSort] = useState("featured");
+  const filterCount = Object.values(filters).filter(Boolean).length;
+  const matched = FEATURED_DESIGNS.filter((design) => facets.every(({ key, values }) => !filters[key] || values(design).includes(filters[key])));
+  const results = sort === "az" ? [...matched].sort((a, b) => a.name.localeCompare(b.name)) : matched;
 
   return (
     <>
       <Nav />
-      <main className="gl">
-        <header className="gl-head">
-          <span className="gl-head-kicker">A COLLECTION FOR EVERY KIND OF LOVE STORY</span>
-          <h1>Find your<br/><em>first impression.</em></h1>
-          <div className="gl-head-bottom"><p>Considered invitations, each with a personality of its own. Explore how they look, how they open, and which one feels like you.</p><span>CURATED FOR YOUR CELEBRATION</span></div>
-        </header>
-
-        <div className="gl-editorial-pair"><figure><img src="/art/weddsent-editorial-hands-v2.webp" alt="Couple in refined wedding attire holding hands" width={1024} height={1536}/><figcaption>BEHIND EVERY INVITATION IS A STORY</figcaption></figure><figure><img src="/art/weddsent-editorial-table-v2.webp" alt="Candlelit courtyard wedding table" width={1536} height={1024}/><figcaption>THE BEGINNING OF SOMETHING BEAUTIFUL</figcaption></figure></div>
-
-        <div className="gl-bar">
-          <button type="button" className="gl-filter-btn" onClick={() => setSheet(true)}><FunnelSimple size={18} /> Filters{active.length ? ` (${active.length})` : ""}</button>
-          <div className="gl-chips" aria-label="Active filters">
-            {active.map(({ f, v }) => (
-              <button key={f + v} type="button" onClick={() => toggle(f, v)}>{f === "opening" ? OPENING_NAME[v as keyof typeof OPENING_NAME] : v} <X size={12} weight="bold" /></button>
+      <main className="ed-gallery">
+        <div className="ed-width">
+          <header className="ed-gallery-head">
+            <h1>Invitation designs</h1>
+            <p>Open a sample invitation, try its colours and start with your favourite.</p>
+          </header>
+          <div className="ed-gallery-toolbar">
+            <button type="button" className="ed-button ed-button--secondary" onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-controls="gallery-filters">
+              <SlidersHorizontal size={17} /> Filters{filterCount ? ` (${filterCount})` : ""}
+            </button>
+            <p role="status">{results.length} {results.length === 1 ? "design" : "designs"}</p>
+            <label>Sort by <select value={sort} onChange={(event) => setSort(event.target.value)}><option value="featured">Featured</option><option value="az">Name (A–Z)</option></select></label>
+          </div>
+          <div className="ed-gallery-filters" id="gallery-filters" hidden={!expanded}>
+            {choices.map(({ key, label, options }) => (
+              <label key={key}>{label}
+                <select value={filters[key] ?? ""} onChange={(event) => setFilters({ ...filters, [key]: event.target.value })}>
+                  <option value="">All</option>
+                  {filters[key] && !options.includes(filters[key]) && <option>{filters[key]}</option>}
+                  {options.map((value) => <option key={value} value={value}>{getLabel(key, value)}</option>)}
+                </select>
+              </label>
             ))}
-            {active.length > 0 && <button type="button" className="gl-clear" onClick={() => setSel({ culture: [], style: [], colour: [], shape: [], opening: [] })}>Clear all</button>}
           </div>
-          <label className="gl-sort">Sort <select value={sort} onChange={(e) => setSort(e.target.value as "featured" | "az")}><option value="featured">Featured</option><option value="az">A to Z</option></select></label>
+          {filterCount > 0 && <div className="ed-gallery-active">
+            {facets.map(({ key }) => {
+              const value = filters[key];
+              return value ? <button key={key} type="button" aria-label={`Remove ${getLabel(key, value)} filter`} onClick={() => setFilters({ ...filters, [key]: "" })}>{getLabel(key, value)} <X size={14} /></button> : null;
+            })}
+            <button type="button" onClick={() => setFilters({})}>Clear filters</button>
+          </div>}
+          {results.length ? <div className="ed-gallery-grid">{results.map((spec) => <DesignCard key={spec.id} spec={spec} />)}</div>
+            : <div className="ed-gallery-empty"><h2>No matching designs</h2><p>Try removing a filter to see more options.</p><button type="button" className="ed-button ed-button--primary" onClick={() => setFilters({})}>Clear filters</button></div>}
         </div>
-
-        <div className="gl-body">
-          <aside className="gl-side" aria-label="Filters">{Filters}</aside>
-          <section aria-live="polite">
-            <p className="gl-count">{list.length} {list.length === 1 ? "design" : "designs"}</p>
-            {list.length === 0 ? (
-              <div className="gl-empty"><p>No design matches all of those at once.</p><button className="btn btn-dark" onClick={() => setSel({ culture: [], style: [], colour: [], shape: [], opening: [] })}>Clear filters</button></div>
-            ) : (
-              <div className="gl-grid">{list.map((d) => <DesignCard key={d.id} spec={d} />)}</div>
-            )}
-          </section>
-        </div>
-
-        {sheet && (
-          <div className="gl-sheet" role="dialog" aria-modal="true" aria-label="Filters">
-            <div className="gl-sheet-in">
-              <header><strong>Filters</strong><button type="button" onClick={() => setSheet(false)} aria-label="Close"><X size={20} /></button></header>
-              {Filters}
-              <button className="btn btn-dark gl-sheet-go" onClick={() => setSheet(false)}>Show {list.length} {list.length === 1 ? "design" : "designs"}</button>
-            </div>
-          </div>
-        )}
       </main>
+      <SiteFooter />
     </>
   );
 }

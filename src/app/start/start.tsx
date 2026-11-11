@@ -1,267 +1,207 @@
 "use client";
+
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, Plus, X } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, Check, Plus, X } from "lucide-react";
 import { Invitation } from "@/components/invitation/invitation";
 import { Phone } from "@/components/phone";
-import { DesignCard } from "@/components/gallery/design-card";
+import { Wordmark } from "@/components/site/nav";
 import { call } from "@/lib/api-client";
-import { defaults, loadDraft, saveDraft, PENDING_EVENTS_KEY, type InviteData, type InviteEvent } from "@/lib/designs";
-import { START_PROGRESS_KEY, START_STEPS, parseStartProgress, type StartStep } from "@/lib/start-progress";
-import { DESIGNS, FEATURED_DESIGNS, FONT_PACKS, INTRO_PRESETS, OPENINGS, paletteOf, specById, type DesignId, type OpeningKind } from "@/engine/registry";
+import { DRAFT_KEY, defaults, friendlyDate, loadDraft, saveDraft, PENDING_EVENTS_KEY, type InviteData, type InviteEvent } from "@/lib/designs";
+import { START_PROGRESS_KEY, parseStartProgress } from "@/lib/start-progress";
+import { DESIGN_IDS, FEATURED_DESIGNS, paletteOf, specById, type DesignId } from "@/engine/registry";
 import "./start.css";
 
-const ease = [0.2, 0.8, 0.2, 1] as const;
-
-const PRESETS: { id: string; label: string; events: string[]; tags: string[]; note: string }[] = [
-  { id: "wedding", label: "A wedding", events: ["Ceremony", "Reception"], tags: ["Any wedding", "Church", "Civil"], note: "Ceremony and reception" },
-  { id: "nikah", label: "Nikah & Walima", events: ["Nikah", "Walima"], tags: ["Nikah", "Walima", "Arabic"], note: "Two events, different guests" },
-  { id: "mehndi", label: "Mehndi weekend", events: ["Mehndi", "Wedding", "Reception"], tags: ["Mehndi", "Shaadi", "Sangeet"], note: "Three events over a few days" },
-  { id: "sangeet", label: "Haldi, Sangeet & wedding", events: ["Haldi", "Sangeet", "Wedding", "Reception"], tags: ["Haldi", "Sangeet", "Mehndi"], note: "A full celebration" },
-  { id: "civil", label: "Civil ceremony & party", events: ["Civil ceremony", "Celebration"], tags: ["Civil", "Any wedding"], note: "Small ceremony, big party" },
-  { id: "one", label: "Just one event", events: ["Celebration"], tags: ["Any wedding"], note: "A single occasion" },
-  { id: "later", label: "I’ll add them later", events: [], tags: [], note: "Skip for now" },
-];
-const STEPS = START_STEPS;
-type Step = StartStep;
+const steps = ["Details", "Design", "Review"];
+const stepKeys = ["names", "design", "preview"] as const;
+const emptyDraft: InviteData = { ...defaults, names: "", date: "", time: "", venue: "", city: "", message: "" };
+type AccountDraft = { content: InviteData; rev: number };
+type AccountEvent = { title: string; starts_on: string | null; starts_at_local: string | null; venue: string; city: string; id: string };
 
 export function Start() {
   const router = useRouter();
-  const q = useSearchParams();
-  const [step, setStep] = useState<Step>("names");
-  const [d, setD] = useState<InviteData>({ ...defaults, names: "", message: "" });
-  const [preset, setPreset] = useState("wedding");
-  const [events, setEvents] = useState<string[]>(PRESETS[0].events);
-  const [undecided, setUndecided] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const query = useSearchParams();
+  const source = query.toString();
+  const [draft, setDraft] = useState<InviteData>(emptyDraft);
+  const [titles, setTitles] = useState<string[]>([]);
+  const [accountDraft, setAccountDraft] = useState<AccountDraft | null>(null);
+  const [accountEvents, setAccountEvents] = useState<InviteEvent[]>([]);
+  const [step, setStep] = useState(0);
+  const [view, setView] = useState<"cover" | "inside">("cover");
+  const [mobilePreview, setMobilePreview] = useState(false);
   const [ready, setReady] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
-    const saved = loadDraft();
-    const progress = parseStartProgress(sessionStorage.getItem(START_PROGRESS_KEY));
-    const fromGallery = q.get("design");
-    const base: InviteData = progress?.draft ?? { ...saved, names: saved.names === defaults.names ? "" : saved.names, message: saved.message === defaults.message ? "" : saved.message };
-    if (fromGallery && DESIGNS.some((x) => x.id === fromGallery)) {
-      base.design = fromGallery as DesignId;
-      base.palette = q.get("palette") ?? "";
-      base.type = q.get("type") ?? "";
-      base.intro = q.get("intro") ?? "";
+    let active = true;
+    async function hydrate() {
+      let base = emptyDraft;
+      let pending: string[] = [];
+      let progress: ReturnType<typeof parseStartProgress> = null;
+      try {
+        if (localStorage.getItem(DRAFT_KEY)) base = loadDraft();
+        const existing = JSON.parse(localStorage.getItem(PENDING_EVENTS_KEY) ?? "[]") as { title?: string }[];
+        pending = existing.flatMap(({ title }) => typeof title === "string" ? [title] : []);
+        progress = parseStartProgress(sessionStorage.getItem(START_PROGRESS_KEY));
+      } catch { /* Continue without a browser draft. */ }
+
+      let saved: AccountDraft | null = null;
+      let savedEvents: InviteEvent[] = [];
+      let sessionError = "";
+      try {
+        const { user } = await call<{ user: { id: string } | null }>("GET", "/api/me");
+        if (user) {
+          const [wedding, { events }] = await Promise.all([
+            call<AccountDraft>("GET", "/api/wedding"),
+            call<{ events: AccountEvent[] }>("GET", "/api/wedding/events"),
+          ]);
+          saved = wedding;
+          if (wedding.rev > 1) base = { ...emptyDraft, ...wedding.content };
+          savedEvents = events.map((event) => ({ id: event.id, title: event.title, startsOn: event.starts_on, startsAt: event.starts_at_local, venue: event.venue, city: event.city }));
+        }
+      } catch (failure) { sessionError = failure instanceof Error ? failure.message : "Couldn’t check your account."; }
+
+      if (!active) return;
+      if (progress) {
+        base = { ...base, ...progress.draft, date: progress.undecided ? "" : progress.draft.date };
+        pending = progress.events;
+        setStep(progress.step === "preview" ? 2 : ["design", "style"].includes(progress.step) ? 1 : 0);
+      }
+      const design = query.get("design");
+      if (design && progress?.source !== source && DESIGN_IDS.includes(design as DesignId)) {
+        const spec = specById(design);
+        base = { ...base, design: spec.id, palette: paletteOf(spec, query.get("palette") ?? undefined).id, type: query.get("type") ?? "", intro: query.get("intro") ?? "", opening: "", accent: "" };
+      }
+      setDraft(base);
+      setTitles(pending.slice(0, 8));
+      setAccountDraft(saved);
+      setAccountEvents(savedEvents);
+      setLoadError(sessionError);
+      setReady(true);
     }
-    setD(base);
-    if (progress) { setStep(progress.step); setPreset(progress.preset); setEvents(progress.events); setUndecided(progress.undecided); }
-    setReady(true);
-  }, [q]);
+    void hydrate();
+    return () => { active = false; };
+  }, [query, source]);
 
   useEffect(() => {
     if (!ready) return;
-    try { sessionStorage.setItem(START_PROGRESS_KEY, JSON.stringify({ step, draft: d, preset, events, undecided })); }
-    catch { /* Browser storage can be disabled or full; setup remains usable. */ }
-  }, [ready, step, d, preset, events, undecided]);
-
-  const patch = (p: Partial<InviteData>) => setD((x) => ({ ...x, ...p }));
-  const idx = STEPS.indexOf(step);
-  const spec = specById(d.design);
-  const names = d.names.trim();
-
-  const can = step === "names" ? names.length > 0 : true;
-  const go = (n: number) => { setErr(null); setStep(STEPS[Math.max(0, Math.min(STEPS.length - 1, n))]); setOpen(false); };
-  const next = () => { if (can) go(idx + 1); };
-
-  const shown: InviteData = { ...d, names: names || "Your names", message: d.message || "We would be honoured to celebrate with you.", date: undecided ? "" : d.date };
-  const evs: InviteEvent[] = events.filter((e) => e.trim()).map((title, i) => ({ id: `p${i}`, title, startsOn: undecided ? null : d.date || null, startsAt: null, venue: d.venue, city: d.city }));
-  const inside = step !== "design" && step !== "preview";
-
-  const OCC: Record<string, string> = { nikah: "Nikah", mehndi: "Mehndi", sangeet: "Wedding", civil: "Civil ceremony" };
-  const choosePreset = (id: string) => { setPreset(id); setEvents([...(PRESETS.find((p) => p.id === id)?.events ?? [])]); patch({ occasion: OCC[id] ?? "Wedding" }); };
-  const suggested = useMemo(() => {
-    const tags = PRESETS.find((p) => p.id === preset)?.tags ?? [];
-    return new Set(FEATURED_DESIGNS.filter((x) => x.cultures.some((c) => tags.includes(c))).map((x) => x.id));
-  }, [preset]);
-  const ordered = useMemo(() => [...FEATURED_DESIGNS].sort((a, b) => Number(suggested.has(b.id)) - Number(suggested.has(a.id))), [suggested]);
-
-  const finish = async () => {
-    setBusy(true); setErr(null);
-    const content = { ...d, names: names || "Our wedding", date: undecided ? "" : d.date };
-    saveDraft(content);
-    const clearProgress = () => { try { sessionStorage.removeItem(START_PROGRESS_KEY); } catch { /* restricted storage */ } };
-    let user: unknown = null;
-    try { user = (await call("GET", "/api/me")).user; } catch { /* backend not connected */ }
-    const titles = events.filter((e) => e.trim());
-    if (!user) {
-      try { localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(titles.map((title) => ({ title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city })))); } catch {}
-      router.push("/signin?mode=up&next=%2Fstudio");
-      clearProgress();
-      return;
-    }
     try {
-      const w = await call("GET", "/api/wedding");
-      await call("PUT", "/api/wedding", { content, rev: w.rev });
-      const existing = (await call("GET", "/api/wedding/events")).events;
-      if (!existing.length) for (const title of titles) await call("POST", "/api/wedding/events", { title, startsOn: undecided ? null : d.date || null, venue: d.venue, city: d.city, visibility: "invited" });
-      router.push("/studio");
-      clearProgress();
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "Couldn’t save. Try again.");
+      sessionStorage.setItem(START_PROGRESS_KEY, JSON.stringify({ step: stepKeys[step], draft, events: titles, preset: "", undecided: !draft.date, source }));
+    } catch { /* The open form can still be used. */ }
+  }, [ready, draft, titles, step, source]);
+
+  const spec = specById(draft.design);
+  const update = (value: Partial<InviteData>) => setDraft((current) => ({ ...current, ...value }));
+  const designs = FEATURED_DESIGNS.some((design) => design.id === spec.id) ? FEATURED_DESIGNS : [spec, ...FEATURED_DESIGNS];
+  const eventNames = titles.map((title) => title.trim()).filter(Boolean);
+  const previewEvents: InviteEvent[] = accountEvents.length ? accountEvents : eventNames.map((title, index) => ({
+    id: `draft-${index}`, title, startsOn: index === 0 ? draft.date || null : null, startsAt: null, venue: draft.venue, city: draft.city,
+  }));
+
+  function navigate(next: number) {
+    setError("");
+    setStep(next);
+    setView(next === 0 ? "inside" : "cover");
+    setMobilePreview(false);
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+    if (step === 0 && !draft.names.trim()) { setError("Enter the names you want on the invitation."); return; }
+    if (step < 2) { navigate(step + 1); return; }
+    if (!draft.names.trim()) { navigate(0); setError("Enter the names you want on the invitation."); return; }
+    setBusy(true);
+    setError("");
+    const content = { ...draft, names: draft.names.trim() };
+    try {
+      const { user } = await call<{ user: { id: string } | null }>("GET", "/api/me");
+      if (user) {
+        if (!accountDraft) throw new Error("Your sign-in changed. Refresh to load your wedding and try again.");
+        const wedding = await call<{ rev: number }>("PUT", "/api/wedding", { content: { ...content, music: content.music?.src === "local-music" ? null : content.music }, rev: accountDraft.rev });
+        setAccountDraft({ content, rev: wedding.rev });
+        if (!accountEvents.length && previewEvents.length) {
+          const { events } = await call<{ events: AccountEvent[] }>("GET", "/api/wedding/events");
+          for (const item of previewEvents) {
+            if (!events.some((saved) => saved.title === item.title && saved.starts_on === item.startsOn)) {
+              await call("POST", "/api/wedding/events", { ...item, visibility: "invited" });
+            }
+          }
+        }
+      } else {
+        if (accountDraft) throw new Error("Your session expired. Open sign-in in another tab, then try again.");
+        if (!saveDraft(content)) throw new Error("Your browser couldn’t save this draft. Allow site storage and try again.");
+        localStorage.setItem(PENDING_EVENTS_KEY, JSON.stringify(previewEvents));
+      }
+      try { sessionStorage.removeItem(START_PROGRESS_KEY); } catch { /* The draft has already been saved. */ }
+      router.push(user ? "/studio" : "/signin?mode=up&next=%2Fstudio");
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Couldn’t save your invitation. Try again.");
       setBusy(false);
     }
-  };
+  }
 
-  if (!ready) return <main className="st8" />;
-
-  const body: Record<Step, React.ReactNode> = {
-    names: (
-      <>
-        <h1>Who’s getting married?</h1>
-        <p className="s8-sub">Write the names the way you’d like guests to see them. Use “&amp;” between two names.</p>
-        <input className="s8-big" autoFocus value={d.names} maxLength={60} onChange={(e) => patch({ names: e.target.value })} placeholder="Amina & Yusuf" aria-label="Names" autoComplete="off" onKeyDown={(e) => e.key === "Enter" && next()} />
-      </>
-    ),
-    date: (
-      <>
-        <h1>When’s the day?</h1>
-        <p className="s8-sub">Not sure yet? That’s fine. You can add it later.</p>
-        <input className="s8-big" type="date" value={d.date} disabled={undecided} onChange={(e) => patch({ date: e.target.value })} aria-label="Date" />
-        <label className="s8-check"><input type="checkbox" checked={undecided} onChange={(e) => setUndecided(e.target.checked)} /> We haven’t decided yet</label>
-      </>
-    ),
-    celebrate: (
-      <>
-        <h1>What are you celebrating?</h1>
-        <p className="s8-sub">Pick a starting point. You can rename, add or remove events any time.</p>
-        <div className="s8-presets">
-          {PRESETS.map((p) => (
-            <button key={p.id} type="button" aria-pressed={preset === p.id} onClick={() => choosePreset(p.id)}>
-              <strong>{p.label}</strong><span>{p.note}</span>{preset === p.id && <Check size={18} weight="bold" className="s8-tick" />}
-            </button>
-          ))}
-        </div>
-        {events.length > 0 && (
-          <div className="s8-events" aria-label="Your events">
-            {events.map((e, i) => (
-              <div key={i}><input value={e} maxLength={80} aria-label={`Event ${i + 1}`} onChange={(x) => setEvents(events.map((v, j) => (j === i ? x.target.value : v)))} /><button type="button" aria-label={`Remove ${e}`} onClick={() => setEvents(events.filter((_, j) => j !== i))}><X size={16} /></button></div>
-            ))}
-            {events.length < 8 && <button type="button" className="s8-add" onClick={() => setEvents([...events, ""])}><Plus size={14} weight="bold" /> Add an event</button>}
-          </div>
-        )}
-      </>
-    ),
-    design: (
-      <>
-        <h1>Choose a design.</h1>
-        <p className="s8-sub">{suggested.size ? "Suggested for what you’re celebrating come first. " : ""}Each one opens differently. Your details are already in.</p>
-        <div className="s8-designs">
-          {ordered.map((x) => (
-            <div key={x.id} className="s8-design" data-on={d.design === x.id}>
-              {suggested.has(x.id) && <em>Suggested</em>}
-              <DesignCard spec={x} href="#" names={names || undefined} />
-              <button type="button" className="s8-pick" aria-pressed={d.design === x.id} onClick={() => patch({ design: x.id, palette: "", type: "", intro: "" })}>{d.design === x.id ? <><Check size={16} weight="bold" /> Chosen</> : `Choose ${x.name}`}</button>
-            </div>
-          ))}
-        </div>
-      </>
-    ),
-    style: (
-      <>
-        <h1>Make it yours.</h1>
-        <p className="s8-sub">Choose the colour, opening gesture and lettering. Each choice updates your invitation.</p>
-        <h2 className="s8-h2">Colours</h2>
-        <div className="s8-pals">{spec.palettes.map((p) => (
-          <button key={p.id} type="button" aria-pressed={paletteOf(spec, d.palette).id === p.id} onClick={() => patch({ palette: p.id, accent: "" })}><i style={{ background: p.accent, boxShadow: p.bg ? `inset 0 0 0 6px ${p.bg}` : undefined }} />{p.name}</button>
-        ))}</div>
-        <h2 className="s8-h2">How it opens</h2>
-        <p className="s8-help">Guests tap or swipe to reveal your invitation. You can change this again in Studio.</p>
-        <div className="s8-openings" role="group" aria-label="Invitation opening">
-          <button type="button" aria-pressed={!d.opening} onClick={() => { patch({ opening: "" }); setOpen(false); }}><strong>Designer’s choice</strong><span>{OPENINGS[spec.opening.kind].hint}</span></button>
-          {(["lift", "bloom", "veil", "focus"] as OpeningKind[]).map((kind) => (
-            <button key={kind} type="button" aria-pressed={d.opening === kind} onClick={() => { patch({ opening: kind }); setOpen(false); }}>
-              <strong>{kind === "lift" ? "Paper lift" : kind === "bloom" ? "Touch reveal" : kind === "veil" ? "Soft veil" : kind === "focus" ? "Focus reveal" : kind === "doors" ? "Opening doors" : "Drawing curtains"}</strong>
-              <span>{OPENINGS[kind].hint}</span>
-            </button>
-          ))}
-        </div>
-        <button type="button" className="s8-replay" onClick={() => setOpen(false)}>Replay opening in the phone</button>
-        {spec.layout === "stationery" && (
-          <>
-            <h2 className="s8-h2">Lettering</h2>
-            <div className="s8-types">
-              <button type="button" aria-pressed={d.type === ""} onClick={() => patch({ type: "" })}><span>Designer’s choice</span></button>
-              {FONT_PACKS.filter((f) => f.script || ["classic", "didone", "deco", "italiana", "garamond"].includes(f.id)).map((f) => (
-                <button key={f.id} type="button" aria-pressed={d.type === f.id} onClick={() => patch({ type: f.id })}><span style={{ fontFamily: f.script ?? f.head, fontSize: f.script ? 24 : 18 }}>{(names || "Amina").split(/[ &]/)[0]}</span><small>{f.name}</small></button>
-              ))}
-            </div>
-            <h2 className="s8-h2">Opening line <small>optional</small></h2>
-            <select className="s8-select" value={d.intro} onChange={(e) => patch({ intro: e.target.value })} aria-label="Opening line">
-              <option value="">Designer’s choice</option>
-              {Array.from(new Set(INTRO_PRESETS.map((i) => i.group))).map((g) => <optgroup key={g} label={g}>{INTRO_PRESETS.filter((i) => i.group === g).map((i) => <option key={i.id} value={i.id === "none" ? "none" : i.text}>{i.label}</option>)}</optgroup>)}
-            </select>
-          </>
-        )}
-      </>
-    ),
-    details: (
-      <>
-        <h1>Where, and a few words.</h1>
-        <p className="s8-sub">All optional. You can fill these in later in the Studio.</p>
-        <label className="s8-f"><span>Venue</span><input value={d.venue} maxLength={80} onChange={(e) => patch({ venue: e.target.value })} placeholder="The Glasshouse" /></label>
-        <label className="s8-f"><span>City</span><input value={d.city} maxLength={80} onChange={(e) => patch({ city: e.target.value })} placeholder="London" /></label>
-        <label className="s8-f"><span>A message for your guests</span><textarea rows={3} value={d.message} maxLength={300} onChange={(e) => patch({ message: e.target.value })} placeholder="We would be honoured to celebrate with you." /></label>
-      </>
-    ),
-    preview: (
-      <>
-        <h1>Here’s your invitation.</h1>
-        <p className="s8-sub">Open it the way a guest would. Everything here can be changed later.</p>
-        <ul className="s8-sum">
-          <li><span>Names</span>{names || "Not added yet"}</li>
-          <li><span>Date</span>{undecided || !d.date ? "To be decided" : d.date}</li>
-          <li><span>Events</span>{events.filter(Boolean).join(", ") || "Add later"}</li>
-          <li><span>Design</span>{spec.name} · {paletteOf(spec, d.palette).name}</li>
-        </ul>
-        {err && <p className="s8-err" role="alert">{err}</p>}
-        <button className="btn btn-dark s8-save" onClick={finish} disabled={busy}>{busy ? "Saving…" : "Continue to your invitation"} <ArrowRight size={18} /></button>
-        <p className="s8-fine">Your choices are saved in this browser first. If you're not signed in, we'll help you create an account to keep them across devices. Nothing is sent to guests yet.</p>
-      </>
-    ),
-  };
-
+  const shown = { ...draft, names: draft.names.trim() || "Your names" };
   return (
-    <main className="st8">
-      <header className="s8-top">
-        <Link href="/" className="s8-logo">weddsent</Link>
-        <span className="s8-top-note">YOUR INVITATION BEGINS HERE</span>
-        <span className="s8-count" aria-live="polite">Step {idx + 1} of {STEPS.length}</span>
-        <Link href="/designs" className="s8-skip">Browse designs</Link>
-      </header>
-      <div className="s8-bar" aria-hidden="true"><motion.span animate={{ width: `${((idx + 1) / STEPS.length) * 100}%` }} transition={{ duration: 0.5, ease }} /></div>
-
-      <div className="s8-grid">
-        <section className="s8-pane">
-          <p className="s8-intro-label">THE MAKING OF SOMETHING BEAUTIFUL <span>✳</span></p>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={step} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} transition={{ duration: 0.4, ease }}>
-              {body[step]}
-            </motion.div>
-          </AnimatePresence>
-          {step !== "preview" && (
-            <div className="s8-nav">
-              <button type="button" className="s8-back" onClick={() => go(idx - 1)} disabled={idx === 0}><ArrowLeft size={18} /> Back</button>
-              <button type="button" className="btn btn-dark" onClick={next} disabled={!can}>{step === "details" ? "See it" : "Continue"} <ArrowRight size={18} /></button>
-            </div>
+    <main className="ed-start">
+      <header className="ed-start-header ed-width"><Wordmark /><Link className="ed-text-link" href="/designs">Browse designs</Link></header>
+      <div className="ed-start-grid ed-width" data-preview={mobilePreview}>
+        <section className="ed-start-editor">
+          <ol className="ed-start-steps" aria-label="Invitation setup progress">
+            {steps.map((name, index) => <li key={name} aria-current={step === index ? "step" : undefined}><span>{index < step ? <Check size={13} /> : index + 1}</span>{name}</li>)}
+          </ol>
+          {!ready ? <p className="ed-start-state" role="status">Loading your draft…</p> : (
+            <form onSubmit={submit} key={step}>
+              {step === 0 && <>
+                <h1>Your wedding details</h1>
+                <label className="ed-field">Names<input dir="auto" name="names" required value={draft.names} onChange={(event) => update({ names: event.target.value })} placeholder="Amina & Yusuf" maxLength={60} /></label>
+                <div className="ed-field-pair">
+                  <label className="ed-field">Wedding date <span>Optional</span><input type="date" value={draft.date} onChange={(event) => update({ date: event.target.value })} /></label>
+                  <label className="ed-field">Venue <span>Optional</span><input dir="auto" value={draft.venue} onChange={(event) => update({ venue: event.target.value })} maxLength={80} /></label>
+                </div>
+                <fieldset className="ed-start-events"><legend>Events <span>Optional</span></legend>
+                  {accountEvents.length > 0 ? <p>Edit your existing events in Studio.</p> : <>
+                    {titles.map((title, index) => <div key={index}><input aria-label={`Event ${index + 1}`} dir="auto" value={title} placeholder={index === 0 ? "e.g. Ceremony or Nikah" : "e.g. Reception or Walima"} maxLength={80} onChange={(event) => setTitles(titles.map((value, position) => position === index ? event.target.value : value))} /><button type="button" aria-label={`Remove event ${index + 1}`} onClick={() => setTitles(titles.filter((_, position) => position !== index))}><X size={17} /></button></div>)}
+                    {titles.length < 8 && <button className="ed-start-add" type="button" onClick={() => setTitles([...titles, ""])}><Plus size={16} /> Add an event</button>}
+                  </>}
+                </fieldset>
+              </>}
+              {step === 1 && <>
+                <h1>Choose your design</h1>
+                <fieldset className="ed-start-designs"><legend>Designs</legend>
+                  {designs.map((design) => (
+                    <label key={design.id}><input type="radio" name="design" checked={design.id === draft.design} onChange={() => { update({ design: design.id, palette: "", type: "", intro: "", opening: "", accent: "" }); setView("cover"); }} /><span>{design.name}</span></label>
+                  ))}
+                </fieldset>
+                <fieldset className="ed-start-colours"><legend>Colours</legend>
+                  {spec.palettes.map((colour) => <label key={colour.id}><input type="radio" name="palette" checked={paletteOf(spec, draft.palette).id === colour.id} onChange={() => update({ palette: colour.id, accent: "" })} /><span style={{ background: colour.bg ?? colour.accent, boxShadow: `inset 0 0 0 4px ${colour.accent}` }} />{colour.name}</label>)}
+                </fieldset>
+              </>}
+              {step === 2 && <>
+                <h1>Review your invitation</h1>
+                <dl className="ed-start-summary">
+                  <div><dt>Names</dt><dd dir="auto">{draft.names || "To add"}</dd></div>
+                  <div><dt>Date</dt><dd>{draft.date ? friendlyDate(draft.date) : "To be confirmed"}</dd></div>
+                  <div><dt>Design</dt><dd>{spec.name}</dd></div>
+                  {previewEvents.length > 0 && <div><dt>Events</dt><dd>{previewEvents.map((item) => item.title).join(", ")}</dd></div>}
+                </dl>
+                <p>{accountDraft ? "Continue to Studio to add the finishing details." : "Create an account to save this draft and continue in Studio."}</p>
+              </>}
+              {(error || loadError) && <p className="ed-start-error" role="alert">{error || loadError}</p>}
+              <div className="ed-start-actions">
+                {step > 0 && <button type="button" className="ed-button ed-button--secondary" onClick={() => navigate(step - 1)} disabled={busy}><ArrowLeft size={16} /> Back</button>}
+                <button className="ed-button ed-button--primary" type="submit" disabled={busy}>{busy ? "Saving…" : step === 2 ? accountDraft ? "Continue to Studio" : "Create an account" : step === 1 ? "Review invitation" : "Choose a design"} <ArrowRight size={17} /></button>
+              </div>
+            </form>
           )}
-          {step === "preview" && <button type="button" className="s8-back s8-edit" onClick={() => go(idx - 1)}><ArrowLeft size={18} /> Keep editing</button>}
+          <button className="ed-start-toggle ed-text-link" type="button" onClick={() => setMobilePreview(!mobilePreview)} aria-expanded={mobilePreview} aria-controls="start-preview">{mobilePreview ? "Back to setup" : "Show invitation preview"}</button>
         </section>
-
-        <aside className="s8-stage" aria-label="Live preview">
-          <span className="s8-preview-label">A LITTLE PREVIEW OF THE BIG DAY</span>
-          <div className="s8-phone">
-            <Phone label="Your invitation">
-              <Invitation key={`${spec.id}-${d.palette}-${d.type}-${d.opening}-${step === "design" ? "c" : "i"}`} data={shown} events={evs} open={inside && step !== "style" ? true : open} onOpenChange={setOpen} />
-            </Phone>
-          </div>
+        <aside className="ed-start-stage" id="start-preview" aria-label="Live invitation preview">
+          <div className="ed-start-stage-top"><strong>Live preview</strong><div role="group" aria-label="Preview view"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Cover</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div></div>
+          <Phone label="Your invitation"><Invitation key={draft.design} data={shown} events={previewEvents} open={view === "inside"} onOpenChange={(open) => setView(open ? "inside" : "cover")} /></Phone>
         </aside>
       </div>
     </main>

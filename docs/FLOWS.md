@@ -262,3 +262,20 @@ Each packet should include:
 Update this file when a workflow changes **before** implementation. No agent may mark a feature complete while its mandatory flow branches are undocumented or unverified.
 **9 Nov F04 sending handoff:** After publishing and adding a household, the owner can inspect its private link, open the sharing panel, and choose native share, WhatsApp, email, SMS, copy or QR. The email channel preaddresses a recipient only when exactly one email exists in that household. The owner confirms and sends in their own app; Wedsent makes no automatic delivery claim or sent-status update. Delivery status/reminders remain a separate provider-backed F05 requirement. Sharing never changes guest allocation or publishes draft content.
 
+
+## Editorial website and invitation setup
+
+F01 begins on the homepage or a design detail page. Browsing, changing a sample palette and opening the sample do not require an account. The homepage carousel links to the same design detail route as the collection.
+
+```mermaid
+flowchart TD
+  Browse["Browse or open a sample"] --> Details["Names, date and events"]
+  Details --> Look["Choose the design and colours"]
+  Look --> Review["Review the invitation"]
+  Review --> Account{"Signed in?"}
+  Account -->|No| SignIn["Create an account or sign in"]
+  Account -->|Yes| Studio["Continue to Studio"]
+  SignIn --> Studio
+```
+
+A missing date is valid. Back and refresh retain the draft. A failed account or save request leaves the draft available to retry. F02 uses the existing shared invitation renderer for the cover and details. The homepage F03/F04 household example uses fictional guests and never calls the RSVP API. Published household replies continue through the private link and are saved by the existing RSVP service.

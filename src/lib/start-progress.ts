@@ -11,6 +11,7 @@ export type StartProgress = {
   preset: string;
   events: string[];
   undecided: boolean;
+  source?: string;
 };
 
 /** Reject malformed, old or unexpectedly large session snapshots. */

@@ -1,4 +1,5 @@
-import { HomeReimagined } from "@/components/site/home-reimagined";
+import { EditionHome } from "@/components/site/edition-home";
+
 export default function Page() {
-  return <HomeReimagined />;
+  return <EditionHome />;
 }
