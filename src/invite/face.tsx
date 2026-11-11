@@ -42,7 +42,12 @@ function FoilFrame({ id }: { id: string }) {
  * One composition per design. Used as the full-screen cover (`fill`) and as the printed card at the top of the scroll.
  * Everything is sized in cqw so it renders identically as a thumbnail, in a phone frame, or full screen.
  */
-export function Face({ data, spec, palette, greeting, event, fill, uid = "a" }: { data: InviteData; spec: DesignSpec; palette: Palette; greeting?: string; event?: InviteEvent; fill?: boolean; uid?: string }) {
+export function Seal({ initials: i, className = "" }: { initials: string; className?: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <span className={`fc-seal ${className}`} aria-hidden="true"><img src="/tex/seal.webp" alt="" draggable={false} /><b>{i}</b></span>;
+}
+
+export function Face({ data, spec, palette, greeting, event, fill, cover, uid = "a" }: { data: InviteData; spec: DesignSpec; palette: Palette; greeting?: string; event?: InviteEvent; fill?: boolean; cover?: boolean; uid?: string }) {
   const names = splitNames(data.names);
   const intro = resolveIntro(data, spec);
   const il = lang(intro);
@@ -67,7 +72,7 @@ export function Face({ data, spec, palette, greeting, event, fill, uid = "a" }: 
   return (
     <section className={`face face--${spec.id}${photo ? " face--photo" : ""}${fill ? " face--fill" : ""}`} aria-label="Invitation" data-opening={data.opening || spec.opening.kind}>
       {/* ---- material and art, per design ---- */}
-      {spec.id === "pearl" && (<><span className="fc-sheen" aria-hidden="true" /><span className="fc-fold" aria-hidden="true" /><span className="fc-mono" aria-hidden="true">{initials(data.names)}</span></>)}
+      {spec.id === "pearl" && (<>{cover && <img className="fc-ribbon" src="/tex/ribbon.webp" alt="" aria-hidden="true" draggable={false} />}<span className="fc-sheen" aria-hidden="true" /><span className="fc-fold" aria-hidden="true" /><span className="fc-mono" aria-hidden="true">{initials(data.names)}</span></>)}
       {spec.id === "vellum" && (<><span className="fc-press" aria-hidden="true" />{fill && <span className="fc-vellum" aria-hidden="true" />}</>)}
       {spec.id === "gilt" && (<><FoilFrame id={`foil-${uid}`} /><span className="fc-glow" aria-hidden="true" /></>)}
       {spec.id === "botanica" && (<><Cut id={A ?? "peony-pink"} className="fc-a1" /><Cut id={B ?? "rose-wild"} className="fc-a2" /><Cut id="olive-b" className="fc-a3" /></>)}
@@ -77,6 +82,7 @@ export function Face({ data, spec, palette, greeting, event, fill, uid = "a" }: 
         <div className="fc-photo" aria-hidden={!photo}>{photo ? <PhotoFill photo={photo} /> : <span className="fc-nophoto" />}<span className="fc-shade" /></div>
       )}
       {spec.id === "linen" && <span className="fc-rule" aria-hidden="true" />}
+      {cover && (spec.id === "vellum" || spec.id === "linen") && <Seal initials={initials(data.names)} />}
 
       <div className="fc-text">
         {greeting && <p className="fc-for">For {greeting}</p>}

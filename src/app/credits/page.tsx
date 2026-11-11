@@ -33,6 +33,8 @@ export default function Page() {
             </li>
           ))}
         </ul>
+        <h2>Generated imagery</h2>
+        <p className="ws-lead">The wax seal, satin ribbon, velvet and deckled-paper photographs in <code>public/tex</code> were generated with Figma AI image tools for this project. The paper, linen, vellum and pearl textures are procedural (scripts/tex/make.py).</p>
         <h2>Fonts</h2>
         <p className="ws-lead">All typefaces are licensed under the SIL Open Font License 1.1 and self-hosted: {Array.from(new Set(FONT_PACKS.flatMap((f) => [f.head, f.script, f.body].filter(Boolean) as string[]).map((s) => s.split(",")[0].replace(/["']|\sVariable/g, "")))).sort().join(", ")}, plus Amiri, Noto Naskh Arabic, Tiro Devanagari Hindi, Instrument Serif, Geist, Bricolage Grotesque and Rethink Sans.</p>
         <h2>Software</h2>

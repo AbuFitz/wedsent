@@ -15,7 +15,6 @@ import { saveLocalMusic, readLocalMusic } from "@/lib/local-music";
 import { CURATED_TRACKS } from "@/lib/music-library";
 import { SoundWaveform } from "@/components/studio/sound-waveform";
 import "./studio.css";
-import "./guided-studio.css";
 
 type Panel = "story" | "events" | "look" | "photo" | "sound" | "extras";
 type View = "cover" | "inside";
@@ -44,12 +43,13 @@ export function Studio() {
   const params = useSearchParams();
   const [panel, setPanel] = useState<Panel>("story");
   const [sending, setSending] = useState(false);
-  const [mobileMode, setMobileMode] = useState<"edit" | "preview">("edit");
+  const [mobileMode, setMobileMode] = useState<"edit" | "preview">("preview");
   const [view, setView] = useState<View>("cover");
   const [mobileFull, setMobileFull] = useState(false);
   const [canvasScene, setCanvasScene] = useState<CanvasScene>("paper");
   const [canvasFrame, setCanvasFrame] = useState<CanvasFrame>("device");
   const [notice, setNotice] = useState("");
+  const [nonce, setNonce] = useState(0);
   const [rawEvents, setRawEvents] = useState<RawEvent[]>([]);
 
   const loadEvents = useCallback(async () => {
@@ -94,34 +94,32 @@ export function Studio() {
   const saveLabel = state === "saved" ? account ? "Saved to account" : "Saved on this device" : state === "saving" ? "Saving…" : state === "conflict" ? "Changed in another tab" : state === "offline" ? "Offline, not synced" : state === "failed" ? "Save failed" : "Loading…";
   const missing = [!draft.names.trim() && "Names", !draft.date && "Date", !draft.venue.trim() && !rawEvents.some((e) => e.venue) && "Venue"].filter(Boolean);
 
-  return <div className="atelier atelier--guided" data-full={mobileFull} data-mode={mobileMode}>
-    <header className="atelier-top">
-      <Link href={account ? "/dashboard" : "/"} className="atelier-brand" aria-label="Wedsent"><span className="atelier-brand-word">wedsent<span className="studio-brand-dot">.</span></span><span>Studio</span></Link>
-      <div className="atelier-top-middle"><span className="atelier-file">{draft.names || "Your invitation"}</span><span className="atelier-save" data-state={state}>{state === "saving" || state === "loading" ? <LoaderCircle size={13} className="atelier-spin"/> : <span className="atelier-save-dot"/>}{saveLabel}</span>{state === "conflict" && <button onClick={reload}>Reload</button>}</div>
-      <div className="atelier-top-actions">
-        <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
-        <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
-      </div>
-    </header>
-
+  return <div className="atelier" data-full={mobileFull} data-mode={mobileMode}>
     <nav className="atelier-dock" aria-label="Invitation tools">
-      {tools.map((item) => <button key={item.id} type="button" className="studio-tool" aria-pressed={!sending && panel === item.id} onClick={() => select(item.id)}><item.icon size={17} /><span>{item.name}</span></button>)}
-      <button type="button" className="studio-tool studio-tool--send" aria-pressed={sending} onClick={showSend}><ArrowRight size={17} /> Publish & share</button>
+      {tools.map((item) => <button key={item.id} type="button" className="studio-tool" aria-pressed={!sending && panel === item.id} onClick={() => select(item.id)}>{(() => { const I = dockIcons[item.id]; return <I size={22} weight="light" />; })()}<span>{item.name}</span></button>)}
     </nav>
 
     <main className="atelier-stage" data-scene={canvasScene} data-frame={canvasFrame} aria-label="Live invitation composition">
-      <div className="atelier-stage-top"><div><h1>Invitation preview</h1></div><div className="atelier-stage-tools"><div className="atelier-view-switch" role="group" aria-label="Invitation preview state"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Opening</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div></div></div>
-      <div className="atelier-stage-centre">
-        <div className="atelier-preview-frame" style={{ ["--preview-tone" as string]: specById(draft.design).site.bg }}>
-          <Phone label="Your live invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")} onEditTarget={(target) => select(target === "words" ? "story" : target === "details" || target === "events" ? "events" : "extras")}/></Phone>
+      <div className="atelier-stage-top">
+        <div className="st-left"><Link href={account ? "/dashboard" : "/"} className="atelier-icon-button st-back" aria-label={account ? "Back to dashboard" : "Back to Wedsent"}><ArrowLeft size={18}/></Link><span className="atelier-save" data-state={state}>{state === "saving" || state === "loading" ? <LoaderCircle size={13} className="atelier-spin"/> : <span className="atelier-save-dot"/>}{saveLabel}</span>{state === "conflict" && <button type="button" className="st-reload" onClick={reload}>Reload</button>}</div>
+        <div className="atelier-view-switch" role="group" aria-label="Invitation preview state"><button type="button" aria-pressed={view === "cover"} onClick={() => setView("cover")}>Opening</button><button type="button" aria-pressed={view === "inside"} onClick={() => setView("inside")}>Inside</button></div>
+        <div className="st-right">
+          <button className="atelier-icon-button" type="button" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={undo}><RotateCcw size={17}/></button>
+          <button className="atelier-icon-button" type="button" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={redo}><RotateCw size={17}/></button>
+          <button className="st-publish" type="button" onClick={showSend} aria-pressed={sending}>Publish <ArrowRight size={15}/></button>
         </div>
       </div>
-      <div className="atelier-stage-bottom"><div><button type="button" onClick={() => setMobileFull(true)}><Maximize2 size={15}/> Full preview</button></div></div>
+      <div className="atelier-stage-centre">
+        <div className="atelier-preview-frame" style={{ ["--preview-tone" as string]: specById(draft.design).site.bg }}>
+          <Phone label="Your live invitation"><Invitation key={`${draft.design}-${nonce}`} data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")} onEditTarget={(target) => select(target === "words" ? "story" : target === "details" || target === "events" ? "events" : "extras")}/></Phone>
+        </div>
+      </div>
+      <div className="atelier-stage-bottom"><button type="button" onClick={() => { setView("cover"); setNonce((n) => n + 1); }}><RotateCcw size={15}/> Replay opening</button><button type="button" onClick={() => setMobileFull(true)}><Maximize2 size={15}/> Full preview</button></div>
       {!missing.length ? <span className="atelier-ready"><Check size={13}/> Essentials added</span> : <button className="atelier-ready atelier-ready--todo" type="button" onClick={() => select(missing.includes("Names") ? "story" : "events")}>{missing.length} essential {missing.length === 1 ? "detail" : "details"} to review <ArrowRight size={13}/></button>}
     </main>
 
     <aside className="atelier-inspector" aria-label="Invitation editor">
-      <header className="atelier-inspector-head"><h2>{sending ? "Publish & share" : tool.name}</h2></header>
+      <header className="atelier-inspector-head"><span className="st-grab" aria-hidden="true"/><div><h2>{sending ? "Publish & share" : tool.name}</h2><p>{sending ? "Get your invitations out" : tool.detail}</p></div><button type="button" className="atelier-icon-button st-close" aria-label="Close panel" onClick={() => setMobileMode("preview")}><X size={18}/></button></header>
       <div className="atelier-inspector-scroll" key={panel}>
         {sending && <div className="studio-send"><span className="studio-send-mark"><Check size={26}/></span><h3>{missing.length ? "Before you invite everyone…" : "Let's get your invitations out."}</h3>{missing.length ? <p>Still to add: {missing.join(", ")}. Complete these essentials before publishing. Your edits stay saved while you work.</p> : <p>Next, add your households, publish your invitation and choose how to share each personal link. Replies will appear in your dashboard.</p>}<Link href={account ? "/dashboard?tab=Guests" : "/signin?mode=up&next=%2Fstudio%3Fstage%3Dsend"}>{account ? "Manage guest list" : "Create account to continue"}<ArrowRight size={17}/></Link>{missing.length > 0 && <button type="button" className="studio-send-return" onClick={() => select(missing.includes("Venue") ? "events" : "story")}>Edit missing details <Pencil size={15}/></button>}<small>Guests can reply without signing in. Sending an invitation requires publishing it first.</small></div>}
         {!sending && panel === "story" && <StoryEditor draft={draft} patch={patch}/>}
@@ -133,11 +131,7 @@ export function Studio() {
       </div>
     </aside>
     <nav className="atelier-mobile-nav" aria-label="Mobile Studio navigation">
-      <div className="studio-mobile-steps">
-        {tools.map((item) => <button key={item.id} type="button" aria-pressed={!sending && panel === item.id} onClick={() => select(item.id)}>{item.name}</button>)}
-        <button type="button" aria-pressed={sending} onClick={showSend}>Publish</button>
-      </div>
-      <div className="studio-mobile-modes"><button type="button" aria-pressed={mobileMode === "edit"} onClick={() => setMobileMode("edit")}><Pencil size={16} /> Edit</button><button type="button" aria-pressed={mobileMode === "preview"} onClick={() => setMobileMode("preview")}><Eye size={16} /> Preview</button></div>
+      {tools.map((item) => { const I = dockIcons[item.id]; const on = mobileMode === "edit" && !sending && panel === item.id; return <button key={item.id} type="button" aria-pressed={on} onClick={() => on ? setMobileMode("preview") : select(item.id)}><I size={22} weight={on ? "fill" : "light"} /><span>{item.name}</span></button>; })}
     </nav>
     {notice && <div className="atelier-toast" role="status">{notice}<button type="button" aria-label="Dismiss notification" onClick={() => setNotice("")}><X size={15}/></button></div>}
     {mobileFull && <div className="atelier-fullscreen" role="dialog" aria-modal="true" aria-label="Guest invitation preview"><div className="atelier-fullscreen-controls"><button onClick={() => setMobileFull(false)}><ArrowLeft size={17}/> Back to Studio</button><div><button type="button" onClick={() => setView("cover")}>Opening</button><button type="button" onClick={() => setView("inside")}>Inside</button></div></div><div className="atelier-fullscreen-invitation"><Invitation data={draft} events={events} open={view === "inside"} onOpenChange={(opened) => setView(opened ? "inside" : "cover")}/></div></div>}

@@ -62,15 +62,15 @@
 .face--pearl{background:url(/tex/pearl.webp) center/cover,var(--bg);background-blend-mode:multiply}
 .fc-sheen{position:absolute;inset:-20%;background:url(/tex/sheen.webp) center/cover;mix-blend-mode:soft-light;opacity:.7;animation:fc-sheen 7s ease-in-out infinite alternate}
 .fc-fold{position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,transparent 49.4%,rgba(0,0,0,.1) 49.9%,rgba(255,255,255,.55) 50.2%,transparent 50.8%)}
-.fc-mono{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%);font:400 54cqw/1 var(--f-head);letter-spacing:-.04em;color:color-mix(in srgb,var(--bg) 93%,#fff);text-shadow:-.4cqw -.4cqw .6cqw rgba(255,255,255,.95),.5cqw .6cqw 1cqw rgba(60,40,70,.22);pointer-events:none;white-space:nowrap}
-.face--pearl .fc-text{padding-top:34cqh}
+.fc-mono{position:absolute;left:50%;top:24%;transform:translate(-50%,-50%);font:400 50cqw/1 var(--f-head);letter-spacing:-.04em;color:color-mix(in srgb,var(--bg) 93%,#fff);text-shadow:-.4cqw -.4cqw .6cqw rgba(255,255,255,.95),.5cqw .6cqw 1cqw rgba(60,40,70,.22);pointer-events:none;white-space:nowrap}
+.face--pearl .fc-text{padding-top:24cqh}
 .face--pearl .fc-names{color:color-mix(in srgb,var(--fg) 92%,var(--a))}
 
 /* ---------------------------- vellum ---------------------------- */
 .face--vellum{background:var(--tex-paper) center/70cqw,var(--soft);background-blend-mode:soft-light}
 .fc-press{position:absolute;inset:6cqw;border:.25cqw solid color-mix(in srgb,var(--fg) 40%,transparent);box-shadow:inset 0 .25cqw 0 rgba(255,255,255,.7),0 -.2cqw 0 rgba(0,0,0,.08)}
 .face--vellum .fc-names,.face--vellum .fc-date{text-shadow:0 .2cqw 0 rgba(255,255,255,.6),0 -.12cqw 0 rgba(0,0,0,.28)}
-.fc-vellum{position:absolute;inset:0;z-index:5;background:rgba(255,255,255,.34);backdrop-filter:blur(1.6px) saturate(.9);box-shadow:inset 0 0 0 .3cqw rgba(255,255,255,.6);pointer-events:none}
+.fc-vellum{position:absolute;inset:0;z-index:5;background:rgba(255,255,255,.16);backdrop-filter:blur(.6px) saturate(.9);box-shadow:inset 0 0 0 .3cqw rgba(255,255,255,.6);pointer-events:none}
 .fc-vellum::before{content:"";position:absolute;inset:0;background:url(/tex/vellum.webp) center/80cqw;opacity:.1}
 
 /* ---------------------------- gilt ---------------------------- */
@@ -229,3 +229,15 @@
 .inv--gallery .in-date strong{font-weight:500}
 .inv--zellige .in-event{border:0}
 .inv--zellige .in-no{color:var(--a)}
+
+/* ---- photoreal pieces (generated, see docs/STATUS.md) ---- */
+.fc-seal{position:absolute;left:50%;bottom:19%;width:25cqw;aspect-ratio:1;transform:translateX(-50%);z-index:6;display:grid;place-items:center;filter:drop-shadow(0 1.2cqw 1.6cqw rgba(40,10,10,.35))}
+.fc-seal img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.fc-seal b{position:relative;font:400 8.5cqw/1 var(--f-head);letter-spacing:.02em;color:#6b1426;text-shadow:.15cqw .2cqw 0 rgba(255,255,255,.22),-.15cqw -.2cqw .2cqw rgba(0,0,0,.45)}
+.fc-ribbon{position:absolute;left:-3%;width:106%;top:82%;transform:translateY(-50%);z-index:4;pointer-events:none;filter:drop-shadow(0 .8cqw 1cqw rgba(60,40,70,.3))}
+.dr-seal{position:absolute;left:50%;top:82%;width:27cqw;transform:translate(-50%,-50%);z-index:8;pointer-events:none}
+.dr-seal .fc-seal{position:relative;left:auto;bottom:auto;transform:none;width:100%}
+.face--vellum .fc-seal{bottom:17%}
+.face--linen .fc-seal{bottom:17%}
+.face--zellige::before{content:"";position:absolute;inset:0;background:url(/tex/velvet.webp) center/cover;mix-blend-mode:soft-light;opacity:.7;pointer-events:none}
+.face--vellum::after{content:"";position:absolute;inset:0;background:url(/tex/deckle.webp) center/cover;mix-blend-mode:soft-light;opacity:.5;pointer-events:none}
